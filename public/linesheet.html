@@ -619,7 +619,8 @@ function saveLogos(){
   }catch(e){console.warn('logo save error',e);}
 }
 function loadLogos(){
-  const logo=localStorage.getItem('bs_ls_logo')||HARDCODED_LOGO;
+  const logo=HARDCODED_LOGO;
+  localStorage.setItem('bs_ls_logo',logo);
   for(const ls of ST.lineSheets){ls.logoImage=logo;}
 }
 
