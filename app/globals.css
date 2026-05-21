@@ -29,7 +29,7 @@ html, body {
 
 /* iOS segmented control */
 .seg-control {
-  display: flex;
+  display: inline-flex;
   background: rgba(118, 118, 128, 0.12);
   border-radius: 9px;
   padding: 2px;
