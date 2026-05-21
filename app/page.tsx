@@ -1237,24 +1237,17 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
           />
         </div>
 
-        {/* Mode + Currency row */}
+        {/* Currency row */}
         <div className="px-4 mb-3 flex items-center gap-3">
-          <SegControl
-            options={[{ value: 'retail', label: 'Retail' }, { value: 'wholesale', label: 'Wholesale' }]}
-            value={quote.mode}
-            onChange={v => onChange({ ...quote, mode: v })}
-            className="flex-1"
-          />
           <SegControl
             options={[{ value: 'AUD', label: 'AUD' }, { value: 'USD', label: 'USD' }]}
             value={quote.currency}
-            onChange={v => onChange({ ...quote, currency: v as Currency })}
+            onChange={v => onChange({ ...quote, currency: v as Currency, mode: 'retail' as const })}
           />
         </div>
 
-        {/* GP / Wholesale price control */}
-        {quote.mode === 'retail' ? (
-          <div className="ios-card mx-4 mb-3 px-4 py-3">
+        {/* GP control */}
+        <div className="ios-card mx-4 mb-3 px-4 py-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Gross Profit %</span>
               <div className="flex items-center gap-3">
@@ -1274,7 +1267,7 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
               Formula: cost ÷ {(1 - quote.retailGP / 100).toFixed(2)}
             </p>
           </div>
-        ) : (
+        {false && (
           <div className="ios-card mx-4 mb-3 px-4 py-3">
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm font-medium">Wholesale Price</span>
@@ -4102,7 +4095,7 @@ function SaveVersionSheet({ open, onClose, suggestedName, onSave }: {
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
-type Tab = 'build' | 'stones' | 'wax' | 'versions' | 'products' | 'settings'
+type Tab = 'build' | 'stones' | 'wax' | 'products' | 'settings'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('build')
@@ -4256,14 +4249,6 @@ export default function App() {
             </button>
           </div>
         )}
-        {tab === 'versions' && (
-          <button
-            className="press-feedback text-ios-blue text-sm font-semibold"
-            onClick={handleSaveVersion}
-          >
-            Save
-          </button>
-        )}
       </div>
 
       {/* Tab content */}
@@ -4276,16 +4261,6 @@ export default function App() {
         )}
         {tab === 'wax' && (
           <WaxWeightTab settings={settings} />
-        )}
-        {tab === 'versions' && (
-          <VersionsTab
-            versions={versions}
-            activeQuote={quote}
-            settings={settings}
-            onLoad={handleLoadVersion}
-            onSave={handleSaveVersion}
-            onDelete={handleDeleteVersion}
-          />
         )}
         {tab === 'products' && (
           <ProductsTab
@@ -4313,11 +4288,10 @@ export default function App() {
       <div className="tab-bar">
         <div className="flex">
           {[
-            { id: 'build',    icon: PenLine,      label: 'Quote'    },
+            { id: 'build',    icon: PenLine,      label: 'Sales'    },
             { id: 'stones',   icon: Gem,           label: 'Stones'   },
             { id: 'wax',      icon: Layers,        label: 'Wax'      },
             { id: 'products', icon: Package,       label: 'Products' },
-            { id: 'versions', icon: BookOpen,      label: 'Versions' },
             { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
           ].map(({ id, icon: Icon, label }) => (
             <button

@@ -1102,7 +1102,6 @@ function renderDashboard(v,ta){
   <span style="font-size:11px;color:#aaa;flex:1;min-width:120px">Auto-backup active</span>
   <button class="btn-ghost btn-ghost-sm" onclick="loadAllImages().then(()=>{render();alert('Images reloaded.')})">🔄 Reload images</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">🏷 Logo all sheets<input type="file" accept="image/*" style="display:none" onchange="applyLogoToAll(this.files[0])"></label>
-  <button class="btn-ghost btn-ghost-sm" onclick="openGlobalWooSync()">🛍 Sync all images</button>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬇ Download backup</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬆ Restore backup<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 Export CSV</button>
@@ -1163,7 +1162,6 @@ function renderEditor(v,ta){
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" data-action="back">← Dashboard</button>
     <button class="btn-ghost btn-ghost-sm" data-action="sortAZ">A → Z</button>
-    <button class="btn-ghost btn-ghost-sm" data-action="wooImages">🛍 WooCommerce Images</button>
     <button class="btn btn-sm" data-action="printPDF">Export PDF</button>`;
   v.innerHTML=`
 <div id="editor-wrap">
