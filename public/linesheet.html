@@ -770,48 +770,80 @@ async function downloadAllZip(btn){
 }
 
 function downloadAllCSV(){
-  const TO_USD={AUD:0.72,USD:1,GBP:1.27,EUR:1.08};
-  const toUSD=(n,cur)=>n*(TO_USD[cur]||1);
+  const TO={AUD:1,USD:1/0.72,GBP:1/1.27,EUR:1/1.08};   // → AUD
+  const toAUD=(n,cur)=>n*(TO[cur]||1);
+  const toUSD=(n,cur)=>toAUD(n,cur)*0.72;
   const q=c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`;
-  const fmt=n=>n!=null&&n!==0?Number(n).toFixed(2):'';
+  const fmtN=n=>(n!=null&&n!==0&&!isNaN(n))?Number(n).toFixed(2):'';
 
-  // Header — Flag column at end
-  const rows=[['Sheet','Buyer','Collection','Currency','SKU','Product','Metal','Wholesale','RRP','Wholesale USD','Flag']];
+  const COLS=[
+    'Sheet Date','Buyer','Collection','Currency',
+    'Category / Group',
+    'SKU','Product Name','Metadata / Notes',
+    'Metal','Line Description',
+    'Wholesale (local)','RRP (local)',
+    'Wholesale AUD','RRP AUD',
+    'Wholesale USD','RRP USD',
+    'Margin % (WS÷RRP)',
+    'Size Rows','Size Breakdown',
+    'Flag'
+  ];
 
-  let grandWS_USD=0;
+  const rows=[COLS];
+  let grandWS_AUD=0;
   const flagged=[];
 
   for(const ls of ST.lineSheets){
     const cur=ls.currency||'AUD';
     const buyer=ls.buyerName||'';
     const collection=ls.collection||'';
-    const sheetLabel=[buyer,collection].filter(Boolean).join(' · ')||'Untitled';
-
+    const sheetDate=ls.date||'';
     let sheetWS=0, sheetRRP=0;
 
     for(const p of ls.products){
       const sku=p.sku||'';
       const piece=p.pieceName||'';
+      const meta=p.metadata||'';
+      const group=p.group||'';
+      const numVariants=p.metalVariants.length;
+
       for(const mv of p.metalVariants){
         const ws=mv.subtotalWholesale||0;
         const rrp=mv.subtotalRRP||0;
-        const wsUSD=toUSD(ws,cur);
-        sheetWS+=ws;
-        sheetRRP+=rrp;
-        grandWS_USD+=wsUSD;
+        const wsAUD=toAUD(ws,cur);
+        const rrpAUD=toAUD(rrp,cur);
+        const wsUSD=wsAUD*0.72;
+        const rrpUSD=rrpAUD*0.72;
+        const margin=rrp>0?((rrp-ws)/rrp*100).toFixed(1):'';
+        sheetWS+=ws; sheetRRP+=rrp; grandWS_AUD+=wsAUD;
 
-        // Build flag
+        // Size rows breakdown
+        const sizeRows=(mv.rows||[]).filter(r=>r.description||r.wholesale||r.rrp);
+        const numSizes=sizeRows.length;
+        const sizeBreakdown=sizeRows.map(r=>{
+          const parts=[r.description||''].filter(Boolean);
+          if(r.wholesale) parts.push('WS:'+Number(r.wholesale).toFixed(2));
+          if(r.rrp) parts.push('RRP:'+Number(r.rrp).toFixed(2));
+          return parts.join(' ');
+        }).join(' | ');
+
+        // Flags
         const issues=[];
         if(!ws||ws===0) issues.push('NO WHOLESALE');
         if(!rrp||rrp===0) issues.push('NO RRP');
         if(!piece) issues.push('NO PRODUCT NAME');
+        if(!sku) issues.push('NO SKU');
         const flag=issues.join(' · ');
 
         const row=[
-          sheetLabel, buyer, collection, cur,
-          sku, piece,
-          mv.metalName||'',
-          fmt(ws), fmt(rrp), fmt(wsUSD),
+          sheetDate, buyer, collection, cur,
+          group, sku, piece, meta,
+          mv.metalName||'', mv.lineDescription||'',
+          fmtN(ws), fmtN(rrp),
+          fmtN(wsAUD), fmtN(rrpAUD),
+          fmtN(wsUSD), fmtN(rrpUSD),
+          margin,
+          numSizes||'', sizeBreakdown,
           flag
         ];
         rows.push(row);
@@ -819,32 +851,44 @@ function downloadAllCSV(){
       }
     }
 
-    // Sheet subtotal row
-    rows.push([
-      '— '+sheetLabel+' TOTAL', '', '', cur, '', '', '',
-      sheetWS.toFixed(2), sheetRRP.toFixed(2), toUSD(sheetWS,cur).toFixed(2), ''
-    ]);
-    rows.push(['','','','','','','','','','','']);
+    // Sheet subtotal
+    const sheetLabel=[buyer,collection].filter(Boolean).join(' · ')||'Untitled';
+    const pad=Array(COLS.length).fill('');
+    const sub=[...pad];
+    sub[0]='— '+sheetLabel+' TOTAL';
+    sub[10]=sheetWS.toFixed(2);
+    sub[11]=sheetRRP.toFixed(2);
+    sub[12]=toAUD(sheetWS,cur).toFixed(2);
+    sub[14]=toUSD(sheetWS,cur).toFixed(2);
+    rows.push(sub);
+    rows.push(Array(COLS.length).fill(''));
   }
 
   // Grand total
-  rows.push(['GRAND TOTAL (wholesale USD)','','','','','','','','',grandWS_USD.toFixed(2),'']);
-  rows.push(['','','','','','','','','','','']);
-  rows.push([`FX rates used: AUD=${TO_USD.AUD}  GBP=${TO_USD.GBP}  EUR=${TO_USD.EUR}`,'','','','','','','','','','']);
+  const gt=Array(COLS.length).fill('');
+  gt[0]='GRAND TOTAL'; gt[2]='(wholesale AUD)'; gt[12]=grandWS_AUD.toFixed(2); gt[14]=(grandWS_AUD*0.72).toFixed(2);
+  rows.push(gt);
+  rows.push(Array(COLS.length).fill(''));
+  const fx=Array(COLS.length).fill('');
+  fx[0]='FX used: 1 AUD = 0.72 USD | 1 GBP = 1.27 USD | 1 EUR = 1.08 USD';
+  rows.push(fx);
 
   // ── Flagged items summary ──────────────────────────────────
+  rows.push(Array(COLS.length).fill(''));
   if(flagged.length){
-    rows.push(['','','','','','','','','','','']);
-    rows.push(['⚠ ITEMS NEEDING ATTENTION ('+flagged.length+')','','','','','','','','','','']);
-    rows.push(['Sheet','Buyer','Collection','Currency','SKU','Product','Metal','Wholesale','RRP','Wholesale USD','Flag']);
+    const hdr=Array(COLS.length).fill('');
+    hdr[0]='⚠ ITEMS NEEDING ATTENTION ('+flagged.length+')';
+    rows.push(hdr);
+    rows.push(COLS);
     for(const r of flagged) rows.push(r);
   } else {
-    rows.push(['','','','','','','','','','','']);
-    rows.push(['✓ All items have wholesale and RRP prices','','','','','','','','','','']);
+    const ok=Array(COLS.length).fill('');
+    ok[0]='✓ All items have wholesale, RRP and SKU';
+    rows.push(ok);
   }
 
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});  // BOM for Excel
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
