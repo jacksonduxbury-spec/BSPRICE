@@ -479,7 +479,17 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
         const selVariants = selProd >= 0 ? (selProducts[selProd]?.metalVariants || []) : []
         return (
           <>
-            <div className="px-4 pb-4 pt-1">
+            <div className="px-4 pb-4 pt-1 space-y-2">
+              <div className="flex gap-2">
+                <button onClick={() => navigator.clipboard.writeText(ws.toFixed(2))}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold press-feedback border border-ios-separator">
+                  Copy WS {formatPrice(ws, currency)}
+                </button>
+                <button onClick={() => navigator.clipboard.writeText(rrp.toFixed(2))}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold press-feedback border border-ios-separator">
+                  Copy RRP {formatPrice(rrp, currency)}
+                </button>
+              </div>
               <button onClick={openPush} className="w-full py-2 rounded-xl text-sm font-semibold press-feedback"
                 style={{ background: 'var(--gold)', color: '#000' }}>
                 → Push to Line Sheet
