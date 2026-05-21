@@ -1131,7 +1131,7 @@ function roundUpAllRRPs(){
     for(const p of (ls.products||[])){
       for(const mv of (p.metalVariants||[])){
         if(mv.subtotalRRP&&mv.subtotalRRP>0){
-          const rounded=Math.ceil(mv.subtotalRRP/5)*5;
+          const rounded=Math.ceil(mv.subtotalRRP/10)*10;
           if(rounded!==mv.subtotalRRP){mv.subtotalRRP=rounded;count++;}
         }
       }
