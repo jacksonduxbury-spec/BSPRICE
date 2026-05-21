@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Plus, Trash2, ChevronDown, Copy, Download, FileText,
-  Settings as SettingsIcon, BookOpen, PenLine, RefreshCw,
-  AlertTriangle, CheckCircle, X, ChevronRight, BarChart3,
+  Settings as SettingsIcon, PenLine, RefreshCw,
+  CheckCircle, X, ChevronRight, BarChart3,
   Package, Search, Tag, Edit3, ArrowRight, Gem, Layers, Scale,
   ImagePlus, FileImage, Loader2, LayoutList
 } from 'lucide-react'
@@ -15,7 +15,7 @@ import {
 } from '@/lib/types'
 import {
   calcMetalCost, calcStoneRetail, calcAdditionalCost, calcTotalCost, calcRetailPrice,
-  calcEffectiveGP, formatPrice, generateTextExport, generateClientTextExport, newQuote,
+  formatPrice, generateTextExport, generateClientTextExport, newQuote,
   DEFAULT_SETTINGS, STONE_GP, STONE_LABELS, STONE_LABELS_CLIENT, METAL_LABELS, DEFAULT_METAL_PRICES,
   DEFAULT_WAX_MULTIPLIERS, CROSS_METAL
 } from '@/lib/pricing'
@@ -42,19 +42,6 @@ function saveSettings(s: AppSettings) {
   localStorage.setItem('bs-settings', JSON.stringify(s))
 }
 
-function loadVersions(): Quote[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const v = localStorage.getItem('bs-versions')
-    if (!v) return []
-    const parsed: Quote[] = JSON.parse(v)
-    return parsed.map(q => { if (!q.additionalItems) q.additionalItems = []; return q })
-  } catch { return [] }
-}
-
-function saveVersions(v: Quote[]) {
-  localStorage.setItem('bs-versions', JSON.stringify(v))
-}
 
 function loadProducts(): Product[] {
   if (typeof window === 'undefined') return []
@@ -340,8 +327,6 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
   const additionalTotal = calcAdditionalCost(quote.additionalItems)
   const totalCost = calcTotalCost(quote, prices)
   const retailPrice = calcRetailPrice(quote, prices, gpMap)
-  const effectiveGP = calcEffectiveGP(quote, prices)
-  const gpWarning = quote.mode === 'wholesale' && effectiveGP < 30 && quote.wholesalePrice > 0
 
   return (
     <div className="ios-card mx-4 mb-3 animate-in">
@@ -440,44 +425,12 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
             </div>
           </div>
         </div>
-      ) : quote.mode === 'retail' && hasVariants ? (
+      ) : (
         // Variant mode: show inc-GST for first variant as a reference
         <div className="px-4 py-3">
           <div className="text-xs text-ios-secondary">
             inc GST shown at checkout · Labour {fmt(quote.labour || 0)} · Packaging {fmt(quote.packaging || 0)}
           </div>
-        </div>
-      ) : (
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-ios-secondary font-medium mb-0.5">Wholesale Price</div>
-              <div className="text-2xl font-bold price-display live-price tracking-tight">
-                {quote.wholesalePrice > 0 ? fmt(quote.wholesalePrice) : '—'}
-              </div>
-              {quote.wholesalePrice > 0 && (
-                <div className="text-xs text-ios-secondary mt-0.5">
-                  inc GST {fmt(quote.wholesalePrice * 1.1)}
-                </div>
-              )}
-            </div>
-            <div className="text-right">
-              {quote.wholesalePrice > 0 && (
-                <>
-                  <div className="text-xs text-ios-secondary mb-0.5">Effective GP</div>
-                  <div className={`text-lg font-bold ${gpWarning ? 'text-ios-red' : 'text-ios-green'}`}>
-                    {effectiveGP.toFixed(1)}%
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          {gpWarning && (
-            <div className="flex items-center gap-2 mt-2 bg-red-50 rounded-ios-xs px-3 py-2">
-              <AlertTriangle size={14} className="text-ios-red shrink-0" />
-              <span className="text-xs text-ios-red font-medium">GP below 30% minimum threshold</span>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -778,9 +731,6 @@ function ExportSheet({ open, onClose, quote, settings }: {
     if (quote.mode === 'retail') {
       const retail = calcRetailPrice(quote, prices, settings.stoneGP)
       rows.push([`RETAIL PRICE (${quote.retailGP}% GP)`, '', '', fmt2(retail), `${quote.retailGP}%`])
-    } else if (quote.wholesalePrice > 0) {
-      const gp = calcEffectiveGP(quote, prices)
-      rows.push(['WHOLESALE PRICE', '', '', fmt2(quote.wholesalePrice), `${gp.toFixed(1)}%`])
     }
 
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
@@ -867,13 +817,6 @@ function ExportSheet({ open, onClose, quote, settings }: {
       doc.setFontSize(9)
       doc.setTextColor(100)
       doc.text(`(${quote.retailGP}% GP)`, 20, finalY + 14)
-    } else if (quote.wholesalePrice > 0) {
-      const gp = calcEffectiveGP(quote, prices)
-      doc.text(`Wholesale: ${fmt2(quote.wholesalePrice)}`, 20, finalY + 8)
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.setTextColor(100)
-      doc.text(`Effective GP: ${gp.toFixed(1)}%`, 20, finalY + 14)
     }
 
     doc.save(`${quote.name.replace(/\s+/g, '_')}_quote.pdf`)
@@ -1462,602 +1405,6 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
         settings={settings}
       />
     </>
-  )
-}
-
-// ─── Proposal builder ────────────────────────────────────────────────────────
-
-const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
-
-function ProposalSheet({ open, onClose, versions, settings }: {
-  open: boolean
-  onClose: () => void
-  versions: Quote[]
-  settings: AppSettings
-}) {
-  const [clientName, setClientName] = useState('')
-  const [intro, setIntro] = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [images, setImages] = useState<Record<string, string>>({})
-  const [generating, setGenerating] = useState(false)
-  const prices = settings.metalPrices
-  const gpMap = settings.stoneGP ?? STONE_GP
-
-  function toggleSelect(id: string) {
-    setSelectedIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) { next.delete(id); setImages(p => { const n = { ...p }; delete n[id]; return n }) }
-      else if (next.size < 6) next.add(id)
-      return next
-    })
-  }
-
-  async function handleImageFile(quoteId: string, file: File) {
-    const reader = new FileReader()
-    reader.onload = e => setImages(prev => ({ ...prev, [quoteId]: e.target!.result as string }))
-    reader.readAsDataURL(file)
-  }
-
-  function getPrice(q: Quote): number {
-    return q.mode === 'retail'
-      ? calcRetailPrice(q, prices, gpMap)
-      : (q.wholesalePrice || 0)
-  }
-
-  const selectedQuotes = versions.filter(v => selectedIds.has(v.id))
-
-  async function generatePDF() {
-    if (selectedQuotes.length === 0) return
-    setGenerating(true)
-    try {
-      const { default: jsPDF } = await import('jspdf')
-      const { default: autoTable } = await import('jspdf-autotable')
-      const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-      const pageW = doc.internal.pageSize.width
-      const pageH = doc.internal.pageSize.height
-      const marginL = 20
-      const marginR = pageW - 20
-      const contentW = pageW - 40
-
-      // ── Load logo + measure aspect ratio once ──────────────────
-      let logoDataUrl = ''
-      let logoAspect = 1
-      try {
-        const res = await fetch('/logo-nav.png')
-        const blob = await res.blob()
-        logoDataUrl = await new Promise<string>(resolve => {
-          const r = new FileReader(); r.onload = () => resolve(r.result as string); r.readAsDataURL(blob)
-        })
-        const imgEl = new Image()
-        await new Promise<void>(resolve => { imgEl.onload = () => resolve(); imgEl.onerror = () => resolve(); imgEl.src = logoDataUrl })
-        logoAspect = imgEl.naturalWidth / imgEl.naturalHeight
-      } catch {}
-
-      // Helper: draw centred logo in a band
-      const drawCentredLogo = (bandH: number, logoH: number, yOffset = 0) => {
-        if (!logoDataUrl) {
-          doc.setFont('helvetica', 'bold')
-          doc.setFontSize(13)
-          doc.setTextColor(255, 255, 255)
-          doc.text('BROHN SMITH JEWELLERY', pageW / 2, bandH / 2 + yOffset + 4, { align: 'center' })
-          return
-        }
-        const logoW = logoH * logoAspect
-        doc.addImage(logoDataUrl, 'PNG', pageW / 2 - logoW / 2, (bandH - logoH) / 2 + yOffset, logoW, logoH)
-      }
-
-      // Helper: draw standard page footer
-      const drawFooter = (label?: string) => {
-        doc.setFillColor(15, 15, 15)
-        doc.rect(0, pageH - 18, pageW, 18, 'F')
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(7)
-        doc.setTextColor(120, 120, 120)
-        const left = label ?? 'All prices AUD  ·  Valid for 30 days'
-        doc.text(left, marginL, pageH - 8)
-        doc.setTextColor(170, 170, 170)
-        doc.text('brohnsmith.com', marginR, pageH - 8, { align: 'right' })
-      }
-
-      // ── COVER PAGE ─────────────────────────────────────────────
-      doc.setFillColor(0, 0, 0)
-      doc.rect(0, 0, pageW, pageH, 'F')
-
-      // Centred logo, upper third
-      const coverLogoH = 36
-      const coverLogoW = coverLogoH * logoAspect
-      if (logoDataUrl) {
-        doc.addImage(logoDataUrl, 'PNG', pageW / 2 - coverLogoW / 2, pageH * 0.22, coverLogoW, coverLogoH)
-      }
-
-      // Thin white rule between logo + text
-      doc.setDrawColor(60, 60, 60)
-      doc.setLineWidth(0.2)
-      doc.line(marginL + 30, pageH * 0.22 + coverLogoH + 10, marginR - 30, pageH * 0.22 + coverLogoH + 10)
-
-      // Cover text
-      const textY = pageH * 0.22 + coverLogoH + 22
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(26)
-      doc.setTextColor(255, 255, 255)
-      doc.text('Design Proposal', pageW / 2, textY, { align: 'center' })
-
-      if (clientName) {
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(13)
-        doc.setTextColor(200, 200, 200)
-        doc.text(`Prepared for ${clientName}`, pageW / 2, textY + 12, { align: 'center' })
-      }
-
-      const dateStr = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(8.5)
-      doc.setTextColor(100, 100, 100)
-      doc.text(dateStr, pageW / 2, textY + (clientName ? 22 : 14), { align: 'center' })
-
-      if (intro) {
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(10)
-        doc.setTextColor(160, 160, 160)
-        const introLines = doc.splitTextToSize(intro, 140)
-        doc.text(introLines, pageW / 2, pageH - 55, { align: 'center' })
-      }
-
-      // Cover footer
-      doc.setFillColor(15, 15, 15)
-      doc.rect(0, pageH - 18, pageW, 18, 'F')
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(7)
-      doc.setTextColor(170, 170, 170)
-      doc.text('brohnsmith.com', pageW / 2, pageH - 8, { align: 'center' })
-
-      // ── ONE PAGE PER OPTION ──────────────────────────────────────
-      const headerH = 44
-
-      for (let i = 0; i < selectedQuotes.length; i++) {
-        doc.addPage()
-        const q = selectedQuotes[i]
-        const optionLabel = OPTION_LABELS[i]
-        const price = getPrice(q)
-        const fmt = (n: number) => formatPrice(n, q.currency)
-
-        // Black header band, centred logo
-        doc.setFillColor(0, 0, 0)
-        doc.rect(0, 0, pageW, headerH, 'F')
-        drawCentredLogo(headerH, 22)
-
-        // Thin white rule under header
-        doc.setDrawColor(255, 255, 255)
-        doc.setLineWidth(0.15)
-        doc.line(0, headerH, pageW, headerH)
-        doc.setLineWidth(0.2)
-
-        // Option label — right side, just below header
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(8)
-        doc.setTextColor(120, 120, 120)
-        doc.text(`OPTION ${optionLabel}`, marginR, headerH + 6, { align: 'right' })
-
-        // Quote name
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(14)
-        doc.setTextColor(0, 0, 0)
-        doc.text(q.name, marginL, headerH + 6)
-        if (clientName) {
-          doc.setFont('helvetica', 'normal')
-          doc.setFontSize(8)
-          doc.setTextColor(140, 140, 140)
-          doc.text(`for ${clientName}`, marginL, headerH + 12)
-        }
-
-        let y = headerH + (clientName ? 18 : 12)
-
-        // Image (if provided)
-        const imgData = images[q.id]
-        if (imgData) {
-          try {
-            const imgEl = new Image()
-            await new Promise<void>(resolve => { imgEl.onload = () => resolve(); imgEl.onerror = () => resolve(); imgEl.src = imgData })
-            const aspect = imgEl.naturalWidth / imgEl.naturalHeight
-            const imgW = contentW
-            const imgH = Math.min(imgW / aspect, 95)
-            doc.addImage(imgData, marginL, y, imgW, imgH)
-            y += imgH + 8
-          } catch {}
-        }
-
-        // Components table
-        const tableRows: string[][] = []
-        for (const m of q.metalLines) tableRows.push([METAL_LABELS[m.metalType], ''])
-        for (const s of q.stoneLines) tableRows.push([STONE_LABELS_CLIENT[s.stoneType], ''])
-        for (const item of (q.additionalItems || [])) tableRows.push([item.label || 'Additional Item', fmt(item.price)])
-        if (q.labour > 0) tableRows.push(['Labour & Craftsmanship', ''])
-
-        if (tableRows.length > 0) {
-          autoTable(doc, {
-            startY: y,
-            head: [['Materials & Components', '']],
-            body: tableRows,
-            styles: { font: 'helvetica', fontSize: 9, cellPadding: 3, textColor: [30, 30, 30] },
-            headStyles: { fillColor: [20, 20, 20], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
-            alternateRowStyles: { fillColor: [248, 248, 248] },
-            columnStyles: { 0: { cellWidth: 140 }, 1: { cellWidth: 30, halign: 'right' } },
-            margin: { left: marginL, right: 20 },
-          })
-          y = (doc as any).lastAutoTable.finalY + 8
-        }
-
-        // Price block
-        doc.setDrawColor(200, 200, 200)
-        doc.setLineWidth(0.2)
-        doc.line(marginL, y, marginR, y)
-        y += 6
-
-        const col1 = 130
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(9)
-        doc.setTextColor(120, 120, 120)
-        doc.text('Price (ex GST)', col1, y, { align: 'right' })
-        doc.text(price > 0 ? fmt(price) : 'TBC', marginR, y, { align: 'right' })
-        y += 5
-
-        if (price > 0) {
-          doc.text('GST (10%)', col1, y, { align: 'right' })
-          doc.text(fmt(price * 0.1), marginR, y, { align: 'right' })
-          y += 3
-        }
-
-        doc.setDrawColor(0, 0, 0)
-        doc.setLineWidth(0.5)
-        doc.line(col1 - 5, y + 1, marginR, y + 1)
-        doc.setLineWidth(0.2)
-        y += 7
-
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(14)
-        doc.setTextColor(0, 0, 0)
-        doc.text('Total (inc GST)', col1, y, { align: 'right' })
-        doc.text(price > 0 ? fmt(price * 1.1) : 'TBC', marginR, y, { align: 'right' })
-
-        drawFooter(`Option ${optionLabel} of ${selectedQuotes.length}`)
-      }
-
-      // ── SUMMARY PAGE (if 2+ quotes) ──────────────────────────────
-      if (selectedQuotes.length > 1) {
-        doc.addPage()
-
-        doc.setFillColor(0, 0, 0)
-        doc.rect(0, 0, pageW, headerH, 'F')
-        drawCentredLogo(headerH, 22)
-
-        doc.setDrawColor(255, 255, 255)
-        doc.setLineWidth(0.15)
-        doc.line(0, headerH, pageW, headerH)
-        doc.setLineWidth(0.2)
-
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(14)
-        doc.setTextColor(0, 0, 0)
-        doc.text('Summary', marginL, headerH + 8)
-
-        const summaryRows = selectedQuotes.map((q, i) => {
-          const price = getPrice(q)
-          const fmt = (n: number) => formatPrice(n, q.currency)
-          return [
-            `Option ${OPTION_LABELS[i]}`,
-            q.name,
-            price > 0 ? fmt(price) : 'TBC',
-            price > 0 ? fmt(price * 1.1) : 'TBC',
-          ]
-        })
-
-        autoTable(doc, {
-          startY: headerH + 14,
-          head: [['', 'Description', 'Ex GST', 'Inc GST']],
-          body: summaryRows,
-          styles: { font: 'helvetica', fontSize: 10, cellPadding: 4 },
-          headStyles: { fillColor: [20, 20, 20], textColor: [255, 255, 255], fontStyle: 'bold' },
-          alternateRowStyles: { fillColor: [248, 248, 248] },
-          columnStyles: {
-            0: { cellWidth: 18, fontStyle: 'bold' },
-            1: { cellWidth: 90 },
-            2: { cellWidth: 30, halign: 'right' },
-            3: { cellWidth: 32, halign: 'right', fontStyle: 'bold' },
-          },
-          margin: { left: marginL, right: 20 },
-        })
-
-        drawFooter()
-      }
-
-      const safeName = (clientName || 'Proposal').replace(/\s+/g, '_')
-      doc.save(`Brohn_Smith_${safeName}_Proposal.pdf`)
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  if (!open) return null
-
-  return (
-    <>
-      <div className="sheet-overlay" onClick={onClose} />
-      <div className="sheet-panel" style={{ maxHeight: '92vh' }}>
-        <div className="sheet-handle" />
-        <div className="flex items-center justify-between px-5 pt-3 pb-2 border-b border-ios-separator/40">
-          <div>
-            <h2 className="font-bold text-base">Client Proposal</h2>
-            <p className="text-xs text-ios-secondary">Multi-option PDF with images</p>
-          </div>
-          <button className="press-feedback text-ios-blue font-semibold text-sm" onClick={onClose}>Done</button>
-        </div>
-
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(92vh - 70px)' }}>
-          <div className="px-4 pt-4 pb-8 space-y-4">
-
-            {/* Client details */}
-            <div className="ios-card px-4 py-3 space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-ios-secondary mb-1">Proposal Details</div>
-              <div>
-                <div className="text-xs text-ios-secondary mb-1">Client name</div>
-                <input
-                  className="ios-input text-sm w-full"
-                  placeholder="e.g. Sarah & James"
-                  value={clientName}
-                  onChange={e => setClientName(e.target.value)}
-                />
-              </div>
-              <div>
-                <div className="text-xs text-ios-secondary mb-1">Cover note (optional)</div>
-                <textarea
-                  className="ios-input text-sm w-full resize-none"
-                  rows={2}
-                  placeholder="e.g. Three bespoke options for your consideration…"
-                  value={intro}
-                  onChange={e => setIntro(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Quote selector */}
-            <div>
-              <div className="flex items-center justify-between px-1 mb-2">
-                <span className="field-label">Select Quotes</span>
-                <span className="text-xs text-ios-secondary">{selectedIds.size} / 6 selected</span>
-              </div>
-
-              {versions.length === 0 ? (
-                <div className="ios-card px-4 py-6 text-center">
-                  <BookOpen size={24} className="mx-auto mb-2 text-ios-secondary opacity-40" />
-                  <p className="text-sm text-ios-secondary">No saved quotes yet — save some first</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {versions.map((v, idx) => {
-                    const isSelected = selectedIds.has(v.id)
-                    const optIdx = selectedQuotes.findIndex(q => q.id === v.id)
-                    const price = getPrice(v)
-                    const fmt = (n: number) => formatPrice(n, v.currency)
-
-                    return (
-                      <div
-                        key={v.id}
-                        className={`ios-card overflow-hidden transition-all ${isSelected ? 'ring-2 ring-black' : ''}`}
-                      >
-                        {/* Quote row */}
-                        <button
-                          className="ios-row w-full text-left press-feedback px-4 py-3"
-                          onClick={() => toggleSelect(v.id)}
-                        >
-                          {/* Option badge or checkbox */}
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold mr-3 transition-all ${isSelected ? 'text-black' : 'border-2 border-ios-separator/60 text-transparent'}`}
-                            style={isSelected ? { background: 'var(--gold)' } : {}}>
-                            {isSelected ? OPTION_LABELS[optIdx] : ''}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm truncate">{v.name}</div>
-                            <div className="text-xs text-ios-secondary mt-0.5">
-                              {v.mode} · {new Date(v.updatedAt || v.createdAt).toLocaleDateString('en-AU', { dateStyle: 'short' })}
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0 ml-2">
-                            <div className="font-bold text-sm price-display">{price > 0 ? fmt(price) : '—'}</div>
-                            <div className="text-xs text-ios-secondary">ex GST</div>
-                          </div>
-                        </button>
-
-                        {/* Image upload (only when selected) */}
-                        {isSelected && (
-                          <div className="px-4 pb-3 border-t border-ios-separator/40 pt-3">
-                            {images[v.id] ? (
-                              <div className="flex items-center gap-3">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={images[v.id]}
-                                  alt="option"
-                                  className="w-16 h-16 object-cover rounded-lg border border-ios-separator/40"
-                                />
-                                <div className="flex-1">
-                                  <div className="text-xs font-medium text-ios-green mb-1 flex items-center gap-1">
-                                    <CheckCircle size={12} /> Image ready
-                                  </div>
-                                  <button
-                                    className="text-xs text-ios-red press-feedback"
-                                    onClick={() => setImages(p => { const n = { ...p }; delete n[v.id]; return n })}
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                                <label className="press-feedback text-ios-blue text-xs font-semibold cursor-pointer">
-                                  Change
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={e => e.target.files?.[0] && handleImageFile(v.id, e.target.files[0])}
-                                  />
-                                </label>
-                              </div>
-                            ) : (
-                              <label className="flex items-center gap-2 press-feedback cursor-pointer py-1">
-                                <div className="w-8 h-8 rounded-lg bg-ios-bg flex items-center justify-center shrink-0">
-                                  <ImagePlus size={16} className="text-ios-secondary" />
-                                </div>
-                                <div>
-                                  <div className="text-sm font-medium text-ios-blue">Add image</div>
-                                  <div className="text-xs text-ios-secondary">Photo or render for this option</div>
-                                </div>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleImageFile(v.id, e.target.files[0])}
-                                />
-                              </label>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Generate button */}
-            <button
-              className={`w-full rounded-ios py-3.5 text-sm font-bold press-feedback flex items-center justify-center gap-2 ${selectedIds.size === 0 ? 'bg-ios-separator/30 text-ios-secondary' : 'btn-gold'}`}
-              disabled={selectedIds.size === 0 || generating}
-              onClick={generatePDF}
-            >
-              {generating ? (
-                <><Loader2 size={16} className="animate-spin" /> Generating…</>
-              ) : (
-                <><FileImage size={16} /> Generate Proposal PDF</>
-              )}
-            </button>
-            {selectedIds.size > 0 && !generating && (
-              <p className="text-xs text-ios-secondary text-center -mt-2">
-                {selectedIds.size + 1} pages · cover + {selectedIds.size} option{selectedIds.size > 1 ? 's' : ''}{selectedIds.size > 1 ? ' + summary' : ''}
-              </p>
-            )}
-
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// ─── Versions tab ─────────────────────────────────────────────────────────────
-
-function VersionsTab({ versions, activeQuote, settings, onLoad, onSave, onDelete }: {
-  versions: Quote[]
-  activeQuote: Quote
-  settings: AppSettings
-  onLoad: (q: Quote) => void
-  onSave: () => void
-  onDelete: (id: string) => void
-}) {
-  const [swipedId, setSwipedId] = useState<string | null>(null)
-  const [showProposal, setShowProposal] = useState(false)
-  const prices = settings.metalPrices
-
-  function getQuotePrice(q: Quote): string {
-    const rate = q.currency === 'USD' ? settings.usdRate : 1
-    const price = q.mode === 'retail'
-      ? calcRetailPrice(q, prices)
-      : q.wholesalePrice || calcTotalCost(q, prices)
-    return formatPrice((q.currency === 'USD' ? price * rate : price), q.currency)
-  }
-
-  return (
-    <div className="scroll-content pt-2">
-      <div className="px-4 mb-3">
-        <h1 className="text-xl font-bold">Saved Quotes</h1>
-        <p className="text-xs text-ios-secondary mt-0.5">{versions.length} version{versions.length !== 1 ? 's' : ''} saved</p>
-      </div>
-
-      {/* Save current + proposal */}
-      <div className="px-4 mb-4 flex flex-col gap-2">
-        <button
-          className="w-full press-feedback btn-gold rounded-ios py-3 text-sm font-bold"
-          onClick={onSave}
-        >
-          Save Current Quote
-        </button>
-        <button
-          className="w-full press-feedback bg-ios-card border border-ios-separator/60 rounded-ios py-3 text-sm font-semibold flex items-center justify-center gap-2"
-          onClick={() => setShowProposal(true)}
-        >
-          <FileImage size={15} />
-          Build Client Proposal
-        </button>
-      </div>
-
-      {versions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-ios-secondary">
-          <BookOpen size={36} className="mb-3 opacity-40" />
-          <p className="text-sm font-medium">No saved quotes yet</p>
-          <p className="text-xs mt-1">Save a quote to see it here</p>
-        </div>
-      ) : (
-        <div className="ios-card mx-4">
-          {versions.map((v, idx) => (
-            <div
-              key={v.id}
-              className={`relative overflow-hidden ${idx < versions.length - 1 ? 'row-sep' : ''}`}
-            >
-              {/* Delete button (revealed on swipe) */}
-              <div
-                className="absolute right-0 top-0 bottom-0 flex items-center bg-ios-red px-4"
-                style={{ opacity: swipedId === v.id ? 1 : 0, transition: 'opacity 0.2s' }}
-              >
-                <button
-                  className="text-white"
-                  onClick={() => { onDelete(v.id); setSwipedId(null) }}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-
-              <button
-                className="ios-row w-full text-left press-feedback"
-                onClick={() => { onLoad(v); setSwipedId(null) }}
-                onContextMenu={e => { e.preventDefault(); setSwipedId(swipedId === v.id ? null : v.id) }}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm truncate">{v.name}</span>
-                    {v.id === activeQuote.id && (
-                      <span className="text-xs px-1.5 py-0.5 bg-black text-white rounded-full shrink-0">Active</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-ios-secondary mt-0.5">
-                    {new Date(v.updatedAt || v.createdAt).toLocaleDateString('en-AU', { dateStyle: 'medium' })} · {v.mode} · {v.currency}
-                  </div>
-                </div>
-                <div className="text-right shrink-0 ml-3">
-                  <div className="font-bold text-sm price-display">{getQuotePrice(v)}</div>
-                  <div className="text-xs text-ios-secondary">{v.metalLines.length + v.stoneLines.length} components</div>
-                </div>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {versions.length > 0 && (
-        <p className="text-xs text-ios-secondary text-center mt-4">Long-press to reveal delete</p>
-      )}
-
-      <ProposalSheet
-        open={showProposal}
-        onClose={() => setShowProposal(false)}
-        versions={versions}
-        settings={settings}
-      />
-    </div>
   )
 }
 
@@ -4005,53 +3352,6 @@ function WaxWeightTab({ settings }: { settings: AppSettings }) {
   )
 }
 
-// ─── Save version sheet ───────────────────────────────────────────────────────
-
-function SaveVersionSheet({ open, onClose, suggestedName, onSave }: {
-  open: boolean
-  onClose: () => void
-  suggestedName: string
-  onSave: (name: string) => void
-}) {
-  const [name, setName] = useState(suggestedName)
-
-  useEffect(() => {
-    if (open) setName(suggestedName)
-  }, [open, suggestedName])
-
-  function handleSave() {
-    onSave(name.trim() || suggestedName)
-    onClose()
-  }
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Save Quote">
-      <div className="px-4 pb-8 mt-2">
-        <p className="text-sm text-ios-secondary mb-4">Name this saved version.</p>
-        <input
-          className="ios-input text-sm w-full border border-ios-separator rounded-ios-xs px-3 py-2.5 mb-5 outline-none focus:border-ios-blue transition-colors"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleSave() }}
-          autoFocus
-          placeholder="Quote name"
-        />
-        <button
-          className="w-full press-feedback btn-gold rounded-ios py-3 text-sm font-bold mb-2"
-          onClick={handleSave}
-        >
-          Save
-        </button>
-        <button
-          className="w-full press-feedback rounded-ios py-3 text-sm font-semibold text-ios-secondary"
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-      </div>
-    </Sheet>
-  )
-}
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
@@ -4060,11 +3360,8 @@ type Tab = 'build' | 'stones' | 'wax' | 'products' | 'sheets' | 'settings'
 export default function App() {
   const [tab, setTab] = useState<Tab>('build')
   const [quote, setQuote] = useState<Quote>(() => loadActiveQuote())
-  const [versions, setVersions] = useState<Quote[]>(() => loadVersions())
   const [settings, setSettings] = useState<AppSettings>(() => loadSettings())
   const [products, setProducts] = useState<Product[]>(() => loadProducts())
-  const [showSaveSheet, setShowSaveSheet] = useState(false)
-  const [suggestedVersionName, setSuggestedVersionName] = useState('')
 
   // Apply shared prices from URL on first load
   useEffect(() => {
@@ -4094,10 +3391,6 @@ export default function App() {
   useEffect(() => {
     saveActiveQuote(quote)
   }, [quote])
-
-  useEffect(() => {
-    saveVersions(versions)
-  }, [versions])
 
   useEffect(() => {
     saveSettings(settings)
@@ -4131,46 +3424,6 @@ export default function App() {
   function handleAddStoneToQuote(stone: StoneLine) {
     setQuote(prev => ({ ...prev, stoneLines: [...prev.stoneLines, stone] }))
     setTab('build')
-  }
-
-  function handleSaveVersion() {
-    const isNew = !versions.find(v => v.id === quote.id)
-    let suggested = quote.name
-    if (isNew) {
-      const date = new Date().toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      if (quote.clientName) {
-        const sameClient = versions.filter(v => v.clientName === quote.clientName).length
-        suggested = `${quote.clientName} - ${date} - v${sameClient + 1}`
-      } else {
-        const n = versions.length + 1
-        suggested = `Quote - ${date} - v${n}`
-      }
-    }
-    setSuggestedVersionName(suggested)
-    setShowSaveSheet(true)
-  }
-
-  function doSaveVersion(name: string) {
-    const updated = { ...quote, name, updatedAt: new Date().toISOString() }
-    setQuote(updated)
-    setVersions(prev => {
-      const existing = prev.findIndex(v => v.id === quote.id)
-      if (existing >= 0) {
-        const arr = [...prev]
-        arr[existing] = updated
-        return arr
-      }
-      return [updated, ...prev]
-    })
-  }
-
-  function handleLoadVersion(q: Quote) {
-    setQuote(q)
-    setTab('build')
-  }
-
-  function handleDeleteVersion(id: string) {
-    setVersions(prev => prev.filter(v => v.id !== id))
   }
 
   function handleNewQuote() {
@@ -4235,14 +3488,6 @@ export default function App() {
           <SettingsTab settings={settings} onChange={setSettings} />
         )}
       </div>
-
-      {/* Save version sheet */}
-      <SaveVersionSheet
-        open={showSaveSheet}
-        onClose={() => setShowSaveSheet(false)}
-        suggestedName={suggestedVersionName}
-        onSave={doSaveVersion}
-      />
 
       {/* Line Sheets iframe tab */}
       {tab === 'sheets' && (
