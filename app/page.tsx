@@ -3517,10 +3517,9 @@ export default function App() {
     setHydrated(true)
   }, [])
 
-  if (!hydrated) return null
-
-  // Apply shared prices from URL on first load
+  // Apply shared prices from URL on first load (only after hydration)
   useEffect(() => {
+    if (!hydrated) return
     const param = new URLSearchParams(window.location.search).get('prices')
     if (!param) return
     try {
@@ -3542,19 +3541,25 @@ export default function App() {
       window.history.replaceState({}, '', '/')
       setTab('settings')
     } catch {}
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hydrated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!hydrated) return
     saveActiveQuote(quote)
-  }, [quote])
+  }, [quote, hydrated])
 
   useEffect(() => {
+    if (!hydrated) return
     saveSettings(settings)
-  }, [settings])
+  }, [settings, hydrated])
 
   useEffect(() => {
+    if (!hydrated) return
     saveProducts(products)
-  }, [products])
+  }, [products, hydrated])
+
+  // All hooks declared — safe to return early now
+  if (!hydrated) return null
 
   function handleLoadProductToQuote(p: Product, gp: number = 70) {
     const q = { ...quoteFromProduct(p), retailGP: gp, mode: 'retail' as const }
