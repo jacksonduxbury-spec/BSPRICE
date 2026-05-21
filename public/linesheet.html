@@ -284,21 +284,20 @@ textarea.fi{resize:vertical;min-height:52px}
 
 /* — Cover — */
 .cov-top{
-  display:flex;justify-content:space-between;align-items:baseline;
+  display:flex;justify-content:center;align-items:baseline;
   margin-bottom:0;
 }
 .cov-brand-name{
   font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;
+  text-align:center;
 }
-.cov-brand-site{
-  font-size:8px;color:#aaa;letter-spacing:0.12em;
-}
+.cov-brand-site{display:none}
 .cov-logo-hero{
   display:flex;align-items:center;justify-content:center;
   padding:52px 0 44px;
 }
 .cov-logo{
-  width:160px;height:160px;flex-shrink:0;
+  width:144px;height:144px;flex-shrink:0;
   border:var(--rule-lt);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;cursor:pointer;overflow:hidden;
@@ -306,7 +305,7 @@ textarea.fi{resize:vertical;min-height:52px}
 .cov-logo.has-img .slot-ui{display:none}
 .cov-logo.has-img{
   border:none;background:transparent;
-  width:160px;height:160px;
+  width:144px;height:144px;
 }
 .cov-logo img{
   max-width:100%;max-height:100%;
@@ -830,7 +829,6 @@ function docHTML(ls){
 <div class="doc-page">
   <div class="cov-top">
     <div class="cov-brand-name">Brohn Smith Jewellery</div>
-    <div class="cov-brand-site">brohnsmith.com</div>
   </div>
   <div class="cov-logo-hero">
     <label class="cov-logo ${ls.logoImage?'has-img':''}" style="cursor:pointer">
