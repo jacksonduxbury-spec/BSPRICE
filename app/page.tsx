@@ -3563,6 +3563,10 @@ export default function App() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-nav.png" alt="Brohn Smith" style={{ height: 28, width: 28, objectFit: 'contain' }} />
           <span className="text-xs font-medium text-ios-secondary uppercase tracking-widest">Pricing</span>
+          <button
+            onClick={() => window.open(window.location.href, '_blank')}
+            style={{ fontSize: 11, color: 'var(--ios-secondary)', background: 'none', border: '1px solid var(--ios-separator)', borderRadius: 5, padding: '2px 7px', cursor: 'pointer', letterSpacing: '0.04em', fontWeight: 600 }}
+          >⧉</button>
         </div>
         {tab === 'build' && (
           <div className="flex items-center gap-3">
