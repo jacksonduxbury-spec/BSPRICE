@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, BookOpen, PenLine, RefreshCw,
   AlertTriangle, CheckCircle, X, ChevronRight, BarChart3,
   Package, Search, Tag, Edit3, ArrowRight, Gem, Layers, Scale,
-  ImagePlus, FileImage, Loader2
+  ImagePlus, FileImage, Loader2, LayoutList
 } from 'lucide-react'
 import {
   type Quote, type MetalLine, type StoneLine, type AdditionalItem, type MetalType,
@@ -4095,7 +4095,7 @@ function SaveVersionSheet({ open, onClose, suggestedName, onSave }: {
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
-type Tab = 'build' | 'stones' | 'wax' | 'products' | 'settings'
+type Tab = 'build' | 'stones' | 'wax' | 'products' | 'sheets' | 'settings'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('build')
@@ -4284,14 +4284,48 @@ export default function App() {
         onSave={doSaveVersion}
       />
 
+      {/* Line Sheets iframe tab */}
+      {tab === 'sheets' && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', flexDirection: 'column' }}>
+          <iframe
+            src="/linesheet.html"
+            style={{ flex: 1, border: 'none', width: '100%' }}
+            title="Line Sheets"
+          />
+          <div className="tab-bar">
+            <div className="flex">
+              {[
+                { id: 'build',    icon: PenLine,      label: 'Sales'    },
+                { id: 'stones',   icon: Gem,           label: 'Stones'   },
+                { id: 'wax',      icon: Layers,        label: 'Wax'      },
+                { id: 'products', icon: Package,       label: 'Products' },
+                { id: 'sheets',   icon: LayoutList,    label: 'Sheets'   },
+                { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
+              ].map(({ id, icon: Icon, label }) => (
+                <button
+                  key={id}
+                  className="flex-1 flex flex-col items-center gap-0.5 py-2 press-feedback"
+                  style={{ color: tab === id ? 'var(--gold)' : 'var(--ios-secondary)' }}
+                  onClick={() => setTab(id as Tab)}
+                >
+                  <Icon size={20} strokeWidth={tab === id ? 2.5 : 1.8} />
+                  <span className="text-[9px] font-semibold">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bottom tab bar */}
-      <div className="tab-bar">
+      <div className="tab-bar" style={{ display: tab === 'sheets' ? 'none' : undefined }}>
         <div className="flex">
           {[
             { id: 'build',    icon: PenLine,      label: 'Sales'    },
             { id: 'stones',   icon: Gem,           label: 'Stones'   },
             { id: 'wax',      icon: Layers,        label: 'Wax'      },
             { id: 'products', icon: Package,       label: 'Products' },
+            { id: 'sheets',   icon: LayoutList,    label: 'Sheets'   },
             { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
           ].map(({ id, icon: Icon, label }) => (
             <button
