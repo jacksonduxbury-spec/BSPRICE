@@ -3585,7 +3585,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-ios-bg">
+    <div className="min-h-screen bg-ios-bg" style={{ maxWidth: 430, margin: '0 auto', position: 'relative' }}>
       {/* Nav bar */}
       <div className="sticky top-0 z-30 bg-ios-bg/90 backdrop-blur-md border-b border-ios-separator/40 px-4 pb-3 flex items-center justify-between" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
         <div className="flex items-center gap-2">
