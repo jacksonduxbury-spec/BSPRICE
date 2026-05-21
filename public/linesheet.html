@@ -773,35 +773,61 @@ function downloadAllCSV(){
   const TO_USD={AUD:0.72,USD:1,GBP:1.27,EUR:1.08};
   const toUSD=(n,cur)=>n*(TO_USD[cur]||1);
   const q=c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`;
+  const fmt=n=>n!=null&&n!==0?Number(n).toFixed(2):'';
 
-  const rows=[['Sheet','Currency','Wholesale','RRP','Wholesale USD']];
+  // Header
+  const rows=[['Sheet','Buyer','Collection','Currency','SKU','Product','Metal','Wholesale','RRP','Wholesale USD']];
+
   let grandWS_USD=0;
+  let grandWS_local=0; // only meaningful if all same currency
 
   for(const ls of ST.lineSheets){
     const cur=ls.currency||'AUD';
-    const label=[ls.buyerName,ls.collection].filter(Boolean).join(' · ')||'Untitled';
-    let sheetWS=0,sheetRRP=0;
-    for(const p of ls.products)
+    const buyer=ls.buyerName||'';
+    const collection=ls.collection||'';
+    const sheetLabel=[buyer,collection].filter(Boolean).join(' · ')||'Untitled';
+
+    let sheetWS=0, sheetRRP=0;
+
+    for(const p of ls.products){
+      const sku=p.sku||'';
+      const piece=p.pieceName||'';
       for(const mv of p.metalVariants){
-        sheetWS+=mv.subtotalWholesale||0;
-        sheetRRP+=mv.subtotalRRP||0;
+        const ws=mv.subtotalWholesale||0;
+        const rrp=mv.subtotalRRP||0;
+        const wsUSD=toUSD(ws,cur);
+        sheetWS+=ws;
+        sheetRRP+=rrp;
+        grandWS_USD+=wsUSD;
+        rows.push([
+          sheetLabel, buyer, collection, cur,
+          sku, piece,
+          mv.metalName||'',
+          fmt(ws), fmt(rrp), fmt(wsUSD)
+        ]);
       }
-    const sheetUSD=toUSD(sheetWS,cur);
-    grandWS_USD+=sheetUSD;
-    rows.push([label, cur, sheetWS.toFixed(2), sheetRRP.toFixed(2), sheetUSD.toFixed(2)]);
+    }
+
+    // Sheet subtotal row
+    rows.push([
+      '— '+sheetLabel+' TOTAL', '', '', cur, '', '',
+      '',
+      sheetWS.toFixed(2), sheetRRP.toFixed(2), toUSD(sheetWS,cur).toFixed(2)
+    ]);
+    rows.push(['','','','','','','','','','']);
   }
 
-  rows.push(['','','','','']);
-  rows.push(['GRAND TOTAL (wholesale USD)','','','',grandWS_USD.toFixed(2)]);
-  rows.push(['','','','']);
-  rows.push([`FX: AUD ${TO_USD.AUD} · GBP ${TO_USD.GBP} · EUR ${TO_USD.EUR}`,'','','']);
+  // Grand total
+  rows.push(['GRAND TOTAL (wholesale USD)','','','','','','','','',grandWS_USD.toFixed(2)]);
+  rows.push(['','','','','','','','','','']);
+  rows.push([`FX rates used: AUD=${TO_USD.AUD}  GBP=${TO_USD.GBP}  EUR=${TO_USD.EUR}`,'','','','','','','','','']);
 
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='brohn-linesheets-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.download='brohn-pricing-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
