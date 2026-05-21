@@ -451,7 +451,10 @@ textarea.fi{resize:vertical;min-height:52px}
 
 <div id="topbar">
   <span class="topbar-brand">Brohn Smith · Line Sheet Builder</span>
-  <div class="topbar-actions" id="topbar-actions"></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button onclick="window.open(window.location.href,'_blank')" style="font-size:10px;color:#aaa;background:none;border:1px solid #ddd;border-radius:5px;padding:2px 8px;cursor:pointer;letter-spacing:0.05em">↗ POP OUT</button>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
 </div>
 
 <div id="app">
@@ -1194,8 +1197,6 @@ function renderDashboard(v,ta){
   <button class="btn-ghost btn-ghost-sm" onclick="createObjectsSheet()">＋ Create Objects sheet</button>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬆ Share with colleague</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬇ Import from colleague<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
-  <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 Export CSV</button>
-  <button class="btn btn-sm" id="zip-btn" onclick="downloadAllZip(this)" style="margin-left:8px">⬇ Download All PDF</button>
 </div>`;
   if(ST.lineSheets.length===0){
     v.innerHTML=`

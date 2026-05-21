@@ -3492,15 +3492,7 @@ export default function App() {
       {/* Line Sheets iframe tab */}
       {tab === 'sheets' && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ background: '#000', padding: '6px 12px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => window.open('/linesheet.html', '_blank')}
-              style={{ fontSize: 11, color: '#aaa', background: 'none', border: '1px solid #444', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
-            >
-              ↗ Pop out
-            </button>
-          </div>
-          <iframe
+<iframe
             src="/linesheet.html"
             style={{ flex: 1, border: 'none', width: '100%' }}
             title="Line Sheets"
