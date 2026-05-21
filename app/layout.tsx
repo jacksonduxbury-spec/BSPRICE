@@ -27,9 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-startup-image" href="/apple-touch-icon.png" />
       </head>
       <body className="bg-ios-bg min-h-screen">
-        <div id="app-shell">
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   )

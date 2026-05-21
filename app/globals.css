@@ -21,20 +21,10 @@
 }
 
 html, body {
-  background: #1a1a1a;
+  background: var(--ios-bg);
   font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Mobile shell — centres the app on desktop */
-#app-shell {
-  max-width: 430px;
-  min-height: 100dvh;
-  margin: 0 auto;
-  background: var(--ios-bg);
-  position: relative;
-  box-shadow: 0 0 60px rgba(0,0,0,0.4);
 }
 
 /* iOS segmented control */
@@ -125,10 +115,8 @@ html, body {
 .sheet-panel {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
+  left: 0;
+  right: 0;
   background: #FFFFFF;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 30px rgba(0,0,0,0.12);
@@ -151,7 +139,7 @@ html, body {
 
 /* Tab bar */
 .tab-bar {
-  position: sticky;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;

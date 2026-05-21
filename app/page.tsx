@@ -1243,29 +1243,13 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
             options={[{ value: 'AUD', label: 'AUD' }, { value: 'USD', label: 'USD' }]}
             value={quote.currency}
             onChange={v => onChange({ ...quote, currency: v as Currency, mode: 'retail' as const })}
-            className="w-36"
           />
-        </div>
-
-        <div className="ios-card mx-4 mb-3 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Gross Profit %</span>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min="10"
-                max="90"
-                step="5"
-                value={quote.retailGP}
-                onChange={e => onChange({ ...quote, retailGP: parseInt(e.target.value) })}
-                className="w-32 accent-black"
-              />
-              <span className="text-lg font-bold price-display w-12 text-right">{quote.retailGP}%</span>
-            </div>
-          </div>
-          <p className="text-xs text-ios-secondary mt-1">
-            Formula: cost ÷ {(1 - quote.retailGP / 100).toFixed(2)}
-          </p>
+          <SegControl
+            options={[{ value: '60', label: '60%' }, { value: '65', label: '65%' }, { value: '70', label: '70%' }, { value: '75', label: '75%' }]}
+            value={String(quote.retailGP)}
+            onChange={v => onChange({ ...quote, retailGP: parseInt(v) })}
+            className="flex-1"
+          />
         </div>
 
         {/* Metals section */}
