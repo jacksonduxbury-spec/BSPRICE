@@ -1237,60 +1237,36 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
           />
         </div>
 
-        {/* Currency row */}
+        {/* Currency + GP row */}
         <div className="px-4 mb-3 flex items-center gap-3">
           <SegControl
             options={[{ value: 'AUD', label: 'AUD' }, { value: 'USD', label: 'USD' }]}
             value={quote.currency}
             onChange={v => onChange({ ...quote, currency: v as Currency, mode: 'retail' as const })}
+            className="w-36"
           />
         </div>
 
-        {/* GP control */}
         <div className="ios-card mx-4 mb-3 px-4 py-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Gross Profit %</span>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min="10"
-                  max="90"
-                  step="5"
-                  value={quote.retailGP}
-                  onChange={e => onChange({ ...quote, retailGP: parseInt(e.target.value) })}
-                  className="w-32 accent-black"
-                />
-                <span className="text-lg font-bold price-display w-12 text-right">{quote.retailGP}%</span>
-              </div>
-            </div>
-            <p className="text-xs text-ios-secondary mt-1">
-              Formula: cost ÷ {(1 - quote.retailGP / 100).toFixed(2)}
-            </p>
-          </div>
-        {false && (
-          <div className="ios-card mx-4 mb-3 px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-sm font-medium">Wholesale Price</span>
-              <div className="flex items-center gap-1">
-                <span className="text-ios-secondary text-sm">{currency}</span>
-                <input
-                  className="ios-input text-right price-display text-lg font-bold w-28"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min="0"
-                  value={(currency === 'USD' ? quote.wholesalePrice * rate : quote.wholesalePrice) || ''}
-                  placeholder="0.00"
-                  onChange={e => {
-                    const raw = parseFloat(e.target.value) || 0
-                    const inAUD = currency === 'USD' ? raw / rate : raw
-                    onChange({ ...quote, wholesalePrice: inAUD })
-                  }}
-                />
-              </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Gross Profit %</span>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="10"
+                max="90"
+                step="5"
+                value={quote.retailGP}
+                onChange={e => onChange({ ...quote, retailGP: parseInt(e.target.value) })}
+                className="w-32 accent-black"
+              />
+              <span className="text-lg font-bold price-display w-12 text-right">{quote.retailGP}%</span>
             </div>
           </div>
-        )}
+          <p className="text-xs text-ios-secondary mt-1">
+            Formula: cost ÷ {(1 - quote.retailGP / 100).toFixed(2)}
+          </p>
+        </div>
 
         {/* Metals section */}
         <div className="px-4 mb-1">
