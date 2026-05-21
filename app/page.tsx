@@ -74,15 +74,16 @@ function saveActiveQuote(q: Quote) {
 // ─── Segmented control ───────────────────────────────────────────────────────
 
 function SegControl<T extends string>({
-  options, value, onChange, className = ''
+  options, value, onChange, className = '', style
 }: {
   options: { value: T; label: string }[]
   value: T
   onChange: (v: T) => void
   className?: string
+  style?: React.CSSProperties
 }) {
   return (
-    <div className={`seg-control ${className}`}>
+    <div className={`seg-control ${className}`} style={style}>
       {options.map(o => (
         <button
           key={o.value}
@@ -1321,7 +1322,7 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
         </div>
 
         {/* Currency + GP row */}
-        <div className="px-4 mb-3 flex items-center gap-3">
+        <div className="px-4 mb-3" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <SegControl
             options={[{ value: 'AUD', label: 'AUD' }, { value: 'USD', label: 'USD' }]}
             value={quote.currency}
@@ -1331,7 +1332,7 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
             options={[{ value: '60', label: '60%' }, { value: '65', label: '65%' }, { value: '70', label: '70%' }, { value: '75', label: '75%' }]}
             value={String(quote.retailGP)}
             onChange={v => onChange({ ...quote, retailGP: parseInt(v) })}
-            className="flex-1"
+            style={{ flex: 1 }}
           />
         </div>
 
