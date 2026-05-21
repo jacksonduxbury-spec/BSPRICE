@@ -1124,6 +1124,59 @@ function render(){
   }
 }
 
+
+function roundUpAllRRPs(){
+  let count=0;
+  for(const ls of ST.lineSheets){
+    for(const p of (ls.products||[])){
+      for(const mv of (p.metalVariants||[])){
+        if(mv.subtotalRRP&&mv.subtotalRRP>0){
+          const rounded=Math.ceil(mv.subtotalRRP/5)*5;
+          if(rounded!==mv.subtotalRRP){mv.subtotalRRP=rounded;count++;}
+        }
+      }
+    }
+  }
+  saveST();render();
+  alert('Rounded up '+count+' RRP value'+(count===1?'':'s')+' to nearest $5.');
+}
+
+function addChainSizes(){
+  let count=0;
+  for(const ls of ST.lineSheets){
+    const col=(ls.collection||'').toUpperCase();
+    if(col!=='NECK')continue;
+    for(const p of (ls.products||[])){
+      if(!p.sizes){p.sizes='60cm min';count++;}
+    }
+  }
+  saveST();render();
+  alert('Updated '+count+' neck product'+(count===1?'':'s')+' with 60cm min.');
+}
+
+function createObjectsSheet(){
+  const existing=ST.lineSheets.find(ls=>(ls.collection||'').toUpperCase()==='OBJECTS'&&ls.buyerName==='H. LORENZO');
+  if(existing){alert('Objects sheet already exists.');return;}
+  const ls=mkLineSheet();
+  ls.buyerName='H. LORENZO';
+  ls.collection='OBJECTS';
+  ls.currency='USD';
+  ls.logoImage=HARDCODED_LOGO;
+  const mkProd=(name)=>{
+    const p=mkProduct();
+    p.pieceName=name;
+    p.metalVariants=[mkVariant('Sterling Silver'),mkVariant('9k Solid Yellow Gold')];
+    return p;
+  };
+  ls.products=[
+    mkProd('Spoon'),
+    mkProd('Chic Incense Holder'),
+    mkProd('Chic II Cigarette Holder'),
+  ];
+  ST.lineSheets.push(ls);
+  saveST();render();
+  alert('Objects sheet created — open it to add images and prices.');
+}
 function renderDashboard(v,ta){
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 CSV</button>
@@ -1136,6 +1189,9 @@ function renderDashboard(v,ta){
   <span style="font-size:11px;color:#aaa;flex:1;min-width:120px">Auto-backup active</span>
   <button class="btn-ghost btn-ghost-sm" onclick="loadAllImages().then(()=>{render();alert('Images reloaded.')})">🔄 Reload images</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">🏷 Logo all sheets<input type="file" accept="image/*" style="display:none" onchange="applyLogoToAll(this.files[0])"></label>
+  <button class="btn-ghost btn-ghost-sm" onclick="roundUpAllRRPs()">✦ Round up RRPs</button>
+  <button class="btn-ghost btn-ghost-sm" onclick="addChainSizes()">📏 Add chain sizes</button>
+  <button class="btn-ghost btn-ghost-sm" onclick="createObjectsSheet()">＋ Create Objects sheet</button>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬆ Share with colleague</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬇ Import from colleague<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 Export CSV</button>
