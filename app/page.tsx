@@ -165,9 +165,9 @@ function MetalLineRow({ line, prices, currency, rate, onUpdate, onDelete }: {
 
   return (
     <div className="ios-row row-sep animate-in">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
         {/* Metal type dropdown */}
-        <div className="relative flex items-center bg-ios-bg rounded-ios-xs px-2 py-1 shrink-0">
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'var(--ios-bg)', borderRadius: 8, padding: '4px 8px', flexShrink: 0 }}>
           <select
             className="ios-select font-semibold text-sm pr-3"
             value={line.metalType}
@@ -181,18 +181,23 @@ function MetalLineRow({ line, prices, currency, rate, onUpdate, onDelete }: {
         </div>
 
         {/* Grams */}
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          <NumInput
-            value={line.grams}
-            onChange={v => onUpdate({ ...line, grams: v })}
-            placeholder="0"
-            suffix="g"
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
+          <input
+            className="ios-input text-right price-display"
+            style={{ minWidth: 0, flex: 1 }}
+            type="number"
+            inputMode="decimal"
             step="0.1"
+            min="0"
+            value={line.grams === 0 ? '' : line.grams}
+            placeholder="0"
+            onChange={e => onUpdate({ ...line, grams: parseFloat(e.target.value) || 0 })}
           />
+          <span className="text-ios-secondary text-sm" style={{ flexShrink: 0 }}>g</span>
         </div>
 
         {/* Cost */}
-        <span className="text-sm font-semibold price-display text-right shrink-0 live-price" style={{ minWidth: 72 }}>
+        <span className="text-sm font-semibold price-display text-right live-price" style={{ minWidth: 72, flexShrink: 0 }}>
           {formatPrice(displayCost, currency)}
         </span>
       </div>
@@ -227,9 +232,9 @@ function StoneLineRow({ line, currency, rate, stoneGP, onUpdate, onDelete }: {
 
   return (
     <div className="ios-row row-sep animate-in">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
         {/* Stone type */}
-        <div className="relative flex items-center bg-ios-bg rounded-ios-xs px-2 py-1 shrink-0">
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'var(--ios-bg)', borderRadius: 8, padding: '4px 8px', flexShrink: 0 }}>
           <select
             className="ios-select font-semibold text-sm pr-3"
             value={line.stoneType}
@@ -243,17 +248,23 @@ function StoneLineRow({ line, currency, rate, stoneGP, onUpdate, onDelete }: {
         </div>
 
         {/* Wholesale cost */}
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          <span className="text-ios-secondary text-sm shrink-0">WS</span>
-          <NumInput
-            value={line.wholesaleCost}
-            onChange={v => onUpdate({ ...line, wholesaleCost: v })}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
+          <span className="text-ios-secondary text-sm" style={{ flexShrink: 0 }}>WS</span>
+          <input
+            className="ios-input text-right price-display"
+            style={{ minWidth: 0, flex: 1 }}
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            value={line.wholesaleCost === 0 ? '' : line.wholesaleCost}
             placeholder="0"
+            onChange={e => onUpdate({ ...line, wholesaleCost: parseFloat(e.target.value) || 0 })}
           />
         </div>
 
         {/* Retail value */}
-        <div className="text-right shrink-0" style={{ minWidth: 72 }}>
+        <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 72 }}>
           <div className="text-sm font-semibold price-display live-price">
             {formatPrice(displayRetail, currency)}
           </div>
@@ -281,23 +292,29 @@ function AdditionalItemRow({ item, currency, rate, onUpdate, onDelete }: {
 
   return (
     <div className="ios-row row-sep animate-in">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
         {/* Label */}
         <input
-          className="ios-input text-sm flex-1 min-w-0"
+          className="ios-input text-sm"
+          style={{ flex: 1, minWidth: 0 }}
           type="text"
           placeholder="Item description"
           value={item.label}
           onChange={e => onUpdate({ ...item, label: e.target.value })}
         />
-        {/* Price */}
-        <NumInput
-          value={item.price}
-          onChange={v => onUpdate({ ...item, price: v })}
+        {/* Price input */}
+        <input
+          className="ios-input text-right price-display"
+          style={{ width: 72, flexShrink: 0 }}
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          value={item.price === 0 ? '' : item.price}
           placeholder="0"
-          className="shrink-0"
+          onChange={e => onUpdate({ ...item, price: parseFloat(e.target.value) || 0 })}
         />
-        <span className="text-sm font-semibold price-display text-right shrink-0 live-price" style={{ minWidth: 72 }}>
+        <span className="text-sm font-semibold price-display live-price" style={{ minWidth: 72, flexShrink: 0, textAlign: 'right' }}>
           {formatPrice(displayPrice, currency)}
         </span>
       </div>
