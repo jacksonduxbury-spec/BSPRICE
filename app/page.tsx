@@ -3505,9 +3505,19 @@ type Tab = 'build' | 'stones' | 'wax' | 'products' | 'sheets' | 'settings'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('build')
-  const [quote, setQuote] = useState<Quote>(() => loadActiveQuote())
-  const [settings, setSettings] = useState<AppSettings>(() => loadSettings())
-  const [products, setProducts] = useState<Product[]>(() => loadProducts())
+  const [quote, setQuote] = useState<Quote>(newQuote)
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
+  const [products, setProducts] = useState<Product[]>([])
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    setQuote(loadActiveQuote())
+    setSettings(loadSettings())
+    setProducts(loadProducts())
+    setHydrated(true)
+  }, [])
+
+  if (!hydrated) return null
 
   // Apply shared prices from URL on first load
   useEffect(() => {
