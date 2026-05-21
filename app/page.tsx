@@ -472,7 +472,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
 
       {/* Push to Line Sheet button */}
       {totalCost > 0 && (() => {
-        const ws = (currency === 'USD' ? totalCost * rate : totalCost) / 0.4
+        const ws = (currency === 'USD' ? totalCost * rate : totalCost) * 2.2
         const rrp = Math.ceil((ws * 2) / 10) * 10
         const selSheet = lsSheetsList.find(s => s.id === selLsId)
         const selProducts = selSheet?.products || []
