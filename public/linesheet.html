@@ -1136,8 +1136,8 @@ function renderDashboard(v,ta){
   <span style="font-size:11px;color:#aaa;flex:1;min-width:120px">Auto-backup active</span>
   <button class="btn-ghost btn-ghost-sm" onclick="loadAllImages().then(()=>{render();alert('Images reloaded.')})">🔄 Reload images</button>
   <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">🏷 Logo all sheets<input type="file" accept="image/*" style="display:none" onchange="applyLogoToAll(this.files[0])"></label>
-  <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬇ Download backup</button>
-  <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬆ Restore backup<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
+  <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬆ Share with colleague</button>
+  <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬇ Import from colleague<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
   <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 Export CSV</button>
   <button class="btn btn-sm" id="zip-btn" onclick="downloadAllZip(this)" style="margin-left:8px">⬇ Download All PDF</button>
 </div>`;
@@ -1172,8 +1172,10 @@ function renderDashboard(v,ta){
 <div id="dashboard">
   <div class="dash-head" style="display:flex;align-items:center;justify-content:space-between">
     <h1>Line Sheets (${ST.lineSheets.length})</h1>
-    <div style="display:flex;gap:8px">
-      <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 Export CSV</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()" title="Download file to share with colleague">⬆ Share</button>
+      <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0" title="Load file from colleague">⬇ Import<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
+      <button class="btn-ghost btn-ghost-sm" onclick="downloadAllCSV()">📊 CSV</button>
       <button class="btn btn-sm" onclick="downloadAllZip(this)">⬇ Download All PDF</button>
     </div>
   </div>
