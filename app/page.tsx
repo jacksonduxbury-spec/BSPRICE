@@ -180,25 +180,18 @@ function MetalLineRow({ line, prices, currency, rate, onUpdate, onDelete }: {
           </select>
           <ChevronDown size={11} className="absolute right-1.5 text-ios-secondary pointer-events-none" />
         </div>
-
         {/* Grams */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
-          <input
-            className="ios-input text-right price-display"
-            style={{ width: 72, minWidth: 0, flexShrink: 1 }}
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            min="0"
-            value={line.grams === 0 ? '' : line.grams}
-            placeholder="0"
-            onChange={e => onUpdate({ ...line, grams: parseFloat(e.target.value) || 0 })}
-          />
-          <span className="text-ios-secondary text-sm" style={{ flexShrink: 0 }}>g</span>
-        </div>
-
-        {/* Cost */}
-        <span className="text-sm font-semibold price-display text-right live-price" style={{ minWidth: 72, flexShrink: 0 }}>
+        <input
+          className="ios-input text-right price-display"
+          style={{ width: 64, flexShrink: 0 }}
+          type="number" inputMode="decimal" step="0.1" min="0"
+          value={line.grams === 0 ? '' : line.grams}
+          placeholder="0"
+          onChange={e => onUpdate({ ...line, grams: parseFloat(e.target.value) || 0 })}
+        />
+        <span style={{ flexShrink: 0, color: 'var(--ios-secondary)', fontSize: 14 }}>g</span>
+        {/* Cost pushed right */}
+        <span className="text-sm font-semibold price-display live-price" style={{ marginLeft: 'auto', flexShrink: 0, minWidth: 64, textAlign: 'right' }}>
           {formatPrice(displayCost, currency)}
         </span>
       </div>
@@ -401,7 +394,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
               const vRetail = calcRetailPrice(vQuote, prices, gpMap)
               const vCost = calcTotalCost(vQuote, prices)
               return (
-                <div key={variant.id} className="flex items-center justify-between">
+                <div key={variant.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span className="text-sm text-ios-secondary">{variant.name || 'Variant'}</span>
                   <div className="text-right">
                     <span className="text-sm font-bold price-display live-price">{fmt(vRetail)}</span>
@@ -412,7 +405,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
             })}
           </div>
           {stoneWS > 0 && (
-            <div className="flex justify-between text-xs text-ios-secondary mt-2 pt-2 border-t border-ios-separator/60">
+            <div className="text-xs text-ios-secondary mt-2 pt-2 border-t border-ios-separator/60" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Stones (WS → Retail)</span>
               <span className="price-display">{fmt(stoneWS)} → {fmt(stoneRetail)}</span>
             </div>
@@ -421,36 +414,36 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
       ) : (
         <div className="px-4 py-3 space-y-2">
           {metalCost > 0 && (
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Metal</span>
               <span className="price-display font-medium">{fmt(metalCost)}</span>
             </div>
           )}
           {stoneWS > 0 && (
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Stones (WS → Retail)</span>
               <span className="price-display font-medium">{fmt(stoneWS)} → {fmt(stoneRetail)}</span>
             </div>
           )}
           {quote.labour > 0 && (
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Labour</span>
               <span className="price-display font-medium">{fmt(quote.labour)}</span>
             </div>
           )}
           {quote.packaging > 0 && (
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Packaging</span>
               <span className="price-display font-medium">{fmt(quote.packaging)}</span>
             </div>
           )}
           {additionalTotal > 0 && (
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Additional items</span>
               <span className="price-display font-medium">{fmt(additionalTotal)}</span>
             </div>
           )}
-          <div className="flex justify-between text-sm pt-1 border-t border-ios-separator/60">
+          <div className="text-sm pt-1 border-t border-ios-separator/60" style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span className="text-ios-secondary">Total cost</span>
             <span className="price-display font-semibold">{fmt(totalCost)}</span>
           </div>
@@ -461,7 +454,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
 
       {quote.mode === 'retail' && !hasVariants ? (
         <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div className="text-xs text-ios-secondary font-medium mb-0.5">Retail Price ({quote.retailGP}% GP)</div>
               <div className="text-2xl font-bold price-display live-price tracking-tight">
@@ -3162,28 +3155,28 @@ function StonesTab({ settings, onAddToQuote }: {
             </div>
           </div>
           <div className="px-4 py-3 space-y-2">
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Wholesale</span>
               <span className="price-display font-medium">{fmt(wholesale)}</span>
             </div>
             {perCt > 0 && (
-              <div className="flex justify-between text-sm">
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
                 <span className="text-ios-secondary">Cost per carat</span>
                 <span className="price-display font-medium">{fmt(perCt)}/ct</span>
               </div>
             )}
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">GP margin</span>
               <span className="font-semibold" style={{ color: 'var(--gold)' }}>{gpPct}%</span>
             </div>
-            <div className="flex justify-between text-sm pt-1 border-t border-ios-separator/60">
+            <div className="text-sm pt-1 border-t border-ios-separator/60" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="text-ios-secondary">Divisor</span>
               <span className="price-display font-medium">÷ {(1 - gp).toFixed(2)}</span>
             </div>
           </div>
           <div className="gold-line" />
           <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <div className="text-xs text-ios-secondary font-medium mb-0.5">Retail (ex GST)</div>
                 <div className="text-2xl font-bold price-display tracking-tight">{fmt(retail)}</div>
@@ -3485,11 +3478,11 @@ function WaxWeightTab({ settings }: { settings: AppSettings }) {
       {mcWeight > 0 && mcCost > 0 && (
         <div className="ios-card mx-4 mb-6 animate-in">
           <div className="px-4 py-3 space-y-2">
-            <div className="flex justify-between text-sm">
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span className="text-ios-secondary">Metal cost ({mcMetal} @ ${pricePerG.toFixed(2)}/g)</span>
               <span className="price-display font-medium">{fmtPrice(mcCost)}</span>
             </div>
-            <div className="flex justify-between text-sm pt-1 border-t border-ios-separator/60">
+            <div className="text-sm pt-1 border-t border-ios-separator/60" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="text-ios-secondary">Retail at {mcGP}% GP (ex GST)</span>
               <span className="price-display font-semibold">{fmtPrice(mcRetail)}</span>
             </div>
