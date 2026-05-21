@@ -1085,8 +1085,15 @@ function metalBlockHTML(ls,p,pi,mv,mi){
       data-lsid="${ls.id}"
       data-path="products.${pi}.metalVariants.${mi}.metalName"
       value="${esc(mv.metalName)}" placeholder="Variant name (internal)">
-    ${p.metalVariants.length>1
-      ?`<button class="btn-text" data-action="removeMetal" data-lsid="${ls.id}" data-pi="${pi}" data-mi="${mi}">Remove</button>`:''}
+    <div style="display:flex;align-items:center;gap:6px">
+      ${p.metalVariants.length>1?`
+      <div class="move-btns">
+        <button class="btn-move" data-action="moveMetalUp" data-lsid="${ls.id}" data-pi="${pi}" data-mi="${mi}" ${mi===0?'disabled':''}>▲</button>
+        <button class="btn-move" data-action="moveMetalDown" data-lsid="${ls.id}" data-pi="${pi}" data-mi="${mi}" ${mi===p.metalVariants.length-1?'disabled':''}>▼</button>
+      </div>`:''}
+      ${p.metalVariants.length>1
+        ?`<button class="btn-text" data-action="removeMetal" data-lsid="${ls.id}" data-pi="${pi}" data-mi="${mi}">Remove</button>`:''}
+    </div>
   </div>
   <div class="f-row">
     <label>Line Description (buyer-facing)</label>
@@ -1530,6 +1537,18 @@ document.addEventListener('click',e=>{
     const ls=ST.lineSheets.find(x=>x.id===id);
     if(!ls)return;
     ls.products[pi].metalVariants.splice(mi,1);
+    saveST();
+    const ef=el('ef');if(ef){ef.innerHTML=editorFieldsHTML(ls);bindSlots();}
+    refreshPreview();
+  }
+  else if(a==='moveMetalUp'||a==='moveMetalDown'){
+    const ls=ST.lineSheets.find(x=>x.id===id);
+    if(!ls)return;
+    const variants=ls.products[pi].metalVariants;
+    const dir=a==='moveMetalUp'?-1:1;
+    const ni=mi+dir;
+    if(ni<0||ni>=variants.length)return;
+    [variants[mi],variants[ni]]=[variants[ni],variants[mi]];
     saveST();
     const ef=el('ef');if(ef){ef.innerHTML=editorFieldsHTML(ls);bindSlots();}
     refreshPreview();
