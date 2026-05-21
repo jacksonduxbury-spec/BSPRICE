@@ -316,6 +316,42 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
   const currency = quote.currency
   const fmt = (n: number) => formatPrice(currency === 'USD' ? n * rate : n, currency)
 
+  // ── Push to line sheet state ──
+  const [pushOpen, setPushOpen] = useState(false)
+  const [lsSheetsList, setLsSheetsList] = useState<any[]>([])
+  const [selLsId, setSelLsId] = useState('')
+  const [selProd, setSelProd] = useState(-1)
+  const [selVar, setSelVar] = useState(-1)
+  const [pushed, setPushed] = useState(false)
+
+  function openPush() {
+    try {
+      const raw = localStorage.getItem('bs_ls_v1')
+      const d = raw ? JSON.parse(raw) : {}
+      setLsSheetsList(d.lineSheets || [])
+    } catch { setLsSheetsList([]) }
+    setSelLsId(''); setSelProd(-1); setSelVar(-1); setPushed(false)
+    setPushOpen(true)
+  }
+
+  function confirmPush(ws: number, rrp: number) {
+    if (!selLsId || selProd < 0 || selVar < 0) return
+    try {
+      const raw = localStorage.getItem('bs_ls_v1')
+      if (!raw) return
+      const d = JSON.parse(raw)
+      const ls = d.lineSheets.find((s: any) => s.id === selLsId)
+      if (!ls) return
+      const mv = ls.products[selProd]?.metalVariants[selVar]
+      if (!mv) return
+      mv.subtotalWholesale = Math.round(ws * 100) / 100
+      mv.subtotalRRP = Math.ceil(rrp / 10) * 10
+      localStorage.setItem('bs_ls_v1', JSON.stringify(d))
+      setPushed(true)
+      setTimeout(() => setPushOpen(false), 800)
+    } catch (e) { alert('Error: ' + String(e)) }
+  }
+
   const gpMap = settings.stoneGP ?? STONE_GP
   const hasVariants = (quote.metalVariants?.length ?? 0) > 0
 
@@ -433,6 +469,83 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
           </div>
         </div>
       )}
+
+      {/* Push to Line Sheet button */}
+      {totalCost > 0 && (() => {
+        const ws = (currency === 'USD' ? totalCost * rate : totalCost) / 0.4
+        const rrp = Math.ceil((ws * 2) / 10) * 10
+        const selSheet = lsSheetsList.find(s => s.id === selLsId)
+        const selProducts = selSheet?.products || []
+        const selVariants = selProd >= 0 ? (selProducts[selProd]?.metalVariants || []) : []
+        return (
+          <>
+            <div className="px-4 pb-4 pt-1">
+              <button onClick={openPush} className="w-full py-2 rounded-xl text-sm font-semibold press-feedback"
+                style={{ background: 'var(--gold)', color: '#000' }}>
+                → Push to Line Sheet
+              </button>
+            </div>
+            {pushOpen && (
+              <div style={{ position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.45)',display:'flex',alignItems:'flex-end' }}
+                onClick={e => { if(e.target===e.currentTarget) setPushOpen(false) }}>
+                <div style={{ background:'#fff',borderRadius:'20px 20px 0 0',width:'100%',padding:'20px 20px 40px',maxHeight:'85vh',overflowY:'auto' }}>
+                  <div style={{ width:36,height:5,background:'#ddd',borderRadius:3,margin:'0 auto 16px' }}/>
+                  <div className="text-sm font-bold mb-1">Push to Line Sheet</div>
+                  <div className="flex gap-4 mb-4 py-2 border-b border-ios-separator/60">
+                    <div><div className="text-xs text-ios-secondary mb-0.5">Wholesale</div>
+                      <div className="text-lg font-bold price-display">{formatPrice(ws, currency)}</div></div>
+                    <div><div className="text-xs text-ios-secondary mb-0.5">RRP</div>
+                      <div className="text-lg font-bold price-display">{formatPrice(rrp, currency)}</div></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-xs text-ios-secondary font-semibold uppercase tracking-wide mb-1">Line Sheet</div>
+                      <select className="w-full p-2 rounded-lg border border-ios-separator text-sm"
+                        value={selLsId} onChange={e => { setSelLsId(e.target.value); setSelProd(-1); setSelVar(-1) }}>
+                        <option value="">Select sheet…</option>
+                        {lsSheetsList.map((ls: any) => (
+                          <option key={ls.id} value={ls.id}>{ls.buyerName} — {ls.collection}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {selLsId && (
+                      <div>
+                        <div className="text-xs text-ios-secondary font-semibold uppercase tracking-wide mb-1">Product</div>
+                        <select className="w-full p-2 rounded-lg border border-ios-separator text-sm"
+                          value={selProd} onChange={e => { setSelProd(Number(e.target.value)); setSelVar(-1) }}>
+                          <option value={-1}>Select product…</option>
+                          {selProducts.map((p: any, i: number) => (
+                            <option key={i} value={i}>{p.pieceName || `Product ${i+1}`}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    {selProd >= 0 && (
+                      <div>
+                        <div className="text-xs text-ios-secondary font-semibold uppercase tracking-wide mb-1">Metal Variant</div>
+                        <select className="w-full p-2 rounded-lg border border-ios-separator text-sm"
+                          value={selVar} onChange={e => setSelVar(Number(e.target.value))}>
+                          <option value={-1}>Select variant…</option>
+                          {selVariants.map((mv: any, i: number) => (
+                            <option key={i} value={i}>{mv.metalName || `Variant ${i+1}`}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    {selVar >= 0 && (
+                      <button onClick={() => confirmPush(ws, rrp)}
+                        className="w-full py-3 rounded-xl font-bold text-sm press-feedback mt-2"
+                        style={{ background: pushed ? 'var(--ios-green)' : 'var(--gold)', color: '#000', transition: 'background 0.3s' }}>
+                        {pushed ? '✓ Done' : `Confirm — WS ${formatPrice(ws, currency)}  RRP ${formatPrice(rrp, currency)}`}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )
+      })()}
     </div>
   )
 }
