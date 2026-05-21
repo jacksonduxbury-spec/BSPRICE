@@ -184,7 +184,7 @@ function MetalLineRow({ line, prices, currency, rate, onUpdate, onDelete }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, minWidth: 0 }}>
           <input
             className="ios-input text-right price-display"
-            style={{ minWidth: 0, flex: 1 }}
+            style={{ width: 72, minWidth: 0, flexShrink: 1 }}
             type="number"
             inputMode="decimal"
             step="0.1"
@@ -1501,24 +1501,36 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
         </div>
         <div className="ios-card mx-4 mb-3">
           <div className="ios-row row-sep">
-            <span className="text-sm font-medium flex-1">Labour</span>
-            <div className="flex items-center gap-1">
+            <span className="text-sm font-medium" style={{ flex: 1 }}>Labour</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span className="text-xs text-ios-secondary">{currency}</span>
-              <NumInput
-                value={quote.labour}
-                onChange={v => onChange({ ...quote, labour: v })}
+              <input
+                className="ios-input text-right price-display"
+                style={{ width: 72 }}
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                value={quote.labour === 0 ? '' : quote.labour}
                 placeholder="0"
+                onChange={e => onChange({ ...quote, labour: parseFloat(e.target.value) || 0 })}
               />
             </div>
           </div>
           <div className="ios-row">
-            <span className="text-sm font-medium flex-1">Packaging</span>
-            <div className="flex items-center gap-1">
+            <span className="text-sm font-medium" style={{ flex: 1 }}>Packaging</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span className="text-xs text-ios-secondary">{currency}</span>
-              <NumInput
-                value={quote.packaging}
-                onChange={v => onChange({ ...quote, packaging: v })}
+              <input
+                className="ios-input text-right price-display"
+                style={{ width: 72 }}
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                value={quote.packaging === 0 ? '' : quote.packaging}
                 placeholder="0"
+                onChange={e => onChange({ ...quote, packaging: parseFloat(e.target.value) || 0 })}
               />
             </div>
           </div>
