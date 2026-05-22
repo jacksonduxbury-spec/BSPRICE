@@ -444,7 +444,54 @@ textarea.fi{resize:vertical;min-height:52px}
   }
   .slot-ui,.btn-add-metal,.btn-add-prod,.btn-del-row,.btn-add-row{display:none!important}
   @page{margin:0;size:A4}
+  /* Order print styles */
+  .order-print-hide{display:none!important}
+  .order-doc{padding:16mm 18mm!important;font-size:11px!important}
+  .order-doc *{font-size:inherit}
 }
+
+/* ── ORDER BUILDER ── */
+.order-wrap{max-width:860px;margin:0 auto;padding:40px 32px}
+.order-hdr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:24px}
+.order-field label{font-size:8px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#888;display:block;margin-bottom:4px}
+.order-field input,.order-field textarea,.order-field select{
+  width:100%;border:none;border-bottom:0.5px solid #ccc;font-size:12px;
+  padding:4px 0;background:transparent;outline:none;font-family:inherit;
+  color:#000;resize:none;
+}
+.order-field input:focus,.order-field textarea:focus{border-bottom-color:#000}
+.order-field.full{grid-column:1/-1}
+.order-items-tbl{width:100%;border-collapse:collapse;margin-top:8px}
+.order-items-tbl th{font-size:8px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 8px;text-align:left;border-bottom:0.5px solid #000}
+.order-items-tbl th.r{text-align:right}
+.order-items-tbl td{padding:8px 8px;border-bottom:0.5px solid #eee;vertical-align:middle;font-size:12px}
+.order-items-tbl td.r{text-align:right}
+.order-items-tbl tr.excluded td{opacity:0.3}
+.order-qty{width:52px;border:0.5px solid #ccc;padding:3px 6px;text-align:center;font-size:12px;font-family:inherit;background:#fff;outline:none}
+.order-qty:focus{border-color:#000}
+.order-totals{margin-top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.order-total-row{display:flex;gap:32px;font-size:12px}
+.order-total-row.grand{font-weight:700;font-size:14px;border-top:0.5px solid #000;padding-top:8px;margin-top:4px}
+.order-section-title{font-size:8px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin:28px 0 12px}
+.order-actions{display:flex;gap:10px;margin-top:28px;padding-top:20px;border-top:0.5px solid #eee}
+
+/* ── ORDER PRINT DOC ── */
+.order-doc{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#000}
+.order-doc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #000}
+.order-doc-brand{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase}
+.order-doc-meta{text-align:right;font-size:10px;line-height:1.8}
+.order-doc-meta strong{font-weight:600}
+.order-doc-bill{margin-bottom:20px}
+.order-doc-bill .lbl{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin-bottom:4px}
+.order-doc-bill .val{font-size:12px;white-space:pre-line}
+.order-doc-tbl{width:100%;border-collapse:collapse;margin-bottom:16px}
+.order-doc-tbl th{font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 6px;text-align:left;border-bottom:0.5px solid #000;font-weight:400}
+.order-doc-tbl th.r,.order-doc-tbl td.r{text-align:right}
+.order-doc-tbl td{padding:7px 8px;border-bottom:0.5px solid #eee;font-size:11px}
+.order-doc-totals{display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-top:12px}
+.order-doc-total-row{display:flex;gap:40px;font-size:11px}
+.order-doc-total-row.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px}
+.order-doc-footer{margin-top:28px;padding-top:12px;border-top:0.5px solid #eee;font-size:9px;color:#888}
 </style>
 </head>
 <body>
@@ -536,9 +583,41 @@ function recomputeSubtotals(ls){
 ───────────────────────────────────────────────────────── */
 const ST={
   lineSheets:[],
+  orders:[],
   activeId:null,
-  view:'dashboard',  // 'dashboard' | 'editor'
+  activeOrderId:null,
+  view:'dashboard',  // 'dashboard' | 'editor' | 'order'
 };
+
+function mkOrder(ls){
+  const today=new Date().toISOString().slice(0,10);
+  const num='SO-'+Math.floor(100000+Math.random()*900000);
+  return{
+    id:uid(),
+    createdAt:today,
+    lineSheetId:ls?ls.id:null,
+    buyerName:ls?ls.buyerName:'',
+    buyerAddress:'',
+    orderNumber:num,
+    orderDate:today,
+    deliveryDate:'',
+    paymentTerms:'Net 30 days',
+    currency:ls?ls.currency:'AUD',
+    notes:'',
+    items:ls?ls.products.flatMap(p=>
+      p.metalVariants.map(mv=>({
+        id:uid(),
+        pieceName:p.pieceName||'',
+        sku:p.sku||'',
+        metalName:mv.metalName||'',
+        lineDescription:mv.lineDescription||'',
+        unitWholesale:mv.subtotalWholesale||0,
+        qty:1,
+        included:!!(mv.subtotalWholesale>0)
+      }))
+    ):[]
+  };
+}
 
 /* ─────────────────────────────────────────────────────────
    INDEXEDDB IMAGE STORE  (images too large for localStorage)
@@ -662,30 +741,29 @@ function loadLogos(){
 function loadST(){
   try{
     const raw=localStorage.getItem('bs_ls_v1');
-    if(raw){const d=JSON.parse(raw);ST.lineSheets=d.lineSheets||[];loadLogos();return;}
+    if(raw){const d=JSON.parse(raw);ST.lineSheets=d.lineSheets||[];ST.orders=d.orders||[];loadLogos();return;}
   }catch(e){}
-  /* Fallback: try to restore from rolling backup */
   try{
     const bk=localStorage.getItem('bs_ls_backup');
-    if(bk){const d=JSON.parse(bk);ST.lineSheets=d.lineSheets||[];loadLogos();console.warn('Restored from backup');}
+    if(bk){const d=JSON.parse(bk);ST.lineSheets=d.lineSheets||[];ST.orders=d.orders||[];loadLogos();console.warn('Restored from backup');}
   }catch(e){}
 }
 
 function saveST(){
-  /* Strip product images before saving to localStorage — those live in IndexedDB */
-  const stripped={lineSheets:ST.lineSheets.map(ls=>({
-    ...ls,
-    logoImage:null,
-    products:ls.products.map(p=>({...p,images:[null,null]}))
-  }))};
+  const stripped={
+    lineSheets:ST.lineSheets.map(ls=>({
+      ...ls,
+      logoImage:null,
+      products:ls.products.map(p=>({...p,images:[null,null]}))
+    })),
+    orders:ST.orders
+  };
   try{
     const payload=JSON.stringify(stripped);
     localStorage.setItem('bs_ls_v1',payload);
     localStorage.setItem('bs_ls_backup',payload);
   }catch(e){console.warn('localStorage save error',e);}
-  /* Logos saved separately in localStorage (sync, reliable) */
   saveLogos();
-  /* Product images saved to IndexedDB asynchronously */
   saveImagesToIDB();
 }
 
@@ -1220,9 +1298,220 @@ function render(){
   const ta=el('topbar-actions');
   if(ST.view==='dashboard'){
     renderDashboard(v,ta);
+  }else if(ST.view==='order'){
+    renderOrder(v,ta);
   }else{
     renderEditor(v,ta);
   }
+}
+
+/* ── ORDER BUILDER ─────────────────────────────────────────────── */
+function fmtMoney2(n,cur){
+  if(!n&&n!==0)return'—';
+  return new Intl.NumberFormat('en-AU',{style:'currency',currency:cur||'AUD',minimumFractionDigits:2}).format(n);
+}
+
+function renderOrder(v,ta){
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord){ST.view='dashboard';render();return;}
+  const cur=ord.currency||'AUD';
+
+  ta.innerHTML=`
+    <button class="btn-ghost btn-ghost-sm" onclick="ST.view='dashboard';render()">← Back</button>
+    <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">🖨 Print / PDF</button>
+    <button class="btn btn-sm" onclick="saveOrderAndBack()">Save Order</button>`;
+
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
+
+  const itemRows=ord.items.map((item,idx)=>{
+    const lineTotal=item.included?(item.unitWholesale*(item.qty||1)):0;
+    return`<tr class="${item.included?'':'excluded'}">
+      <td><input type="checkbox" ${item.included?'checked':''} onchange="toggleOrderItem(${idx},this.checked)" style="cursor:pointer"></td>
+      <td>${esc(item.pieceName)||'—'}</td>
+      <td style="color:#888">${esc(item.metalName)||'—'}</td>
+      <td style="color:#888;font-size:10px">${esc(item.sku)||''}</td>
+      <td class="r">${fmtMoney2(item.unitWholesale,cur)}</td>
+      <td class="r"><input class="order-qty" type="number" min="0" value="${item.qty||1}" onchange="updateOrderQty(${idx},this.value)" ${item.included?'':'disabled'}></td>
+      <td class="r">${item.included?fmtMoney2(lineTotal,cur):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  v.innerHTML=`
+<div style="height:100%;overflow-y:auto">
+<div class="order-wrap">
+  <div style="margin-bottom:20px">
+    <div style="font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin-bottom:6px">Sales Order</div>
+    <div style="font-size:20px;font-weight:300">${esc(ord.buyerName)||'New Order'}</div>
+  </div>
+
+  <div class="order-section-title">Order Details</div>
+  <div class="order-hdr-grid">
+    <div class="order-field">
+      <label>Buyer Name</label>
+      <input type="text" value="${esc(ord.buyerName)}" oninput="ord.buyerName=this.value">
+    </div>
+    <div class="order-field">
+      <label>Order Number</label>
+      <input type="text" value="${esc(ord.orderNumber)}" oninput="ord.orderNumber=this.value">
+    </div>
+    <div class="order-field full">
+      <label>Buyer Address</label>
+      <textarea rows="2" oninput="ord.buyerAddress=this.value">${esc(ord.buyerAddress)}</textarea>
+    </div>
+    <div class="order-field">
+      <label>Order Date</label>
+      <input type="date" value="${esc(ord.orderDate)}" onchange="ord.orderDate=this.value">
+    </div>
+    <div class="order-field">
+      <label>Expected Delivery</label>
+      <input type="date" value="${esc(ord.deliveryDate)}" onchange="ord.deliveryDate=this.value">
+    </div>
+    <div class="order-field">
+      <label>Currency</label>
+      <select onchange="ord.currency=this.value;render()">
+        ${['AUD','USD','GBP','EUR'].map(c=>`<option value="${c}"${ord.currency===c?' selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="order-field">
+      <label>Payment Terms</label>
+      <input type="text" value="${esc(ord.paymentTerms)}" oninput="ord.paymentTerms=this.value">
+    </div>
+    <div class="order-field full">
+      <label>Notes</label>
+      <textarea rows="2" oninput="ord.notes=this.value">${esc(ord.notes||'')}</textarea>
+    </div>
+  </div>
+
+  <div class="order-section-title">Items — tick to include, set quantities</div>
+  <table class="order-items-tbl">
+    <thead>
+      <tr>
+        <th style="width:28px"></th>
+        <th>Product</th><th>Metal</th><th>SKU</th>
+        <th class="r">Unit WS (${cur})</th>
+        <th class="r">Qty</th>
+        <th class="r">Line Total</th>
+      </tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+
+  <div class="order-totals">
+    <div class="order-total-row grand">
+      <span>Order Total (${cur})</span>
+      <span>${fmtMoney2(subtotal,cur)}</span>
+    </div>
+    <div style="font-size:10px;color:#aaa;margin-top:4px">${included.length} line${included.length!==1?'s':''} · ${included.reduce((s,i)=>s+(i.qty||1),0)} units</div>
+  </div>
+
+  <div class="order-actions order-print-hide">
+    <button class="btn" onclick="printOrder('${ord.id}')">🖨 Print / Save as PDF</button>
+    <button class="btn-ghost" onclick="saveOrderAndBack()">Save & Close</button>
+    <button class="btn-text" style="margin-left:auto;color:#e00" onclick="deleteOrder('${ord.id}')">Delete order</button>
+  </div>
+</div>
+</div>`;
+}
+
+// Helpers called from inline handlers
+function toggleOrderItem(idx,checked){
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  ord.items[idx].included=checked;
+  render();
+}
+function updateOrderQty(idx,val){
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  ord.items[idx].qty=Math.max(0,parseInt(val)||0);
+  render();
+}
+function saveOrderAndBack(){
+  saveST();
+  ST.view='dashboard';
+  render();
+}
+function deleteOrder(id){
+  if(!confirm('Delete this order?'))return;
+  ST.orders=ST.orders.filter(o=>o.id!==id);
+  saveST();
+  ST.view='dashboard';
+  render();
+}
+
+function printOrder(id){
+  const ord=ST.orders.find(o=>o.id===id)||ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  saveST();
+  const cur=ord.currency||'AUD';
+  const fmt=n=>fmtMoney2(n,cur);
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
+
+  const rows=included.map((item,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${esc(item.pieceName)||'—'}</td>
+      <td>${esc(item.metalName)||'—'}</td>
+      <td style="color:#888">${esc(item.sku)||''}</td>
+      <td class="r">${fmt(item.unitWholesale)}</td>
+      <td class="r">${item.qty||1}</td>
+      <td class="r">${fmt(item.unitWholesale*(item.qty||1))}</td>
+    </tr>`).join('');
+
+  const delivLine=ord.deliveryDate?`<div><strong>Delivery:</strong> ${ord.deliveryDate}</div>`:'';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Order ${esc(ord.orderNumber)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;color:#000;padding:16mm 18mm}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #000}
+.brand{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase}
+.meta{text-align:right;font-size:10px;line-height:1.9}
+.bill{margin-bottom:18px}.bill .lbl{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin-bottom:3px}
+.bill .val{font-size:11px;white-space:pre-line}
+table{width:100%;border-collapse:collapse;margin-bottom:14px}
+th{font-size:8px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 6px;text-align:left;border-bottom:0.5px solid #000}
+th.r,td.r{text-align:right}
+td{padding:7px 8px;border-bottom:0.5px solid #eee;font-size:11px}
+.totals{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.trow{display:flex;gap:40px;font-size:11px}
+.trow.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px}
+.footer{margin-top:24px;padding-top:10px;border-top:0.5px solid #eee;font-size:9px;color:#888}
+@page{margin:0;size:A4}
+@media print{body{padding:16mm 18mm}}
+</style></head><body>
+<div class="hd">
+  <div class="brand">Brohn Smith</div>
+  <div class="meta">
+    <div><strong>Sales Order</strong> ${esc(ord.orderNumber)}</div>
+    <div>Date: ${ord.orderDate||'—'}</div>
+    ${delivLine}
+    <div>Terms: ${esc(ord.paymentTerms)||'—'}</div>
+    <div>Currency: ${cur}</div>
+  </div>
+</div>
+<div class="bill">
+  <div class="lbl">Bill To</div>
+  <div class="val">${esc(ord.buyerName)||'—'}${ord.buyerAddress?'\n'+esc(ord.buyerAddress):''}</div>
+</div>
+<table>
+  <thead><tr><th>#</th><th>Product</th><th>Metal</th><th>SKU</th><th class="r">Unit Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="totals">
+  <div class="trow grand"><span>Order Total (${cur})</span><span>${fmt(subtotal)}</span></div>
+  <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
+</div>
+${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
+<div class="footer">All prices are wholesale and exclusive of GST, freight and duties. Prices valid for 30 days from order date.</div>
+</body></html>`;
+
+  const w=window.open('','_blank','width=820,height=1100');
+  w.document.write(html);
+  w.document.close();
+  w.onload=()=>w.print();
 }
 
 
@@ -1317,6 +1606,7 @@ function renderDashboard(v,ta){
         <div class="act-btns">
           <button class="btn-ghost btn-ghost-sm" data-action="edit" data-id="${ls.id}">Edit</button>
           <button class="btn-ghost btn-ghost-sm" data-action="dup" data-id="${ls.id}">Duplicate</button>
+          <button class="btn-ghost btn-ghost-sm" data-action="createOrder" data-id="${ls.id}">+ Order</button>
           <button class="btn-ghost btn-ghost-sm" data-action="pdf" data-id="${ls.id}">Export PDF</button>
           <button class="btn-ghost btn-ghost-sm" data-action="del" data-id="${ls.id}">Delete</button>
         </div>
@@ -1343,8 +1633,35 @@ function renderDashboard(v,ta){
     </thead>
     <tbody>${rows}</tbody>
   </table>
+
+  ${ST.orders.length>0?`
+  <div class="dash-head" style="margin-top:36px">
+    <h1>Sales Orders (${ST.orders.length})</h1>
+  </div>
+  <table class="ls-table">
+    <thead><tr><th>Buyer</th><th>Order #</th><th>Date</th><th>Currency</th><th class="r">&nbsp;</th></tr></thead>
+    <tbody>${ST.orders.map(ord=>`<tr>
+      <td><strong>${esc(ord.buyerName)||'<span style="color:#bbb">Unnamed</span>'}</strong></td>
+      <td class="muted">${esc(ord.orderNumber)||'—'}</td>
+      <td class="muted">${ord.orderDate||'—'}</td>
+      <td class="muted">${ord.currency||'AUD'}</td>
+      <td class="act"><div class="act-btns">
+        <button class="btn-ghost btn-ghost-sm" onclick="openOrder('${ord.id}')">Open</button>
+        <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">Print PDF</button>
+        <button class="btn-ghost btn-ghost-sm" onclick="deleteOrder('${ord.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`:''}
+
   ${backupBar}
 </div>`;
+}
+
+function openOrder(id){
+  ST.activeOrderId=id;
+  ST.view='order';
+  render();
 }
 
 function renderEditor(v,ta){
@@ -1577,6 +1894,15 @@ document.addEventListener('click',e=>{
   else if(a==='del'){
     if(!confirm('Delete this line sheet? This cannot be undone.'))return;
     ST.lineSheets=ST.lineSheets.filter(x=>x.id!==id);
+    saveST();render();
+  }
+  else if(a==='createOrder'){
+    const ls=ST.lineSheets.find(x=>x.id===id);
+    if(!ls)return;
+    const ord=mkOrder(ls);
+    ST.orders.push(ord);
+    ST.activeOrderId=ord.id;
+    ST.view='order';
     saveST();render();
   }
   else if(a==='pdf'||a==='printPDF'){
