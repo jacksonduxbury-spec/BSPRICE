@@ -1719,7 +1719,7 @@ tr{page-break-inside:avoid}
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
-<div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of GST, freight and duties.</div>
+<div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of taxes, freight and duties.</div>
 </body></html>`;
 
   const w=window.open('','_blank','width=860,height=1100');

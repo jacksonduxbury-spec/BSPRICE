@@ -461,7 +461,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
                 {fmt(retailPrice)}
               </div>
               <div className="text-xs text-ios-secondary mt-0.5">
-                inc GST {fmt(retailPrice * 1.1)}
+                
               </div>
             </div>
             <div className="text-right">
@@ -473,10 +473,9 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
           </div>
         </div>
       ) : (
-        // Variant mode: show inc-GST for first variant as a reference
         <div className="px-4 py-3">
           <div className="text-xs text-ios-secondary">
-            inc GST shown at checkout · Labour {fmt(quote.labour || 0)} · Packaging {fmt(quote.packaging || 0)}
+            Labour {fmt(quote.labour || 0)} · Packaging {fmt(quote.packaging || 0)}
           </div>
         </div>
       )}
@@ -715,12 +714,12 @@ function ExportSheet({ open, onClose, quote, settings }: {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(110, 110, 110)
-    doc.text('Subtotal (ex GST)', col1, finalY, { align: 'right' })
+    doc.text('Subtotal', col1, finalY, { align: 'right' })
     doc.text(finalPrice > 0 ? fmt2(finalPrice) : 'TBC', col2, finalY, { align: 'right' })
     finalY += 5
 
     if (finalPrice > 0) {
-      doc.text('GST (10%)', col1, finalY, { align: 'right' })
+      doc.text('Tax', col1, finalY, { align: 'right' })
       doc.text(fmt2(gstAmount), col2, finalY, { align: 'right' })
       finalY += 3
     }
@@ -734,7 +733,7 @@ function ExportSheet({ open, onClose, quote, settings }: {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
     doc.setTextColor(0, 0, 0)
-    doc.text('Total (inc GST)', col1, finalY, { align: 'right' })
+    doc.text('Total', col1, finalY, { align: 'right' })
     doc.text(finalPrice > 0 ? fmt2(incGST) : 'TBC', col2, finalY, { align: 'right' })
     finalY += 5
 
@@ -754,7 +753,7 @@ function ExportSheet({ open, onClose, quote, settings }: {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7.5)
     doc.setTextColor(150, 150, 150)
-    doc.text('All prices in AUD. Ex GST unless indicated.', marginL, pageH - 10)
+    doc.text('All prices in AUD.', marginL, pageH - 10)
     doc.setTextColor(180, 180, 180)
     doc.text('brohnsmith.com', marginR, pageH - 10, { align: 'right' })
 
@@ -2357,7 +2356,7 @@ function ProductsTab({ products, settings, onLoadToQuote, onAddToQuote, onSavePr
           collection: sh.groupName,
           date: today,
           currency: existingSheet?.currency ?? cur,
-          footerTerms: 'All prices AUD ex GST unless otherwise stated',
+          footerTerms: 'All prices AUD',
           logoImage: null,
           products: sh.products,
         }
@@ -2405,7 +2404,7 @@ function ProductsTab({ products, settings, onLoadToQuote, onAddToQuote, onSavePr
         collection: label,
         date: new Date().toISOString().slice(0, 10),
         currency: existingSheet?.currency ?? cur,
-        footerTerms: 'All prices AUD ex GST unless otherwise stated',
+        footerTerms: 'All prices AUD',
         logoImage: null,
         products: items,
       })
@@ -3069,7 +3068,7 @@ function StonesTab({ settings, onAddToQuote }: {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-sm font-semibold price-display">{fmt(gem.wholesale)}</div>
-                    <div className="text-xs text-ios-secondary">WS ex GST</div>
+                    <div className="text-xs text-ios-secondary">Wholesale</div>
                   </div>
                 </div>
               </button>
@@ -3178,9 +3177,9 @@ function StonesTab({ settings, onAddToQuote }: {
           <div className="px-4 py-4">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div className="text-xs text-ios-secondary font-medium mb-0.5">Retail (ex GST)</div>
+                <div className="text-xs text-ios-secondary font-medium mb-0.5">Retail</div>
                 <div className="text-2xl font-bold price-display tracking-tight">{fmt(retail)}</div>
-                <div className="text-xs text-ios-secondary mt-0.5">inc GST {fmt(retailGST)}</div>
+                <div className="text-xs text-ios-secondary mt-0.5"></div>
               </div>
               {retailPerCt > 0 && (
                 <div className="text-right">
@@ -3208,8 +3207,8 @@ function StonesTab({ settings, onAddToQuote }: {
                   desc || STONE_LABELS_CLIENT[stoneType as StoneType] || 'Stone',
                   `Wholesale: ${fmt(wholesale)}`,
                   `GP: ${gpPct}%`,
-                  `Retail (ex GST): ${fmt(retail)}`,
-                  `Retail (inc GST): ${fmt(retailGST)}`,
+                  `Retail: ${fmt(retail)}`,
+                  ``,
                   ...(perCt > 0 ? [`Per carat: ${fmt(perCt)}/ct`] : []),
                 ]
                 navigator.clipboard.writeText(lines.join('\n'))
@@ -3483,13 +3482,13 @@ function WaxWeightTab({ settings }: { settings: AppSettings }) {
               <span className="price-display font-medium">{fmtPrice(mcCost)}</span>
             </div>
             <div className="text-sm pt-1 border-t border-ios-separator/60" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="text-ios-secondary">Retail at {mcGP}% GP (ex GST)</span>
+              <span className="text-ios-secondary">Retail at {mcGP}% GP</span>
               <span className="price-display font-semibold">{fmtPrice(mcRetail)}</span>
             </div>
           </div>
           <div className="gold-line" />
           <div className="px-4 py-3 flex justify-between">
-            <span className="text-sm text-ios-secondary">inc GST</span>
+            <span className="text-sm text-ios-secondary">Retail inc tax</span>
             <span className="text-lg font-bold price-display" style={{ color: 'var(--gold)' }}>{fmtPrice(mcRetailGST)}</span>
           </div>
         </div>
