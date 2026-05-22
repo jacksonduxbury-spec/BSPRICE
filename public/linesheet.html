@@ -1641,7 +1641,7 @@ async function printOrder(id){
   let rowNum=0;
   const rows=pdfKinds.map(kind=>{
     const kindItems=included.filter(i=>(i.collection||'OTHER')===kind);
-    const hdr=`<tr><td colspan="7" style="padding:10px 8px 4px;font-size:8px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;border-bottom:1px solid #000;border-top:${rowNum>0?'8px solid transparent':''}">${esc(kind)}</td></tr>`;
+    const hdr=`<tr class="kind-hdr"><td colspan="7" style="padding:10px 8px 4px;font-size:8px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;border-bottom:1px solid #000;border-top:${rowNum>0?'8px solid transparent':''}">${esc(kind)}</td></tr>`;
     const itemRows=kindItems.map(item=>{
       rowNum++;
       const imgCell=item.image
@@ -1677,15 +1677,18 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;colo
 .bill{margin-bottom:18px}.bill .lbl{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin-bottom:3px}
 .bill .val{font-size:12px;white-space:pre-line}
 table{width:100%;border-collapse:collapse;margin-bottom:14px}
+thead{display:table-header-group}
 th{font-size:8px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 6px;text-align:left;border-bottom:0.5px solid #000}
 th.r,td.r{text-align:right}
 td{padding:6px 8px;border-bottom:0.5px solid #eee;font-size:11px;vertical-align:middle}
-.totals{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:12px}
+tr{page-break-inside:avoid}
+.totals{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:12px;page-break-inside:avoid}
 .trow{display:flex;gap:40px;font-size:11px;color:#888}
 .trow.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px;color:#000}
-.footer{margin-top:24px;padding-top:10px;border-top:0.5px solid #eee;font-size:9px;color:#888}
-@page{margin:0;size:A4}
-@media print{body{padding:16mm 18mm}}
+.footer{margin-top:24px;padding-top:10px;border-top:0.5px solid #eee;font-size:9px;color:#888;page-break-inside:avoid}
+.kind-hdr{page-break-after:avoid}
+@page{margin:16mm 18mm;size:A4}
+@media print{body{padding:0}}
 </style></head><body>
 <div class="hd">
   <div class="brand-block">
