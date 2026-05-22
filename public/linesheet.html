@@ -1104,14 +1104,16 @@ function docHTML(ls){
 
     pageNum++;
     const imgSlots=p.images.map((img,ii)=>`
-      <div class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}"
+      <label class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}" style="cursor:pointer"
            data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+        <input type="file" accept="image/*" style="display:none"
+          onchange="handleSlotFile(this,'${ls.id}',${pi},${ii})">
         <div class="slot-ui">
           <div class="slot-plus">+</div>
           <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
         </div>
         ${img?`<img src="${img}" alt="">`:''}
-      </div>`).join('');
+      </label>`).join('');
 
     const pxRows=p.metalVariants.map(mv=>{
       const desc=mv.lineDescription||cleanMetalDesc(mv.metalName,p.pieceName)||'Variant';
@@ -1202,14 +1204,16 @@ function editorFieldsHTML(ls){
 
 function productCardHTML(ls,p,pi){
   const imgSlots=p.images.map((img,ii)=>`
-    <div class="ed-slot ${img?'has-img':''}"
+    <label class="ed-slot ${img?'has-img':''}" style="cursor:pointer"
          data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+      <input type="file" accept="image/*" style="display:none"
+        onchange="handleSlotFile(this,'${ls.id}',${pi},${ii})">
       <div class="slot-ui">
         <div class="slot-plus">+</div>
         <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
       </div>
       ${img?`<img src="${img}" alt="">`:''}
-    </div>`).join('');
+    </label>`).join('');
 
   const metalBlocks=p.metalVariants.map((mv,mi)=>metalBlockHTML(ls,p,pi,mv,mi)).join('');
   const addMetal=p.metalVariants.length<3
@@ -1836,71 +1840,66 @@ function refreshSubtotals(ls,pi,mi){
 }
 
 /* ─────────────────────────────────────────────────────────
-   IMAGE SLOT BINDING
+   IMAGE SLOT HANDLING
+   Slots are now <label> elements with an embedded <input type="file">
+   so clicks trigger the file picker natively — no programmatic .click() needed.
 ───────────────────────────────────────────────────────── */
-let _pendingSlot=null;
 
-function bindSlots(){
-  document.querySelectorAll('[data-imgslot]').forEach(slot=>{
-    slot.onclick=null;
-    slot.ondragover=null;
-    slot.ondragleave=null;
-    slot.ondrop=null;
-    slot.onclick=e=>{
-      e.stopPropagation();
-      _pendingSlot=slot;
-      el('g-file-input').value='';
-      el('g-file-input').click();
-    };
-    slot.ondragover=e=>{e.preventDefault();slot.classList.add('drag-over')};
-    slot.ondragleave=()=>slot.classList.remove('drag-over');
-    slot.ondrop=e=>{
-      e.preventDefault();
-      slot.classList.remove('drag-over');
-      const f=e.dataTransfer.files[0];
-      if(f&&f.type.startsWith('image/'))readAndSave(f,slot);
-    };
-  });
-}
-
-el('g-file-input').onchange=e=>{
-  const f=e.target.files[0];
-  if(f&&_pendingSlot)readAndSave(f,_pendingSlot);
-  _pendingSlot=null;
-};
-
-function readAndSave(file,slot){
-  const reader=new FileReader();
-  reader.onload=ev=>saveSlotImage(slot,ev.target.result);
-  reader.readAsDataURL(file);
-}
-
-function saveSlotImage(slot,dataUrl){
-  const ls=activeLS();
+/* Called by inline onchange on each slot's embedded file input */
+function handleSlotFile(input, lsid, pi, ii){
+  const f=input.files[0];
+  if(!f)return;
+  const ls=ST.lineSheets.find(x=>x.id===lsid);
   if(!ls)return;
-  const type=slot.dataset.imgslot;
-  if(type==='logo'){
-    ls.logoImage=dataUrl;
-    saveLogos();
-  }else{
-    const pi=+slot.dataset.pi;
-    const ii=+slot.dataset.ii;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const dataUrl=ev.target.result;
     ls.products[pi].images[ii]=dataUrl;
-  }
-  _imgsDirty=true;
-  saveST();
-  refreshPreview();
-  /* update editor slots too */
-  if(type==='ed-prod'){
-    const pi=+slot.dataset.pi;
-    const ii=+slot.dataset.ii;
-    /* update editor slot in-place */
-    let img=slot.querySelector('img');
-    if(!img){img=document.createElement('img');slot.appendChild(img);}
-    img.src=dataUrl;
-    slot.classList.add('has-img');
-  }
+    _imgsDirty=true;
+    saveST();
+    refreshPreview();
+    /* update editor slot in-place without full re-render */
+    const slot=document.querySelector(
+      `[data-imgslot="ed-prod"][data-lsid="${lsid}"][data-pi="${pi}"][data-ii="${ii}"]`
+    );
+    if(slot){
+      let img=slot.querySelector('img');
+      if(!img){img=document.createElement('img');slot.appendChild(img);}
+      img.src=dataUrl;
+      slot.classList.add('has-img');
+    }
+    /* reset so same file can be re-selected */
+    input.value='';
+  };
+  reader.readAsDataURL(f);
 }
+
+/* bindSlots kept as no-op; drag-drop still wired via event delegation below */
+function bindSlots(){}
+
+/* Drag-drop on slots via event delegation */
+document.addEventListener('dragover',e=>{
+  if(e.target.closest('[data-imgslot]'))e.preventDefault();
+});
+document.addEventListener('drop',e=>{
+  const slot=e.target.closest('[data-imgslot]');
+  if(!slot)return;
+  e.preventDefault();
+  slot.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(!f||!f.type.startsWith('image/'))return;
+  const lsid=slot.dataset.lsid;
+  const pi=+slot.dataset.pi;
+  const ii=+slot.dataset.ii;
+  /* Synthesise a fake input object to reuse handleSlotFile */
+  handleSlotFile({files:[f],value:''}, lsid, pi, ii);
+});
+document.addEventListener('dragenter',e=>{
+  if(e.target.closest('[data-imgslot]'))e.target.closest('[data-imgslot]').classList.add('drag-over');
+});
+document.addEventListener('dragleave',e=>{
+  if(e.target.closest('[data-imgslot]'))e.target.closest('[data-imgslot]').classList.remove('drag-over');
+});
 
 /* ─────────────────────────────────────────────────────────
    INPUT AUTOSAVE
