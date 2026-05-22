@@ -1913,17 +1913,22 @@ function _applySlotImage(lsid, pi, ii, file){
   reader.readAsDataURL(file);
 }
 
-/* Single delegated change listener — works even under SES lockdown */
-document.addEventListener('change',e=>{
-  const input=e.target;
-  if(!input.dataset.slotInput&&!input.hasAttribute('data-slot-input'))return;
-  const file=input.files&&input.files[0];
-  if(!file)return;
-  _applySlotImage(input.dataset.lsid, +input.dataset.pi, +input.dataset.ii, file);
-  input.value='';
-});
-
-function bindSlots(){}
+/* Wire change listeners directly onto every slot input.
+   Called after each render. Direct addEventListener beats both inline
+   onchange (killed by SES) and event delegation (bubbling edge-cases). */
+function bindSlots(){
+  document.querySelectorAll('[data-slot-input]').forEach(input=>{
+    /* remove old listener by cloning, then re-attach */
+    const fresh=input.cloneNode(true);
+    input.parentNode.replaceChild(fresh,input);
+    fresh.addEventListener('change',function(){
+      const file=this.files&&this.files[0];
+      if(!file)return;
+      _applySlotImage(this.dataset.lsid,+this.dataset.pi,+this.dataset.ii,file);
+      this.value='';
+    });
+  });
+}
 
 /* Drag-drop support via event delegation */
 document.addEventListener('dragover',e=>{
