@@ -1930,10 +1930,13 @@ document.addEventListener('drop',e=>{
   handleSlotFile({files:[f],value:''},slot.dataset.lsid,+slot.dataset.pi,+slot.dataset.ii);
 });
 document.addEventListener('dragenter',e=>{
-  if(e.target.closest('[data-imgslot]'))e.target.closest('[data-imgslot]').classList.add('drag-over');
+  const slot=e.target.closest('[data-imgslot]');
+  if(slot)slot.classList.add('drag-over');
 });
 document.addEventListener('dragleave',e=>{
-  if(e.target.closest('[data-imgslot]'))e.target.closest('[data-imgslot]').classList.remove('drag-over');
+  const slot=e.target.closest('[data-imgslot]');
+  /* Only remove when leaving the slot itself, not crossing into a child element */
+  if(slot&&!slot.contains(e.relatedTarget))slot.classList.remove('drag-over');
 });
 
 /* ─────────────────────────────────────────────────────────
