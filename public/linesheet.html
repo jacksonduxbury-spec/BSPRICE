@@ -598,7 +598,8 @@ function mkOrder(primaryLS){
       p.metalVariants.map(mv=>({
         id:uid(),
         sheetId:ls.id,
-        sheetLabel:[ls.buyerName,ls.collection].filter(Boolean).join(' · ')||'Untitled',
+        sheetLabel:ls.buyerName||'Untitled',
+        collection:(ls.collection||'').toUpperCase()||'OTHER',
         productId:p.id,
         pieceName:p.pieceName||'',
         sku:p.sku||'',
@@ -1340,12 +1341,14 @@ async function renderOrder(v,ta){
   const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
   const deposit=subtotal*0.5;
 
-  // Group items by sheet for display
-  const sheets=[...new Set(ord.items.map(i=>i.sheetLabel||''))].filter(Boolean);
-  const itemRows=sheets.map(sheet=>{
-    const sheetItems=ord.items.filter(i=>i.sheetLabel===sheet);
-    const sheetHeader=`<tr><td colspan="8" style="padding:12px 8px 4px;font-size:8px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#aaa;border-bottom:0.5px solid #eee">${esc(sheet)}</td></tr>`;
-    const rows=sheetItems.map(item=>{
+  // Group by collection (kind), then by sheet within each kind
+  const kinds=[...new Set(ord.items.map(i=>i.collection||'OTHER'))];
+  const KIND_ORDER=['HAND','NECK','WRIST','EAR','OBJECTS','OTHER'];
+  kinds.sort((a,b)=>{const ai=KIND_ORDER.indexOf(a),bi=KIND_ORDER.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
+  const itemRows=kinds.map(kind=>{
+    const kindItems=ord.items.filter(i=>(i.collection||'OTHER')===kind);
+    const kindHeader=`<tr><td colspan="7" style="padding:14px 8px 4px;font-size:9px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#000;border-bottom:1px solid #000">${esc(kind)}</td></tr>`;
+    const rows=kindItems.map(item=>{
       const idx=ord.items.indexOf(item);
       const lineTotal=item.included?(item.unitWholesale*(item.qty||1)):0;
       const thumb=item.image?`<img src="${item.image}" style="width:36px;height:36px;object-fit:cover;border:0.5px solid #eee">`:
@@ -1353,14 +1356,18 @@ async function renderOrder(v,ta){
       return`<tr class="${item.included?'':'excluded'}">
         <td><input type="checkbox" ${item.included?'checked':''} onchange="toggleOrderItem(${idx},this.checked)" style="cursor:pointer"></td>
         <td>${thumb}</td>
-        <td><div style="font-size:12px">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}</td>
+        <td>
+          <div style="font-size:12px">${esc(item.pieceName)||'—'}</div>
+          ${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}
+          <div style="font-size:9px;color:#bbb">${esc(item.sheetLabel||'')}</div>
+        </td>
         <td style="color:#888">${esc(item.metalName)||'—'}</td>
         <td class="r">${fmtMoney2(item.unitWholesale,cur)}</td>
         <td class="r"><input class="order-qty" type="number" min="0" value="${item.qty||1}" onchange="updateOrderQty(${idx},this.value)" ${item.included?'':'disabled'}></td>
         <td class="r">${item.included?fmtMoney2(lineTotal,cur):'—'}</td>
       </tr>`;
     }).join('');
-    return sheetHeader+rows;
+    return kindHeader+rows;
   }).join('');
 
   v.innerHTML=`
@@ -1484,19 +1491,31 @@ async function printOrder(id){
     if(item.productId&&!item.image) item.image=allImgs[`img:${item.productId}:0`]||null;
   }
 
-  const rows=included.map((item,i)=>{
-    const imgCell=item.image
-      ?`<td><img src="${item.image}" style="width:48px;height:48px;object-fit:cover;border:0.5px solid #eee;display:block"></td>`
-      :`<td><div style="width:48px;height:48px;background:#f5f5f5;border:0.5px solid #eee"></div></td>`;
-    return`<tr>
-      <td style="color:#aaa;font-size:10px">${i+1}</td>
-      ${imgCell}
-      <td><div style="font-weight:500">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}</td>
-      <td style="color:#555">${esc(item.metalName)||'—'}</td>
-      <td class="r">${fmt(item.unitWholesale)}</td>
-      <td class="r">${item.qty||1}</td>
-      <td class="r">${fmt(item.unitWholesale*(item.qty||1))}</td>
-    </tr>`;
+  // Group PDF rows by kind
+  const pdfKinds=[...new Set(included.map(i=>i.collection||'OTHER'))];
+  const PDF_KIND_ORDER=['HAND','NECK','WRIST','EAR','OBJECTS','OTHER'];
+  pdfKinds.sort((a,b)=>{const ai=PDF_KIND_ORDER.indexOf(a),bi=PDF_KIND_ORDER.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
+  let rowNum=0;
+  const rows=pdfKinds.map(kind=>{
+    const kindItems=included.filter(i=>(i.collection||'OTHER')===kind);
+    const hdr=`<tr><td colspan="7" style="padding:10px 8px 4px;font-size:8px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;border-bottom:1px solid #000;border-top:${rowNum>0?'8px solid transparent':''}">${esc(kind)}</td></tr>`;
+    const itemRows=kindItems.map(item=>{
+      rowNum++;
+      const imgCell=item.image
+        ?`<td><img src="${item.image}" style="width:48px;height:48px;object-fit:cover;border:0.5px solid #eee;display:block"></td>`
+        :`<td><div style="width:48px;height:48px;background:#f5f5f5;border:0.5px solid #eee"></div></td>`;
+      return`<tr>
+        <td style="color:#aaa;font-size:10px">${rowNum}</td>
+        ${imgCell}
+        <td><div style="font-weight:500">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}
+        <div style="font-size:9px;color:#bbb">${esc(item.sheetLabel||'')}</div></td>
+        <td style="color:#555">${esc(item.metalName)||'—'}</td>
+        <td class="r">${fmt(item.unitWholesale)}</td>
+        <td class="r">${item.qty||1}</td>
+        <td class="r">${fmt(item.unitWholesale*(item.qty||1))}</td>
+      </tr>`;
+    }).join('');
+    return hdr+itemRows;
   }).join('');
 
   const delivLine=ord.deliveryDate?`<div><strong>Delivery:</strong> ${ord.deliveryDate}</div>`:'';
