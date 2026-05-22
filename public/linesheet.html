@@ -1112,7 +1112,7 @@ function docHTML(ls){
       <label class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}" style="cursor:pointer"
            data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
         <input type="file" accept="image/*" style="display:none"
-          onchange="handleSlotFile(this,'${ls.id}',${pi},${ii})">
+          data-slot-input data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
         <div class="slot-ui">
           <div class="slot-plus">+</div>
           <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
@@ -1212,7 +1212,7 @@ function productCardHTML(ls,p,pi){
     <label class="ed-slot ${img?'has-img':''}" style="cursor:pointer"
          data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
       <input type="file" accept="image/*" style="display:none"
-        onchange="handleSlotFile(this,'${ls.id}',${pi},${ii})">
+        data-slot-input data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
       <div class="slot-ui">
         <div class="slot-plus">+</div>
         <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
@@ -1886,43 +1886,42 @@ function refreshSubtotals(ls,pi,mi){
    label+input file picking works on all platforms including iOS PWA.
 ───────────────────────────────────────────────────────── */
 
-/* Called by inline onchange on each slot's embedded file input */
-function handleSlotFile(input, lsid, pi, ii){
-  try{
-    const f=input.files[0];
-    if(!f){console.warn('handleSlotFile: no file');return;}
-    const ls=ST.lineSheets.find(x=>x.id===lsid);
-    if(!ls){console.warn('handleSlotFile: no sheet found for lsid='+lsid+', sheets='+ST.lineSheets.map(x=>x.id));return;}
-    if(!ls.products[pi]){console.warn('handleSlotFile: no product at pi='+pi);return;}
-    if(!ls.products[pi].images)ls.products[pi].images=[null,null];
-    const reader=new FileReader();
-    reader.onerror=()=>console.warn('handleSlotFile: FileReader error');
-    reader.onload=ev=>{
-      try{
-        const dataUrl=ev.target.result;
-        ls.products[pi].images[ii]=dataUrl;
-        _imgsDirty=true;
-        saveST();
-        refreshPreview();
-        /* update editor slot in-place */
-        const slot=document.querySelector(
-          `[data-imgslot="ed-prod"][data-lsid="${lsid}"][data-pi="${pi}"][data-ii="${ii}"]`
-        );
-        if(slot){
-          let img=slot.querySelector('img');
-          if(!img){img=document.createElement('img');slot.appendChild(img);}
-          img.src=dataUrl;
-          slot.classList.add('has-img');
-        }else{
-          console.warn('handleSlotFile: slot not found in DOM, re-rendering editor');
-          render();
-        }
-        input.value='';
-      }catch(e){console.error('handleSlotFile onload error:',e);}
-    };
-    reader.readAsDataURL(f);
-  }catch(e){console.error('handleSlotFile error:',e);}
+/* Image slot file handling — uses event delegation to avoid
+   inline onchange attributes (broken by SES/MetaMask lockdown) */
+function _applySlotImage(lsid, pi, ii, file){
+  if(!file)return;
+  const ls=ST.lineSheets.find(x=>x.id===lsid);
+  if(!ls||!ls.products[pi])return;
+  if(!ls.products[pi].images)ls.products[pi].images=[null,null];
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const dataUrl=ev.target.result;
+    ls.products[pi].images[ii]=dataUrl;
+    _imgsDirty=true;
+    saveST();
+    refreshPreview();
+    const edSlot=document.querySelector(
+      `[data-imgslot="ed-prod"][data-lsid="${lsid}"][data-pi="${pi}"][data-ii="${ii}"]`
+    );
+    if(edSlot){
+      let img=edSlot.querySelector('img');
+      if(!img){img=document.createElement('img');edSlot.appendChild(img);}
+      img.src=dataUrl;
+      edSlot.classList.add('has-img');
+    }
+  };
+  reader.readAsDataURL(file);
 }
+
+/* Single delegated change listener — works even under SES lockdown */
+document.addEventListener('change',e=>{
+  const input=e.target;
+  if(!input.dataset.slotInput&&!input.hasAttribute('data-slot-input'))return;
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  _applySlotImage(input.dataset.lsid, +input.dataset.pi, +input.dataset.ii, file);
+  input.value='';
+});
 
 function bindSlots(){}
 
@@ -1937,7 +1936,7 @@ document.addEventListener('drop',e=>{
   slot.classList.remove('drag-over');
   const f=e.dataTransfer.files[0];
   if(!f||!f.type.startsWith('image/'))return;
-  handleSlotFile({files:[f],value:''},slot.dataset.lsid,+slot.dataset.pi,+slot.dataset.ii);
+  _applySlotImage(slot.dataset.lsid,+slot.dataset.pi,+slot.dataset.ii,f);
 });
 document.addEventListener('dragenter',e=>{
   const slot=e.target.closest('[data-imgslot]');
