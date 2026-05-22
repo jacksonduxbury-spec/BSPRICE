@@ -1343,6 +1343,7 @@ async function renderOrder(v,ta){
 
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" onclick="ST.view='dashboard';render()">← Back</button>
+    <button class="btn-ghost btn-ghost-sm" onclick="syncOrderFromSheets('${ord.id}')">↻ Sync from sheets</button>
     <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">🖨 Print / PDF</button>
     <button class="btn btn-sm" onclick="saveOrderAndBack()">Save Order</button>`;
 
@@ -1549,6 +1550,41 @@ function updateOrderQty(idx,val){
   const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord)return;
   ord.items[idx].qty=Math.max(0,parseInt(val)||0);
+  renderOrder(el('view'),el('topbar-actions'));
+}
+function syncOrderFromSheets(ordId){
+  const ord=ST.orders.find(o=>o.id===ordId);
+  if(!ord)return;
+  // Build a set of existing (productId + metalName) combos so we don't duplicate
+  const existing=new Set(ord.items.map(i=>`${i.productId}||${i.metalName}`));
+  let added=0;
+  for(const ls of ST.lineSheets){
+    for(const p of ls.products){
+      for(const mv of p.metalVariants){
+        const key=`${p.id}||${mv.metalName||''}`;
+        if(existing.has(key))continue;
+        ord.items.push({
+          id:uid(),
+          sheetId:ls.id,
+          sheetLabel:ls.buyerName||'Untitled',
+          collection:(ls.collection||'').toUpperCase()||'OTHER',
+          productId:p.id,
+          pieceName:p.pieceName||'',
+          sku:p.sku||'',
+          metalName:mv.metalName||'',
+          lineDescription:mv.lineDescription||'',
+          unitWholesale:mv.subtotalWholesale||0,
+          qty:1,
+          included:false,
+          image:null
+        });
+        existing.add(key);
+        added++;
+      }
+    }
+  }
+  if(added===0){alert('All line sheet items are already in this order.');return;}
+  saveST();
   renderOrder(el('view'),el('topbar-actions'));
 }
 function saveOrderAndBack(){
