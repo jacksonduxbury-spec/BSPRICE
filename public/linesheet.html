@@ -1416,7 +1416,13 @@ async function renderOrder(v,ta){
     </div>
   </div>
 
-  <div class="order-section-title">Items — tick to include, set quantities</div>
+  <div class="order-section-title" style="display:flex;align-items:center;justify-content:space-between">
+    <span>Items — tick to include, set quantities</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ghost btn-ghost-sm" onclick="addItemFromQuote()">+ From Quote</button>
+      <button class="btn-ghost btn-ghost-sm" onclick="addCustomItem()">+ Custom Item</button>
+    </div>
+  </div>
   <table class="order-items-tbl">
     <thead>
       <tr>
@@ -1452,6 +1458,76 @@ async function renderOrder(v,ta){
   </div>
 </div>
 </div>`;
+}
+
+function addItemFromQuote(){
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  try{
+    const raw=localStorage.getItem('bs-active');
+    if(!raw){alert('No active quote found — open the pricing app and build your quote first.');return;}
+    const q=JSON.parse(raw);
+    // Get the wholesale price from the quote
+    const ws=q.wholesalePrice&&q.wholesalePrice>0
+      ? q.wholesalePrice
+      : null;
+    // Build a metal label from the metal lines
+    const metalLabel=q.metalLines&&q.metalLines.length>0
+      ? [...new Set(q.metalLines.map(l=>l.metalType))].join(', ')
+      : '';
+    const priceSuggestion=ws?ws.toFixed(2):'';
+    const name=prompt('Product name:', q.name&&q.name!=='New Quote'?q.name:'');
+    if(name===null)return;
+    const metal=prompt('Metal:', metalLabel);
+    if(metal===null)return;
+    const wsInput=prompt('Wholesale price ('+( ord.currency||'AUD')+')', priceSuggestion);
+    if(wsInput===null)return;
+    const wsVal=parseFloat(wsInput)||0;
+    ord.items.push({
+      id:uid(),
+      sheetId:null,
+      sheetLabel:'Custom',
+      collection:'OTHER',
+      productId:null,
+      pieceName:name||'Custom item',
+      sku:q.sku||'',
+      metalName:metal||'',
+      lineDescription:'',
+      unitWholesale:wsVal,
+      qty:1,
+      included:true,
+      image:null
+    });
+    renderOrder(el('view'),el('topbar-actions'));
+  }catch(e){alert('Could not read quote: '+e.message);}
+}
+
+function addCustomItem(){
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  const name=prompt('Product name:','');
+  if(name===null)return;
+  const metal=prompt('Metal:','');
+  if(metal===null)return;
+  const wsInput=prompt('Wholesale price ('+(ord.currency||'AUD')+'):','');
+  if(wsInput===null)return;
+  const wsVal=parseFloat(wsInput)||0;
+  ord.items.push({
+    id:uid(),
+    sheetId:null,
+    sheetLabel:'Custom',
+    collection:'OTHER',
+    productId:null,
+    pieceName:name||'Custom item',
+    sku:'',
+    metalName:metal||'',
+    lineDescription:'',
+    unitWholesale:wsVal,
+    qty:1,
+    included:true,
+    image:null
+  });
+  renderOrder(el('view'),el('topbar-actions'));
 }
 
 function toggleOrderItem(idx,checked){
