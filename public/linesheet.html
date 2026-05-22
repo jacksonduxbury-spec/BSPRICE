@@ -764,7 +764,10 @@ function saveST(){
       logoImage:null,
       products:ls.products.map(p=>({...p,images:[null,null]}))
     })),
-    orders:ST.orders
+    orders:ST.orders.map(ord=>({
+      ...ord,
+      items:ord.items.map(item=>({...item,image:null}))
+    }))
   };
   try{
     const payload=JSON.stringify(stripped);
