@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "tailwindcss -i ./app/globals.css -o ./app/globals.built.css --minify && next build",
+    "build": "next build",
+    "css": "tailwindcss -i ./app/globals.css -o ./app/globals.built.css --minify",
     "start": "next start"
   },
   "dependencies": {
