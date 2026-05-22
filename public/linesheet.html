@@ -607,7 +607,7 @@ function mkOrder(primaryLS){
         lineDescription:mv.lineDescription||'',
         unitWholesale:mv.subtotalWholesale||0,
         qty:1,
-        included:!!(primaryLS&&ls.id===primaryLS.id&&mv.subtotalWholesale>0),
+        included:false,
         image:null
       }))
     )
