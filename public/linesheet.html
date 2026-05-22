@@ -589,33 +589,40 @@ const ST={
   view:'dashboard',  // 'dashboard' | 'editor' | 'order'
 };
 
-function mkOrder(ls){
+function mkOrder(primaryLS){
   const today=new Date().toISOString().slice(0,10);
   const num='SO-'+Math.floor(100000+Math.random()*900000);
-  return{
-    id:uid(),
-    createdAt:today,
-    lineSheetId:ls?ls.id:null,
-    buyerName:ls?ls.buyerName:'',
-    buyerAddress:'',
-    orderNumber:num,
-    orderDate:today,
-    deliveryDate:'',
-    paymentTerms:'Net 30 days',
-    currency:ls?ls.currency:'AUD',
-    notes:'',
-    items:ls?ls.products.flatMap(p=>
+  // Build items from ALL sheets — primary sheet items default included, others default excluded
+  const items=ST.lineSheets.flatMap(ls=>
+    ls.products.flatMap(p=>
       p.metalVariants.map(mv=>({
         id:uid(),
+        sheetId:ls.id,
+        sheetLabel:[ls.buyerName,ls.collection].filter(Boolean).join(' · ')||'Untitled',
+        productId:p.id,
         pieceName:p.pieceName||'',
         sku:p.sku||'',
         metalName:mv.metalName||'',
         lineDescription:mv.lineDescription||'',
         unitWholesale:mv.subtotalWholesale||0,
         qty:1,
-        included:!!(mv.subtotalWholesale>0)
+        included:!!(primaryLS&&ls.id===primaryLS.id&&mv.subtotalWholesale>0),
+        image:null
       }))
-    ):[]
+    )
+  );
+  return{
+    id:uid(),
+    createdAt:today,
+    buyerName:primaryLS?primaryLS.buyerName:'',
+    buyerAddress:'',
+    orderNumber:num,
+    orderDate:today,
+    deliveryDate:'',
+    paymentTerms:'50% deposit required upfront, balance due on delivery',
+    currency:primaryLS?primaryLS.currency:'AUD',
+    notes:'',
+    items
   };
 }
 
@@ -1299,7 +1306,7 @@ function render(){
   if(ST.view==='dashboard'){
     renderDashboard(v,ta);
   }else if(ST.view==='order'){
-    renderOrder(v,ta);
+    renderOrder(v,ta); // async — runs independently
   }else{
     renderEditor(v,ta);
   }
@@ -1311,10 +1318,18 @@ function fmtMoney2(n,cur){
   return new Intl.NumberFormat('en-AU',{style:'currency',currency:cur||'AUD',minimumFractionDigits:2}).format(n);
 }
 
-function renderOrder(v,ta){
+async function renderOrder(v,ta){
   const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord){ST.view='dashboard';render();return;}
   const cur=ord.currency||'AUD';
+
+  // Load images from IDB into order items
+  const allImgs=await idbGetAll();
+  for(const item of ord.items){
+    if(item.productId&&!item.image){
+      item.image=allImgs[`img:${item.productId}:0`]||null;
+    }
+  }
 
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" onclick="ST.view='dashboard';render()">← Back</button>
@@ -1323,18 +1338,29 @@ function renderOrder(v,ta){
 
   const included=ord.items.filter(i=>i.included&&i.qty>0);
   const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
+  const deposit=subtotal*0.5;
 
-  const itemRows=ord.items.map((item,idx)=>{
-    const lineTotal=item.included?(item.unitWholesale*(item.qty||1)):0;
-    return`<tr class="${item.included?'':'excluded'}">
-      <td><input type="checkbox" ${item.included?'checked':''} onchange="toggleOrderItem(${idx},this.checked)" style="cursor:pointer"></td>
-      <td>${esc(item.pieceName)||'—'}</td>
-      <td style="color:#888">${esc(item.metalName)||'—'}</td>
-      <td style="color:#888;font-size:10px">${esc(item.sku)||''}</td>
-      <td class="r">${fmtMoney2(item.unitWholesale,cur)}</td>
-      <td class="r"><input class="order-qty" type="number" min="0" value="${item.qty||1}" onchange="updateOrderQty(${idx},this.value)" ${item.included?'':'disabled'}></td>
-      <td class="r">${item.included?fmtMoney2(lineTotal,cur):'—'}</td>
-    </tr>`;
+  // Group items by sheet for display
+  const sheets=[...new Set(ord.items.map(i=>i.sheetLabel||''))].filter(Boolean);
+  const itemRows=sheets.map(sheet=>{
+    const sheetItems=ord.items.filter(i=>i.sheetLabel===sheet);
+    const sheetHeader=`<tr><td colspan="8" style="padding:12px 8px 4px;font-size:8px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#aaa;border-bottom:0.5px solid #eee">${esc(sheet)}</td></tr>`;
+    const rows=sheetItems.map(item=>{
+      const idx=ord.items.indexOf(item);
+      const lineTotal=item.included?(item.unitWholesale*(item.qty||1)):0;
+      const thumb=item.image?`<img src="${item.image}" style="width:36px;height:36px;object-fit:cover;border:0.5px solid #eee">`:
+        `<div style="width:36px;height:36px;background:#f5f5f5;border:0.5px solid #eee"></div>`;
+      return`<tr class="${item.included?'':'excluded'}">
+        <td><input type="checkbox" ${item.included?'checked':''} onchange="toggleOrderItem(${idx},this.checked)" style="cursor:pointer"></td>
+        <td>${thumb}</td>
+        <td><div style="font-size:12px">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}</td>
+        <td style="color:#888">${esc(item.metalName)||'—'}</td>
+        <td class="r">${fmtMoney2(item.unitWholesale,cur)}</td>
+        <td class="r"><input class="order-qty" type="number" min="0" value="${item.qty||1}" onchange="updateOrderQty(${idx},this.value)" ${item.included?'':'disabled'}></td>
+        <td class="r">${item.included?fmtMoney2(lineTotal,cur):'—'}</td>
+      </tr>`;
+    }).join('');
+    return sheetHeader+rows;
   }).join('');
 
   v.innerHTML=`
@@ -1369,7 +1395,7 @@ function renderOrder(v,ta){
     </div>
     <div class="order-field">
       <label>Currency</label>
-      <select onchange="ord.currency=this.value;render()">
+      <select onchange="ord.currency=this.value;renderOrder(el('view'),el('topbar-actions'))">
         ${['AUD','USD','GBP','EUR'].map(c=>`<option value="${c}"${ord.currency===c?' selected':''}>${c}</option>`).join('')}
       </select>
     </div>
@@ -1388,7 +1414,8 @@ function renderOrder(v,ta){
     <thead>
       <tr>
         <th style="width:28px"></th>
-        <th>Product</th><th>Metal</th><th>SKU</th>
+        <th style="width:44px"></th>
+        <th>Product</th><th>Metal</th>
         <th class="r">Unit WS (${cur})</th>
         <th class="r">Qty</th>
         <th class="r">Line Total</th>
@@ -1398,6 +1425,12 @@ function renderOrder(v,ta){
   </table>
 
   <div class="order-totals">
+    <div class="order-total-row" style="color:#888">
+      <span>Deposit due (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
+    </div>
+    <div class="order-total-row" style="color:#888">
+      <span>Balance on delivery (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
+    </div>
     <div class="order-total-row grand">
       <span>Order Total (${cur})</span>
       <span>${fmtMoney2(subtotal,cur)}</span>
@@ -1414,33 +1447,28 @@ function renderOrder(v,ta){
 </div>`;
 }
 
-// Helpers called from inline handlers
 function toggleOrderItem(idx,checked){
   const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord)return;
   ord.items[idx].included=checked;
-  render();
+  renderOrder(el('view'),el('topbar-actions'));
 }
 function updateOrderQty(idx,val){
   const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord)return;
   ord.items[idx].qty=Math.max(0,parseInt(val)||0);
-  render();
+  renderOrder(el('view'),el('topbar-actions'));
 }
 function saveOrderAndBack(){
-  saveST();
-  ST.view='dashboard';
-  render();
+  saveST();ST.view='dashboard';render();
 }
 function deleteOrder(id){
   if(!confirm('Delete this order?'))return;
   ST.orders=ST.orders.filter(o=>o.id!==id);
-  saveST();
-  ST.view='dashboard';
-  render();
+  saveST();ST.view='dashboard';render();
 }
 
-function printOrder(id){
+async function printOrder(id){
   const ord=ST.orders.find(o=>o.id===id)||ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord)return;
   saveST();
@@ -1448,17 +1476,28 @@ function printOrder(id){
   const fmt=n=>fmtMoney2(n,cur);
   const included=ord.items.filter(i=>i.included&&i.qty>0);
   const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
+  const deposit=subtotal*0.5;
 
-  const rows=included.map((item,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td>${esc(item.pieceName)||'—'}</td>
-      <td>${esc(item.metalName)||'—'}</td>
-      <td style="color:#888">${esc(item.sku)||''}</td>
+  // Ensure images loaded
+  const allImgs=await idbGetAll();
+  for(const item of ord.items){
+    if(item.productId&&!item.image) item.image=allImgs[`img:${item.productId}:0`]||null;
+  }
+
+  const rows=included.map((item,i)=>{
+    const imgCell=item.image
+      ?`<td><img src="${item.image}" style="width:48px;height:48px;object-fit:cover;border:0.5px solid #eee;display:block"></td>`
+      :`<td><div style="width:48px;height:48px;background:#f5f5f5;border:0.5px solid #eee"></div></td>`;
+    return`<tr>
+      <td style="color:#aaa;font-size:10px">${i+1}</td>
+      ${imgCell}
+      <td><div style="font-weight:500">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}</td>
+      <td style="color:#555">${esc(item.metalName)||'—'}</td>
       <td class="r">${fmt(item.unitWholesale)}</td>
       <td class="r">${item.qty||1}</td>
       <td class="r">${fmt(item.unitWholesale*(item.qty||1))}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   const delivLine=ord.deliveryDate?`<div><strong>Delivery:</strong> ${ord.deliveryDate}</div>`:'';
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -1470,14 +1509,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;colo
 .brand{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase}
 .meta{text-align:right;font-size:10px;line-height:1.9}
 .bill{margin-bottom:18px}.bill .lbl{font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin-bottom:3px}
-.bill .val{font-size:11px;white-space:pre-line}
+.bill .val{font-size:12px;white-space:pre-line}
 table{width:100%;border-collapse:collapse;margin-bottom:14px}
 th{font-size:8px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 6px;text-align:left;border-bottom:0.5px solid #000}
 th.r,td.r{text-align:right}
-td{padding:7px 8px;border-bottom:0.5px solid #eee;font-size:11px}
-.totals{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-.trow{display:flex;gap:40px;font-size:11px}
-.trow.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px}
+td{padding:6px 8px;border-bottom:0.5px solid #eee;font-size:11px;vertical-align:middle}
+.totals{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:12px}
+.trow{display:flex;gap:40px;font-size:11px;color:#888}
+.trow.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px;color:#000}
 .footer{margin-top:24px;padding-top:10px;border-top:0.5px solid #eee;font-size:9px;color:#888}
 @page{margin:0;size:A4}
 @media print{body{padding:16mm 18mm}}
@@ -1488,7 +1527,6 @@ td{padding:7px 8px;border-bottom:0.5px solid #eee;font-size:11px}
     <div><strong>Sales Order</strong> ${esc(ord.orderNumber)}</div>
     <div>Date: ${ord.orderDate||'—'}</div>
     ${delivLine}
-    <div>Terms: ${esc(ord.paymentTerms)||'—'}</div>
     <div>Currency: ${cur}</div>
   </div>
 </div>
@@ -1497,21 +1535,23 @@ td{padding:7px 8px;border-bottom:0.5px solid #eee;font-size:11px}
   <div class="val">${esc(ord.buyerName)||'—'}${ord.buyerAddress?'\n'+esc(ord.buyerAddress):''}</div>
 </div>
 <table>
-  <thead><tr><th>#</th><th>Product</th><th>Metal</th><th>SKU</th><th class="r">Unit Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>
+  <thead><tr><th>#</th><th style="width:56px"></th><th>Product</th><th>Metal</th><th class="r">Unit Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
 <div class="totals">
+  <div class="trow"><span>Deposit due upfront (50%)</span><span>${fmt(deposit)}</span></div>
+  <div class="trow"><span>Balance on delivery (50%)</span><span>${fmt(deposit)}</span></div>
   <div class="trow grand"><span>Order Total (${cur})</span><span>${fmt(subtotal)}</span></div>
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
-<div class="footer">All prices are wholesale and exclusive of GST, freight and duties. Prices valid for 30 days from order date.</div>
+<div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of GST, freight and duties.</div>
 </body></html>`;
 
-  const w=window.open('','_blank','width=820,height=1100');
+  const w=window.open('','_blank','width=860,height=1100');
   w.document.write(html);
   w.document.close();
-  w.onload=()=>w.print();
+  setTimeout(()=>w.print(),500);
 }
 
 
