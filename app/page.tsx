@@ -3509,7 +3509,6 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [products, setProducts] = useState<Product[]>([])
   const [hydrated, setHydrated] = useState(false)
-  const [pickingSlot, setPickingSlot] = useState<{lsid:string,pi:number,ii:number}|null>(null)
 
   useEffect(() => {
     setQuote(loadActiveQuote())
@@ -3558,18 +3557,6 @@ export default function App() {
     if (!hydrated) return
     saveProducts(products)
   }, [products, hydrated])
-
-  // File-picker bridge for linesheet iframe (iOS/PWA blocks file inputs inside iframes)
-  // Step 1: receive slot info from iframe, show overlay in parent
-  useEffect(() => {
-    if (!hydrated) return
-    const handler = (e: MessageEvent) => {
-      if (!e.data || e.data.type !== 'bs:pickFile') return
-      setPickingSlot({ lsid: e.data.lsid, pi: Number(e.data.pi), ii: Number(e.data.ii) })
-    }
-    window.addEventListener('message', handler)
-    return () => window.removeEventListener('message', handler)
-  }, [hydrated])
 
   // All hooks declared — safe to return early now
   if (!hydrated) return null
@@ -3668,78 +3655,8 @@ export default function App() {
         )}
       </div>
 
-      {/* File-picker overlay for linesheet image slots (bypasses iframe restriction) */}
-      {pickingSlot && (
-        <label style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          background: 'rgba(0,0,0,0.55)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: 12, cursor: 'pointer',
-        }}>
-          <input
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={e => {
-              const file = e.target.files?.[0]
-              const slot = pickingSlot
-              setPickingSlot(null)
-              if (!file || !slot) return
-              const reader = new FileReader()
-              reader.onload = ev => {
-                const iframe = document.querySelector('iframe[title="Line Sheets"]') as HTMLIFrameElement
-                iframe?.contentWindow?.postMessage(
-                  { type: 'bs:fileData', lsid: slot.lsid, pi: slot.pi, ii: slot.ii, dataUrl: ev.target?.result },
-                  '*'
-                )
-              }
-              reader.readAsDataURL(file)
-            }}
-          />
-          <div style={{
-            background: '#fff', borderRadius: 14, padding: '20px 32px',
-            fontSize: 16, fontWeight: 600, color: '#000', letterSpacing: '0.02em',
-          }}>Choose Photo</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}
-            onClick={e => { e.preventDefault(); setPickingSlot(null) }}>Cancel</div>
-        </label>
-      )}
-
-      {/* Line Sheets iframe tab */}
-      {tab === 'sheets' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 10, display: 'flex', flexDirection: 'column' }}>
-          <iframe
-            src="/linesheet.html"
-            style={{ flex: 1, border: 'none', width: '100%' }}
-            title="Line Sheets"
-          />
-          <div className="tab-bar">
-            <div className="flex">
-              {[
-                { id: 'build',    icon: PenLine,      label: 'Sales'    },
-                { id: 'stones',   icon: Gem,           label: 'Stones'   },
-                { id: 'wax',      icon: Layers,        label: 'Wax'      },
-                { id: 'products', icon: Package,       label: 'Products' },
-                { id: 'sheets',   icon: LayoutList,    label: 'Sheets'   },
-                { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
-              ].map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  className="flex-1 flex flex-col items-center gap-0.5 py-2 press-feedback"
-                  style={{ color: tab === id ? 'var(--gold)' : 'var(--ios-secondary)' }}
-                  onClick={() => setTab(id as Tab)}
-                >
-                  <Icon size={20} strokeWidth={tab === id ? 2.5 : 1.8} />
-                  <span className="text-[9px] font-semibold">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Bottom tab bar */}
-      <div className="tab-bar" style={{ display: tab === 'sheets' ? 'none' : undefined }}>
+      <div className="tab-bar">
         <div className="flex">
           {[
             { id: 'build',    icon: PenLine,      label: 'Sales'    },
@@ -3753,7 +3670,7 @@ export default function App() {
               key={id}
               className="flex-1 flex flex-col items-center gap-0.5 py-2 press-feedback"
               style={{ color: tab === id ? 'var(--gold)' : 'var(--ios-secondary)' }}
-              onClick={() => setTab(id as Tab)}
+              onClick={() => id === 'sheets' ? window.location.href = '/linesheet.html' : setTab(id as Tab)}
             >
               <Icon size={20} strokeWidth={tab === id ? 2.5 : 1.8} />
               <span className="text-[9px] font-semibold">{label}</span>
