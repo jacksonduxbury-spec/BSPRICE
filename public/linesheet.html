@@ -1109,16 +1109,15 @@ function docHTML(ls){
 
     pageNum++;
     const imgSlots=p.images.map((img,ii)=>`
-      <label class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}" style="cursor:pointer"
-           data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
-        <input type="file" accept="image/*" style="display:none"
-          data-slot-input data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+      <div class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}" style="cursor:pointer"
+           data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}"
+           onclick="openSlotPicker('${ls.id}',${pi},${ii})">
         <div class="slot-ui">
           <div class="slot-plus">+</div>
           <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
         </div>
         ${img?`<img src="${img}" alt="">`:''}
-      </label>`).join('');
+      </div>`).join('');
 
     const pxRows=p.metalVariants.map(mv=>{
       const desc=mv.lineDescription||cleanMetalDesc(mv.metalName,p.pieceName)||'Variant';
@@ -1209,16 +1208,15 @@ function editorFieldsHTML(ls){
 
 function productCardHTML(ls,p,pi){
   const imgSlots=p.images.map((img,ii)=>`
-    <label class="ed-slot ${img?'has-img':''}" style="cursor:pointer"
-         data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
-      <input type="file" accept="image/*" style="display:none"
-        data-slot-input data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+    <div class="ed-slot ${img?'has-img':''}" style="cursor:pointer"
+         data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}"
+         onclick="openSlotPicker('${ls.id}',${pi},${ii})">
       <div class="slot-ui">
         <div class="slot-plus">+</div>
         <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
       </div>
       ${img?`<img src="${img}" alt="">`:''}
-    </label>`).join('');
+    </div>`).join('');
 
   const metalBlocks=p.metalVariants.map((mv,mi)=>metalBlockHTML(ls,p,pi,mv,mi)).join('');
   const addMetal=p.metalVariants.length<3
@@ -1886,16 +1884,20 @@ function refreshSubtotals(ls,pi,mi){
    label+input file picking works on all platforms including iOS PWA.
 ───────────────────────────────────────────────────────── */
 
-/* Image slot file handling — uses event delegation to avoid
-   inline onchange attributes (broken by SES/MetaMask lockdown) */
-function _applySlotImage(lsid, pi, ii, file){
-  if(!file)return;
+/* ── Image slot picking ─────────────────────────────────
+   Full-page context: programmatic .click() on a global file input
+   is called synchronously from a user click, so browsers allow it.
+   addEventListener used throughout (not .onchange =) to stay SES-safe.
+──────────────────────────────────────────────────────── */
+let _slotLsid=null,_slotPi=0,_slotIi=0;
+
+function saveFileToSlot(lsid,pi,ii,file){
   const ls=ST.lineSheets.find(x=>x.id===lsid);
   if(!ls||!ls.products[pi])return;
   if(!ls.products[pi].images)ls.products[pi].images=[null,null];
   const reader=new FileReader();
-  reader.onload=ev=>{
-    const dataUrl=ev.target.result;
+  reader.addEventListener('load',function(){
+    const dataUrl=this.result;
     ls.products[pi].images[ii]=dataUrl;
     _imgsDirty=true;
     saveST();
@@ -1909,26 +1911,29 @@ function _applySlotImage(lsid, pi, ii, file){
       img.src=dataUrl;
       edSlot.classList.add('has-img');
     }
-  };
+  });
   reader.readAsDataURL(file);
 }
 
-/* Wire change listeners directly onto every slot input.
-   Called after each render. Direct addEventListener beats both inline
-   onchange (killed by SES) and event delegation (bubbling edge-cases). */
-function bindSlots(){
-  document.querySelectorAll('[data-slot-input]').forEach(input=>{
-    /* remove old listener by cloning, then re-attach */
-    const fresh=input.cloneNode(true);
-    input.parentNode.replaceChild(fresh,input);
-    fresh.addEventListener('change',function(){
-      const file=this.files&&this.files[0];
-      if(!file)return;
-      _applySlotImage(this.dataset.lsid,+this.dataset.pi,+this.dataset.ii,file);
-      this.value='';
-    });
-  });
+function openSlotPicker(lsid,pi,ii){
+  _slotLsid=lsid; _slotPi=pi; _slotIi=ii;
+  const inp=document.getElementById('g-file-input');
+  inp.value='';
+  inp.click();
 }
+
+(function wireGlobalInput(){
+  const inp=document.getElementById('g-file-input');
+  inp.addEventListener('change',function(){
+    const file=this.files&&this.files[0];
+    if(!file||!_slotLsid)return;
+    const lsid=_slotLsid, pi=_slotPi, ii=_slotIi;
+    _slotLsid=null;
+    saveFileToSlot(lsid,pi,ii,file);
+  });
+})();
+
+function bindSlots(){}
 
 /* Drag-drop support via event delegation */
 document.addEventListener('dragover',e=>{
@@ -1941,7 +1946,7 @@ document.addEventListener('drop',e=>{
   slot.classList.remove('drag-over');
   const f=e.dataTransfer.files[0];
   if(!f||!f.type.startsWith('image/'))return;
-  _applySlotImage(slot.dataset.lsid,+slot.dataset.pi,+slot.dataset.ii,f);
+  saveFileToSlot(slot.dataset.lsid,+slot.dataset.pi,+slot.dataset.ii,f);
 });
 document.addEventListener('dragenter',e=>{
   const slot=e.target.closest('[data-imgslot]');
