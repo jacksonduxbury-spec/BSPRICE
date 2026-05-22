@@ -3558,6 +3558,37 @@ export default function App() {
     saveProducts(products)
   }, [products, hydrated])
 
+  // File-picker bridge for linesheet iframe (iOS/PWA blocks file inputs inside iframes)
+  useEffect(() => {
+    if (!hydrated) return
+    const handler = (e: MessageEvent) => {
+      if (!e.data || e.data.type !== 'bs:pickFile') return
+      const { lsid, pi, ii } = e.data
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.style.cssText = 'position:fixed;top:-999px;left:-999px;opacity:0'
+      document.body.appendChild(input)
+      input.onchange = () => {
+        const file = input.files?.[0]
+        if (!file) { document.body.removeChild(input); return }
+        const reader = new FileReader()
+        reader.onload = ev => {
+          const iframe = document.querySelector('iframe[title="Line Sheets"]') as HTMLIFrameElement
+          iframe?.contentWindow?.postMessage(
+            { type: 'bs:fileData', lsid, pi, ii, dataUrl: ev.target?.result },
+            '*'
+          )
+          document.body.removeChild(input)
+        }
+        reader.readAsDataURL(file)
+      }
+      input.click()
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [hydrated])
+
   // All hooks declared — safe to return early now
   if (!hydrated) return null
 
