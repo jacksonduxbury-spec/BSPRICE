@@ -1346,7 +1346,9 @@ function editSellerDetails(){
   if(name===null)return;
   const details=prompt('Address / contact (one item per line):',s.details||'');
   if(details===null)return;
-  saveSeller({name:name.trim(),details:details.trim()});
+  const abn=prompt('ABN (optional):',s.abn||'');
+  if(abn===null)return;
+  saveSeller({name:name.trim(),details:details.trim(),abn:abn.trim()});
   renderOrder(el('view'),el('topbar-actions'));
 }
 
@@ -1423,6 +1425,7 @@ async function renderOrder(v,ta){
       <div>
         <div style="font-size:14px;font-weight:600;letter-spacing:0.04em">${esc(seller.name)||'Brohn Smith Jewellery'}</div>
         ${seller.details?`<div style="font-size:10px;color:#666;white-space:pre-line;margin-top:2px">${esc(seller.details)}</div>`:''}
+        ${seller.abn?`<div style="font-size:10px;color:#666;margin-top:2px">ABN ${esc(seller.abn)}</div>`:''}
         <button class="btn-text order-print-hide" style="font-size:9px;margin-top:4px;color:#aaa" onclick="editSellerDetails()">Edit business details</button>
       </div>
     </div>
@@ -1759,6 +1762,7 @@ tr{page-break-inside:avoid}
     <div>
       <div class="brand-name">${esc(seller.name||'Brohn Smith Jewellery')}</div>
       ${(seller.details||'')?`<div class="brand-details">${esc(seller.details)}</div>`:''}
+      ${(seller.abn||'')?`<div class="brand-details">ABN ${esc(seller.abn)}</div>`:''}
     </div>
   </div>
   <div class="meta">
