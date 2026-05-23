@@ -2059,7 +2059,25 @@ document.addEventListener('click',function(e){
   });
 })();
 
-function bindSlots(){}
+function bindSlots(){
+  /* Attach change listeners directly to every slot-file-input in the editor.
+     Direct attachment (not delegation) means it works even if the element
+     was just created via innerHTML and avoids any bubbling / re-render race. */
+  document.querySelectorAll('.slot-file-input').forEach(function(inp){
+    /* Avoid double-wiring on repeated bindSlots calls */
+    if(inp._slotWired)return;
+    inp._slotWired=true;
+    inp.addEventListener('change',function(){
+      const file=this.files&&this.files[0];
+      if(!file)return;
+      const lsid=this.dataset.lsid;
+      const pi=parseInt(this.dataset.pi,10);
+      const ii=parseInt(this.dataset.ii,10);
+      this.value='';
+      saveFileToSlot(lsid,pi,ii,file);
+    });
+  });
+}
 
 /* Drag-drop support via event delegation */
 document.addEventListener('dragover',e=>{
