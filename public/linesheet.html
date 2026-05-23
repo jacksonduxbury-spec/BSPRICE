@@ -1358,6 +1358,7 @@ async function renderOrder(v,ta){
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" onclick="ST.view='dashboard';render()">← Back</button>
     <button class="btn-ghost btn-ghost-sm" onclick="syncOrderFromSheets('${ord.id}')">↻ Sync from sheets</button>
+    <button class="btn-ghost btn-ghost-sm" onclick="exportOrderCSV('${ord.id}')">⬇ Production CSV</button>
     <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">🖨 Print / PDF</button>
     <button class="btn btn-sm" onclick="saveOrderAndBack()">Save Order</button>`;
 
@@ -1609,6 +1610,49 @@ function syncOrderFromSheets(ordId){
   saveST();
   renderOrder(el('view'),el('topbar-actions'));
 }
+function exportOrderCSV(ordId){
+  const ord=ST.orders.find(o=>o.id===ordId);
+  if(!ord)return;
+  const cur=ord.currency||'AUD';
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  if(!included.length){alert('No items included in this order.');return;}
+
+  const cell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const cols=['Order #','Date','Buyer','Collection','Product','SKU','Metal','Description','Qty','Unit WS ('+cur+')','Line Total ('+cur+')','Notes'];
+  const rows=included.map(item=>[
+    ord.orderNumber,
+    ord.orderDate||'',
+    ord.buyerName||'',
+    item.collection||'',
+    item.pieceName||'',
+    item.sku||'',
+    item.metalName||'',
+    item.lineDescription||'',
+    item.qty||1,
+    item.unitWholesale||0,
+    (item.unitWholesale||0)*(item.qty||1),
+    ord.notes||''
+  ].map(cell).join(','));
+
+  const subtotal=included.reduce((s,i)=>s+(i.unitWholesale||0)*(i.qty||1),0);
+  const summary=[
+    [],
+    [cell('Total units'),cell(included.reduce((s,i)=>s+(i.qty||1),0))],
+    [cell('Order total ('+cur+')'),cell(subtotal.toFixed(2))],
+    [cell('Deposit 50%'),cell((subtotal*0.5).toFixed(2))],
+    [cell('Balance 50%'),cell((subtotal*0.5).toFixed(2))],
+  ].map(r=>r.join(','));
+
+  const csv='﻿'+[cols.map(cell).join(','),...rows,...summary].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=(ord.orderNumber||'order')+'-production.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+
 function saveOrderAndBack(){
   saveST();ST.view='dashboard';render();
 }
