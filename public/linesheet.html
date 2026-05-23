@@ -2057,7 +2057,8 @@ document.addEventListener('click',function(e){
     const lsid=t.dataset.lsid;
     const pi=parseInt(t.dataset.pi,10);
     const ii=parseInt(t.dataset.ii,10);
-    t.value=''; /* reset so same file can be re-selected */
+    /* Do NOT reset t.value here — clearing the input before FileReader finishes
+       revokes the file reference on Chrome/Mac (NotReadableError) */
     saveFileToSlot(lsid,pi,ii,file);
   });
 })();
@@ -2076,7 +2077,6 @@ function bindSlots(){
       const lsid=this.dataset.lsid;
       const pi=parseInt(this.dataset.pi,10);
       const ii=parseInt(this.dataset.ii,10);
-      this.value='';
       saveFileToSlot(lsid,pi,ii,file);
     });
   });
