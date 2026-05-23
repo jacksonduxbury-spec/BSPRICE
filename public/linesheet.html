@@ -1115,8 +1115,7 @@ function docHTML(ls){
     pageNum++;
     const imgSlots=p.images.map((img,ii)=>`
       <div class="pp-img-slot ${img?'has-img':''} ${ii===1?'secondary':''}" style="cursor:pointer"
-           data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}"
-           onclick="openSlotPicker('${ls.id}',${pi},${ii})">
+           data-imgslot="prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
         <div class="slot-ui">
           <div class="slot-plus">+</div>
           <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
@@ -1214,8 +1213,7 @@ function editorFieldsHTML(ls){
 function productCardHTML(ls,p,pi){
   const imgSlots=p.images.map((img,ii)=>`
     <div class="ed-slot ${img?'has-img':''}" style="cursor:pointer"
-         data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}"
-         onclick="openSlotPicker('${ls.id}',${pi},${ii})">
+         data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
       <div class="slot-ui">
         <div class="slot-plus">+</div>
         <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
@@ -1984,27 +1982,32 @@ function refreshSubtotals(ls,pi,mi){
 let _slotLsid=null,_slotPi=0,_slotIi=0;
 
 function saveFileToSlot(lsid,pi,ii,file){
-  const ls=ST.lineSheets.find(x=>x.id===lsid);
-  if(!ls||!ls.products[pi])return;
-  if(!ls.products[pi].images)ls.products[pi].images=[null,null];
-  const reader=new FileReader();
-  reader.addEventListener('load',function(){
-    const dataUrl=this.result;
-    ls.products[pi].images[ii]=dataUrl;
-    _imgsDirty=true;
-    saveST();
-    refreshPreview();
-    const edSlot=document.querySelector(
-      `[data-imgslot="ed-prod"][data-lsid="${lsid}"][data-pi="${pi}"][data-ii="${ii}"]`
-    );
-    if(edSlot){
-      let img=edSlot.querySelector('img');
-      if(!img){img=document.createElement('img');edSlot.appendChild(img);}
-      img.src=dataUrl;
-      edSlot.classList.add('has-img');
-    }
-  });
-  reader.readAsDataURL(file);
+  try{
+    const ls=ST.lineSheets.find(x=>x.id===lsid);
+    if(!ls||!ls.products[pi]){console.warn('[img] no product',lsid,pi);return;}
+    if(!ls.products[pi].images)ls.products[pi].images=[null,null];
+    const reader=new FileReader();
+    reader.addEventListener('load',function(){
+      try{
+        const dataUrl=this.result;
+        ls.products[pi].images[ii]=dataUrl;
+        _imgsDirty=true;
+        saveST();
+        refreshPreview();
+        const edSlot=document.querySelector(
+          `[data-imgslot="ed-prod"][data-lsid="${lsid}"][data-pi="${pi}"][data-ii="${ii}"]`
+        );
+        if(edSlot){
+          let img=edSlot.querySelector('img');
+          if(!img){img=document.createElement('img');edSlot.appendChild(img);}
+          img.src=dataUrl;
+          edSlot.classList.add('has-img');
+        }
+      }catch(err){console.error('[img] load handler error',err);}
+    });
+    reader.addEventListener('error',function(){console.error('[img] FileReader error',reader.error);});
+    reader.readAsDataURL(file);
+  }catch(err){console.error('[img] saveFileToSlot error',err);}
 }
 
 function openSlotPicker(lsid,pi,ii){
@@ -2013,6 +2016,20 @@ function openSlotPicker(lsid,pi,ii){
   inp.value='';
   inp.click();
 }
+
+/* Delegated click handler for image slots — SES-safe (no inline onclick) */
+document.addEventListener('click',function(e){
+  const slot=e.target.closest('[data-imgslot]');
+  if(!slot)return;
+  const lsid=slot.dataset.lsid;
+  const pi=parseInt(slot.dataset.pi,10);
+  const ii=parseInt(slot.dataset.ii,10);
+  if(!lsid&&lsid!==0)return;
+  _slotLsid=lsid; _slotPi=pi; _slotIi=ii;
+  const inp=document.getElementById('g-file-input');
+  inp.value='';
+  inp.click();
+});
 
 (function wireGlobalInput(){
   const inp=document.getElementById('g-file-input');
