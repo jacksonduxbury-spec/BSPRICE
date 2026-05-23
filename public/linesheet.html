@@ -2023,19 +2023,8 @@ function openSlotPicker(lsid,pi,ii){
   inp.click();
 }
 
-/* Delegated click handler for image slots — SES-safe (no inline onclick) */
-document.addEventListener('click',function(e){
-  const slot=e.target.closest('[data-imgslot]');
-  if(!slot)return;
-  const lsid=slot.dataset.lsid;
-  const pi=parseInt(slot.dataset.pi,10);
-  const ii=parseInt(slot.dataset.ii,10);
-  if(!lsid&&lsid!==0)return;
-  _slotLsid=lsid; _slotPi=pi; _slotIi=ii;
-  const inp=document.getElementById('g-file-input');
-  inp.value='';
-  inp.click();
-});
+/* Image slots are now <label> elements — clicking them natively activates
+   the child file input. No click handler needed here. */
 
 (function wireGlobalInput(){
   /* Legacy global input — kept as fallback for drag-drop and old code paths */
