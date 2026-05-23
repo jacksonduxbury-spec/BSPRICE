@@ -446,6 +446,7 @@ textarea.fi{resize:vertical;min-height:52px}
   @page{margin:0;size:A4}
   /* Order print styles */
   .order-print-hide{display:none!important}
+  .order-print-show{display:block!important}
   .order-doc{padding:16mm 18mm!important;font-size:11px!important}
   .order-doc *{font-size:inherit}
 }
@@ -455,11 +456,12 @@ textarea.fi{resize:vertical;min-height:52px}
 .order-hdr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:24px}
 .order-field label{font-size:8px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#888;display:block;margin-bottom:4px}
 .order-field input,.order-field textarea,.order-field select{
-  width:100%;border:none;border-bottom:0.5px solid #ccc;font-size:12px;
-  padding:4px 0;background:transparent;outline:none;font-family:inherit;
-  color:#000;resize:none;
+  width:100%;border:none;border-bottom:1px solid #ddd;font-size:12px;
+  padding:6px 8px;background:#fafafa;outline:none;font-family:inherit;
+  color:#000;resize:none;border-radius:4px 4px 0 0;transition:background 0.15s,border-color 0.15s;
 }
-.order-field input:focus,.order-field textarea:focus{border-bottom-color:#000}
+.order-field input:hover,.order-field textarea:hover,.order-field select:hover{background:#f0f0f0;border-bottom-color:#aaa}
+.order-field input:focus,.order-field textarea:focus,.order-field select:focus{background:#fff;border-bottom:2px solid #000;padding-bottom:5px}
 .order-field.full{grid-column:1/-1}
 .order-items-tbl{width:100%;border-collapse:collapse;margin-top:8px}
 .order-items-tbl th{font-size:8px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:#888;padding:0 8px 8px;text-align:left;border-bottom:0.5px solid #000}
@@ -469,6 +471,9 @@ textarea.fi{resize:vertical;min-height:52px}
 .order-items-tbl tr.excluded td{opacity:0.3}
 .order-qty{width:52px;border:0.5px solid #ccc;padding:3px 6px;text-align:center;font-size:12px;font-family:inherit;background:#fff;outline:none}
 .order-qty:focus{border-color:#000}
+.order-inline-field{border-bottom:1px solid transparent!important;transition:background 0.15s,border-color 0.15s;border-radius:3px;padding:2px 4px!important;margin:-2px -4px}
+.order-inline-field:hover{background:#f0f0f0!important;border-bottom-color:#aaa!important}
+.order-inline-field:focus{background:#fff!important;border-bottom:2px solid #000!important;outline:none}
 .order-totals{margin-top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .order-total-row{display:flex;gap:32px;font-size:12px}
 .order-total-row.grand{font-weight:700;font-size:14px;border-top:0.5px solid #000;padding-top:8px;margin-top:4px}
@@ -1382,11 +1387,17 @@ async function renderOrder(v,ta){
         <td><input type="checkbox" ${item.included?'checked':''} onchange="toggleOrderItem(${idx},this.checked)" style="cursor:pointer"></td>
         <td>${thumb}</td>
         <td>
-          <div style="font-size:12px">${esc(item.pieceName)||'—'}</div>
+          <input type="text" class="order-inline-field order-print-hide" data-order-idx="${idx}" data-order-field="pieceName" value="${esc(item.pieceName||'')}" placeholder="Piece name" style="font-size:12px;width:100%;border:none;background:transparent;outline:none;padding:0;font-family:inherit;color:inherit">
+          <div class="order-print-show" style="font-size:12px;display:none">${esc(item.pieceName)||'—'}</div>
           ${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}
           <div style="font-size:9px;color:#bbb">${esc(item.sheetLabel||'')}</div>
+          <input type="text" class="order-inline-field order-print-hide" data-order-idx="${idx}" data-order-field="lineDescription" value="${esc(item.lineDescription||item.description||'')}" placeholder="Description (optional)" style="font-size:9px;width:100%;border:none;background:transparent;outline:none;padding:0;font-family:inherit;color:#888;margin-top:2px">
+          <div class="order-print-show" style="font-size:9px;color:#888;display:none">${esc(item.lineDescription||item.description||'')}</div>
         </td>
-        <td style="color:#888">${esc(item.metalName)||'—'}</td>
+        <td>
+          <input type="text" class="order-inline-field order-print-hide" data-order-idx="${idx}" data-order-field="metalName" value="${esc(item.metalName||'')}" placeholder="Metal" style="font-size:12px;width:100%;border:none;background:transparent;outline:none;padding:0;font-family:inherit;color:#888">
+          <div class="order-print-show" style="font-size:12px;color:#888;display:none">${esc(item.metalName)||'—'}</div>
+        </td>
         <td class="r">${fmtMoney2(item.unitWholesale,cur)}</td>
         <td class="r"><input class="order-qty" type="number" min="0" value="${item.qty||1}" onchange="updateOrderQty(${idx},this.value)" ${item.included?'':'disabled'}></td>
         <td class="r">${item.included?fmtMoney2(lineTotal,cur):'—'}</td>
@@ -1419,33 +1430,33 @@ async function renderOrder(v,ta){
   <div class="order-hdr-grid">
     <div class="order-field">
       <label>Buyer Name</label>
-      <input type="text" value="${esc(ord.buyerName)}" oninput="ord.buyerName=this.value">
+      <input type="text" value="${esc(ord.buyerName)}" data-order-hdr="buyerName">
     </div>
     <div class="order-field">
       <label>Order Number</label>
-      <input type="text" value="${esc(ord.orderNumber)}" oninput="ord.orderNumber=this.value">
+      <input type="text" value="${esc(ord.orderNumber)}" data-order-hdr="orderNumber">
     </div>
     <div class="order-field full">
       <label>Buyer Address</label>
-      <textarea rows="2" oninput="ord.buyerAddress=this.value">${esc(ord.buyerAddress)}</textarea>
+      <textarea rows="2" data-order-hdr="buyerAddress">${esc(ord.buyerAddress)}</textarea>
     </div>
     <div class="order-field">
       <label>Order Date</label>
-      <input type="date" value="${esc(ord.orderDate)}" onchange="ord.orderDate=this.value">
+      <input type="date" value="${esc(ord.orderDate)}" data-order-hdr="orderDate">
     </div>
     <div class="order-field">
       <label>Currency</label>
-      <select onchange="ord.currency=this.value;renderOrder(el('view'),el('topbar-actions'))">
+      <select data-order-hdr="currency" data-order-hdr-rerender="1">
         ${['AUD','USD','GBP','EUR'].map(c=>`<option value="${c}"${ord.currency===c?' selected':''}>${c}</option>`).join('')}
       </select>
     </div>
     <div class="order-field">
       <label>Payment Terms</label>
-      <input type="text" value="${esc(ord.paymentTerms)}" oninput="ord.paymentTerms=this.value">
+      <input type="text" value="${esc(ord.paymentTerms)}" data-order-hdr="paymentTerms">
     </div>
     <div class="order-field full">
       <label>Notes</label>
-      <textarea rows="2" oninput="ord.notes=this.value">${esc(ord.notes||'')}</textarea>
+      <textarea rows="2" data-order-hdr="notes">${esc(ord.notes||'')}</textarea>
     </div>
   </div>
 
@@ -1695,7 +1706,8 @@ async function printOrder(id){
         <td style="color:#aaa;font-size:10px">${rowNum}</td>
         ${imgCell}
         <td><div style="font-weight:500">${esc(item.pieceName)||'—'}</div>${item.sku?`<div style="font-size:9px;color:#aaa">${esc(item.sku)}</div>`:''}
-        <div style="font-size:9px;color:#bbb">${esc(item.sheetLabel||'')}</div></td>
+        <div style="font-size:9px;color:#bbb">${esc(item.sheetLabel||'')}</div>
+        ${item.lineDescription?`<div style="font-size:9px;color:#888">${esc(item.lineDescription)}</div>`:''}</td>
         <td style="color:#555">${esc(item.metalName)||'—'}</td>
         <td class="r">${fmt(item.unitWholesale)}</td>
         <td class="r">${item.qty||1}</td>
@@ -2043,8 +2055,37 @@ document.addEventListener('dragleave',e=>{
 ───────────────────────────────────────────────────────── */
 let _previewTimer=null;
 
+/* Order header + item inline field autosave */
+let _orderFieldTimer=null;
+function _handleOrderHdr(t){
+  const field=t.dataset.orderHdr;
+  if(!field)return false;
+  const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return true;
+  ord[field]=t.value;
+  clearTimeout(_orderFieldTimer);
+  if(t.dataset.orderHdrRerender){
+    _orderFieldTimer=setTimeout(()=>{saveST();renderOrder(el('view'),el('topbar-actions'));},100);
+  } else {
+    _orderFieldTimer=setTimeout(()=>saveST(),400);
+  }
+  return true;
+}
+
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(_handleOrderHdr(t))return;
+  if(t.dataset.orderIdx!==undefined&&t.dataset.orderField){
+    const idx=parseInt(t.dataset.orderIdx,10);
+    const field=t.dataset.orderField;
+    const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+    if(ord&&ord.items[idx]){
+      ord.items[idx][field]=t.value;
+      clearTimeout(_orderFieldTimer);
+      _orderFieldTimer=setTimeout(()=>saveST(),400);
+    }
+    return;
+  }
   if(!t.dataset.lsid||!t.dataset.path)return;
   if(t.dataset.path==='currency')return; /* handled by change event */
   const ls=ST.lineSheets.find(x=>x.id===t.dataset.lsid);
@@ -2062,6 +2103,7 @@ document.addEventListener('input',e=>{
 
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(_handleOrderHdr(t))return;
   if(!t.dataset.lsid||!t.dataset.path)return;
   const ls=ST.lineSheets.find(x=>x.id===t.dataset.lsid);
   if(!ls)return;
