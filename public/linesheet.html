@@ -201,6 +201,8 @@ textarea.fi{resize:vertical;min-height:52px}
   aspect-ratio:4/3;border:var(--rule-lt);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;cursor:pointer;position:relative;overflow:hidden;background:#fff;
+  /* label element needs these to behave like a block */
+  box-sizing:border-box;text-align:center;
 }
 .ed-slot:hover{border-color:#888}
 .ed-slot.has-img .slot-ui{display:none}
@@ -211,7 +213,7 @@ textarea.fi{resize:vertical;min-height:52px}
 .slot-plus{font-size:14px;font-weight:200;color:#ccc;line-height:1}
 .slot-lbl{font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:#ccc}
 .ed-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.ed-slot .slot-file-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+/* slot-file-input is 1px hidden — the label itself handles the click natively */
 
 /* Metal block */
 .metal-block{
@@ -1213,16 +1215,17 @@ function editorFieldsHTML(ls){
 
 function productCardHTML(ls,p,pi){
   const imgSlots=p.images.map((img,ii)=>`
-    <div class="ed-slot ${img?'has-img':''}"
-         data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+    <label class="ed-slot ${img?'has-img':''}"
+           data-imgslot="ed-prod" data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
       <input type="file" accept="image/*" class="slot-file-input"
-             data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}">
+             data-lsid="${ls.id}" data-pi="${pi}" data-ii="${ii}"
+             style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
       <div class="slot-ui">
         <div class="slot-plus">+</div>
         <div class="slot-lbl">${ii===0?'Product shot':'Styled shot'}</div>
       </div>
       ${img?`<img src="${img}" alt="">`:''}
-    </div>`).join('');
+    </label>`).join('');
 
   const metalBlocks=p.metalVariants.map((mv,mi)=>metalBlockHTML(ls,p,pi,mv,mi)).join('');
   const addMetal=p.metalVariants.length<3
