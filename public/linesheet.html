@@ -1348,7 +1348,9 @@ function editSellerDetails(){
   if(details===null)return;
   const abn=prompt('ABN (optional):',s.abn||'');
   if(abn===null)return;
-  saveSeller({name:name.trim(),details:details.trim(),abn:abn.trim()});
+  const bankDetails=prompt('Bank details (shown at bottom of order — one item per line, e.g. Bank: ANZ, BSB: 012-345, Account: 123456789):',s.bankDetails||'');
+  if(bankDetails===null)return;
+  saveSeller({name:name.trim(),details:details.trim(),abn:abn.trim(),bankDetails:bankDetails.trim()});
   renderOrder(el('view'),el('topbar-actions'));
 }
 
@@ -1504,6 +1506,12 @@ async function renderOrder(v,ta){
     </div>
     <div style="font-size:10px;color:#aaa;margin-top:4px">${included.length} line${included.length!==1?'s':''} · ${included.reduce((s,i)=>s+(i.qty||1),0)} units</div>
   </div>
+
+  ${seller.bankDetails?`
+  <div style="margin-top:32px;padding-top:16px;border-top:0.5px solid #e0e0e0">
+    <div style="font-size:8px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#888;margin-bottom:8px">Payment Details</div>
+    <div style="font-size:11px;color:#444;white-space:pre-line;line-height:1.7">${esc(seller.bankDetails)}</div>
+  </div>`:''}
 
   <div class="order-actions order-print-hide">
     <button class="btn" onclick="printOrder('${ord.id}')">🖨 Print / Save as PDF</button>
@@ -1786,6 +1794,7 @@ tr{page-break-inside:avoid}
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
+${seller.bankDetails?`<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid #ddd;font-size:9px;color:#444;line-height:1.7"><strong style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888">Payment Details</strong><br>${esc(seller.bankDetails).replace(/\n/g,'<br>')}</div>`:''}
 <div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of taxes, freight and duties.</div>
 </body></html>`;
 
