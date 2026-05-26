@@ -627,6 +627,7 @@ function mkOrder(primaryLS){
     createdAt:today,
     buyerName:primaryLS?primaryLS.buyerName:'',
     buyerAddress:'',
+    buyerTax:'',
     orderNumber:num,
     orderDate:today,
     deliveryDate:'',
@@ -1435,6 +1436,7 @@ async function renderOrder(v,ta){
       <div style="font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin-bottom:4px">Sales Order</div>
       <div style="font-size:18px;font-weight:300">${esc(ord.buyerName)||'New Order'}</div>
       <div style="font-size:10px;color:#999;margin-top:2px">${esc(ord.orderNumber)}</div>
+      ${ord.buyerTax?`<div style="font-size:10px;color:#999;margin-top:1px">${esc(ord.buyerTax)}</div>`:''}
     </div>
   </div>
 
@@ -1451,6 +1453,10 @@ async function renderOrder(v,ta){
     <div class="order-field full">
       <label>Buyer Address</label>
       <textarea rows="2" data-order-hdr="buyerAddress">${esc(ord.buyerAddress)}</textarea>
+    </div>
+    <div class="order-field">
+      <label>Tax / EIN / VAT</label>
+      <input type="text" value="${esc(ord.buyerTax||'')}" data-order-hdr="buyerTax" placeholder="e.g. EIN# 33-4789614">
     </div>
     <div class="order-field">
       <label>Order Date</label>
@@ -1781,7 +1787,7 @@ tr{page-break-inside:avoid}
 </div>
 <div class="bill">
   <div class="lbl">Bill To</div>
-  <div class="val">${esc(ord.buyerName)||'—'}${ord.buyerAddress?'\n'+esc(ord.buyerAddress):''}</div>
+  <div class="val">${esc(ord.buyerName)||'—'}${ord.buyerAddress?'\n'+esc(ord.buyerAddress):''}${ord.buyerTax?'\n'+esc(ord.buyerTax):''}</div>
 </div>
 <table>
   <thead><tr><th>#</th><th style="width:56px"></th><th>Product</th><th>Metal</th><th class="r">Unit Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>
