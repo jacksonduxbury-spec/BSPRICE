@@ -601,7 +601,7 @@ const ST={
 
 function mkOrder(primaryLS){
   const today=new Date().toISOString().slice(0,10);
-  const num='SO-'+Math.floor(100000+Math.random()*900000);
+  const num='OC-'+Math.floor(100000+Math.random()*900000);
   // Build items from ALL sheets — primary sheet items default included, others default excluded
   const items=ST.lineSheets.flatMap(ls=>
     ls.products.flatMap(p=>
