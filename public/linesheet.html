@@ -1370,11 +1370,11 @@ async function renderOrder(v,ta){
   }
 
   ta.innerHTML=`
-    <button class="btn-ghost btn-ghost-sm" onclick="ST.view='dashboard';render()">← Back</button>
-    <button class="btn-ghost btn-ghost-sm" onclick="syncOrderFromSheets('${ord.id}')">↻ Sync from sheets</button>
-    <button class="btn-ghost btn-ghost-sm" onclick="exportOrderCSV('${ord.id}')">⬇ Production CSV</button>
-    <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">🖨 Print / PDF</button>
-    <button class="btn btn-sm" onclick="saveOrderAndBack()">Save Order</button>`;
+    <button class="btn-ghost btn-ghost-sm" data-action="back">← Back</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="syncOrder" data-id="${ord.id}">↻ Sync from sheets</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="exportOrderCSV" data-id="${ord.id}">⬇ Production CSV</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">🖨 Print / PDF</button>
+    <button class="btn btn-sm" data-action="saveOrderBack">Save Order</button>`;
 
   const included=ord.items.filter(i=>i.included&&i.qty>0);
   const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
@@ -1429,7 +1429,7 @@ async function renderOrder(v,ta){
         <div style="font-size:14px;font-weight:600;letter-spacing:0.04em">${esc(seller.name)||'Brohn Smith Jewellery'}</div>
         ${seller.details?`<div style="font-size:10px;color:#666;white-space:pre-line;margin-top:2px">${esc(seller.details)}</div>`:''}
         ${seller.abn?`<div style="font-size:10px;color:#666;margin-top:2px">ABN ${esc(seller.abn)}</div>`:''}
-        <button class="btn-text order-print-hide" style="font-size:9px;margin-top:4px;color:#aaa" onclick="editSellerDetails()">Edit business details</button>
+        <button class="btn-text order-print-hide" id="btn-edit-seller" style="font-size:9px;margin-top:4px;color:#aaa">Edit business details</button>
       </div>
     </div>
     <div style="text-align:right">
@@ -1520,9 +1520,9 @@ async function renderOrder(v,ta){
   </div>`:''}
 
   <div class="order-actions order-print-hide">
-    <button class="btn" onclick="printOrder('${ord.id}')">🖨 Print / Save as PDF</button>
-    <button class="btn-ghost" onclick="saveOrderAndBack()">Save & Close</button>
-    <button class="btn-text" style="margin-left:auto;color:#e00" onclick="deleteOrder('${ord.id}')">Delete order</button>
+    <button class="btn" data-action="printOrder" data-id="${ord.id}">🖨 Print / Save as PDF</button>
+    <button class="btn-ghost" data-action="saveOrderBack">Save & Close</button>
+    <button class="btn-text" style="margin-left:auto;color:#e00" data-action="deleteOrder" data-id="${ord.id}">Delete order</button>
   </div>
 </div>
 </div>`;
@@ -1942,9 +1942,9 @@ function renderDashboard(v,ta){
       <td class="muted">${ord.orderDate||'—'}</td>
       <td class="muted">${ord.currency||'AUD'}</td>
       <td class="act"><div class="act-btns">
-        <button class="btn-ghost btn-ghost-sm" onclick="openOrder('${ord.id}')">Open</button>
-        <button class="btn-ghost btn-ghost-sm" onclick="printOrder('${ord.id}')">Print PDF</button>
-        <button class="btn-ghost btn-ghost-sm" onclick="deleteOrder('${ord.id}')">Delete</button>
+        <button class="btn-ghost btn-ghost-sm" data-action="openOrder" data-id="${ord.id}">Open</button>
+        <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">Print PDF</button>
+        <button class="btn-ghost btn-ghost-sm" data-action="deleteOrder" data-id="${ord.id}">Delete</button>
       </div></td>
     </tr>`).join('')}
     </tbody>
@@ -2231,6 +2231,7 @@ window.addEventListener('pagehide',()=>saveST());
    BUTTON ACTIONS (delegated)
 ───────────────────────────────────────────────────────── */
 document.addEventListener('click',e=>{
+  if(e.target.closest('#btn-edit-seller')){editSellerDetails();return;}
   const btn=e.target.closest('[data-action]');
   if(!btn)return;
   const a=btn.dataset.action;
@@ -2374,6 +2375,12 @@ document.addEventListener('click',e=>{
     const ef=el('ef');if(ef){ef.innerHTML=editorFieldsHTML(ls);bindSlots();}
     refreshPreview();
   }
+  else if(a==='printOrder'){printOrder(id);}
+  else if(a==='saveOrderBack'){saveOrderAndBack();}
+  else if(a==='deleteOrder'){deleteOrder(id);}
+  else if(a==='syncOrder'){syncOrderFromSheets(id);}
+  else if(a==='exportOrderCSV'){exportOrderCSV(id);}
+  else if(a==='openOrder'){openOrder(id);}
 });
 
 /* ─────────────────────────────────────────────────────────
