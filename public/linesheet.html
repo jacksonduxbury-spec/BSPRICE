@@ -1433,7 +1433,7 @@ async function renderOrder(v,ta){
       </div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin-bottom:4px">Sales Order</div>
+      <div style="font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin-bottom:4px">Order Confirmation</div>
       <div style="font-size:18px;font-weight:300">${esc(ord.buyerName)||'New Order'}</div>
       <div style="font-size:10px;color:#999;margin-top:2px">${esc(ord.orderNumber)}</div>
       ${ord.buyerTax?`<div style="font-size:10px;color:#999;margin-top:1px">${esc(ord.buyerTax)}</div>`:''}
@@ -1780,7 +1780,7 @@ tr{page-break-inside:avoid}
     </div>
   </div>
   <div class="meta">
-    <div><strong>Sales Order</strong> ${esc(ord.orderNumber)}</div>
+    <div><strong>Order Confirmation</strong> ${esc(ord.orderNumber)}</div>
     <div>Date: ${ord.orderDate||'—'}</div>
     <div>Currency: ${cur}</div>
   </div>
@@ -1932,7 +1932,7 @@ function renderDashboard(v,ta){
 
   ${ST.orders.length>0?`
   <div class="dash-head" style="margin-top:36px">
-    <h1>Sales Orders (${ST.orders.length})</h1>
+    <h1>Order Confirmations (${ST.orders.length})</h1>
   </div>
   <table class="ls-table">
     <thead><tr><th>Buyer</th><th>Order #</th><th>Date</th><th>Currency</th><th class="r">&nbsp;</th></tr></thead>
