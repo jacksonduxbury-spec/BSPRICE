@@ -1504,6 +1504,12 @@ async function renderOrder(v,ta){
   </table>
 
   <div class="order-totals">
+    <div class="order-total-row" style="color:#888">
+      <span>Deposit due (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
+    </div>
+    <div class="order-total-row" style="color:#888">
+      <span>Balance on delivery (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
+    </div>
     <div class="order-total-row grand">
       <span>Order Total (${cur})</span>
       <span>${fmtMoney2(subtotal,cur)}</span>
@@ -1800,13 +1806,15 @@ tr{page-break-inside:avoid}
   <tbody>${rows}</tbody>
 </table>
 <div class="totals">
+  <div class="trow"><span>Deposit due upfront (50%)</span><span>${fmt(deposit)}</span></div>
+  <div class="trow"><span>Balance on delivery (50%)</span><span>${fmt(deposit)}</span></div>
   <div class="trow grand"><span>Order Total (${cur})</span><span>${fmt(subtotal)}</span></div>
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
 ${ord.orderTerms?`<div class="terms"><strong style="font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:#888;display:block;margin-bottom:5px">Terms &amp; Conditions</strong><span style="font-size:8.5px;color:#555;line-height:1.8">${esc(ord.orderTerms).replace(/\n/g,'<br>')}</span></div>`:''}
 ${seller.bankDetails?`<div class="payment"><strong style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888">Payment Details</strong><br><span style="font-size:9px;color:#444;line-height:1.7">${esc(seller.bankDetails).replace(/\n/g,'<br>')}</span></div>`:''}
-<div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of taxes, freight and duties.</div>
+<div class="footer">50% deposit required upfront. All prices are wholesale and exclusive of taxes, freight and duties.</div>
 </body></html>`;
 
   const w=window.open('','_blank','width=860,height=1100');
