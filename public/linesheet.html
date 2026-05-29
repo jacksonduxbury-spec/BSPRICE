@@ -1476,6 +1476,10 @@ async function renderOrder(v,ta){
       <label>Notes</label>
       <textarea rows="2" data-order-hdr="notes">${esc(ord.notes||'')}</textarea>
     </div>
+    <div class="order-field full">
+      <label>Terms &amp; Conditions</label>
+      <textarea rows="4" data-order-hdr="orderTerms">${esc(ord.orderTerms||'')}</textarea>
+    </div>
   </div>
 
   <div class="order-section-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -1513,8 +1517,14 @@ async function renderOrder(v,ta){
     <div style="font-size:10px;color:#aaa;margin-top:4px">${included.length} line${included.length!==1?'s':''} · ${included.reduce((s,i)=>s+(i.qty||1),0)} units</div>
   </div>
 
+  ${ord.orderTerms?`
+  <div style="margin-top:24px;padding-top:16px;border-top:0.5px solid #e0e0e0">
+    <div style="font-size:8px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#888;margin-bottom:8px">Terms &amp; Conditions</div>
+    <div style="font-size:10px;color:#555;line-height:1.7">${esc(ord.orderTerms)}</div>
+  </div>`:''}
+
   ${seller.bankDetails?`
-  <div style="margin-top:32px;padding-top:16px;border-top:0.5px solid #e0e0e0">
+  <div style="margin-top:24px;padding-top:16px;border-top:0.5px solid #e0e0e0">
     <div style="font-size:8px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#888;margin-bottom:8px">Payment Details</div>
     <div style="font-size:11px;color:#444;white-space:pre-line;line-height:1.7">${esc(seller.bankDetails)}</div>
   </div>`:''}
@@ -1800,6 +1810,7 @@ tr{page-break-inside:avoid}
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
+${ord.orderTerms?`<div style="margin-top:20px;padding-top:14px;border-top:0.5px solid #ddd;font-size:8.5px;color:#555;line-height:1.8"><strong style="font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:#888;display:block;margin-bottom:5px">Terms &amp; Conditions</strong>${esc(ord.orderTerms).replace(/\n/g,'<br>')}</div>`:''}
 ${seller.bankDetails?`<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid #ddd;font-size:9px;color:#444;line-height:1.7"><strong style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888">Payment Details</strong><br>${esc(seller.bankDetails).replace(/\n/g,'<br>')}</div>`:''}
 <div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of taxes, freight and duties.</div>
 </body></html>`;
