@@ -1504,12 +1504,6 @@ async function renderOrder(v,ta){
   </table>
 
   <div class="order-totals">
-    <div class="order-total-row" style="color:#888">
-      <span>Deposit due (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
-    </div>
-    <div class="order-total-row" style="color:#888">
-      <span>Balance on delivery (50%)</span><span>${fmtMoney2(deposit,cur)}</span>
-    </div>
     <div class="order-total-row grand">
       <span>Order Total (${cur})</span>
       <span>${fmtMoney2(subtotal,cur)}</span>
@@ -1806,8 +1800,6 @@ tr{page-break-inside:avoid}
   <tbody>${rows}</tbody>
 </table>
 <div class="totals">
-  <div class="trow"><span>Deposit due upfront (50%)</span><span>${fmt(deposit)}</span></div>
-  <div class="trow"><span>Balance on delivery (50%)</span><span>${fmt(deposit)}</span></div>
   <div class="trow grand"><span>Order Total (${cur})</span><span>${fmt(subtotal)}</span></div>
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
