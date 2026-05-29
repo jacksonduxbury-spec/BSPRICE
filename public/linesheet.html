@@ -1776,9 +1776,11 @@ tr{page-break-inside:avoid}
 .trow{display:flex;gap:40px;font-size:11px;color:#888}
 .trow.grand{font-weight:700;border-top:0.5px solid #000;padding-top:8px;margin-top:4px;font-size:13px;color:#000}
 .footer{margin-top:24px;padding-top:10px;border-top:0.5px solid #eee;font-size:9px;color:#888;page-break-inside:avoid}
+.terms{margin-top:20px;padding-top:14px;border-top:0.5px solid #ddd;page-break-inside:avoid}
+.payment{margin-top:20px;padding-top:12px;border-top:0.5px solid #ddd;page-break-inside:avoid}
 .kind-hdr{page-break-after:avoid}
-@page{margin:16mm 18mm;size:A4}
-@media print{body{padding:0}}
+@page{margin:0;size:A4}
+@media print{body{padding:16mm 18mm}html{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style></head><body>
 <div class="hd">
   <div class="brand-block">
@@ -1810,8 +1812,8 @@ tr{page-break-inside:avoid}
   <div style="font-size:9px;color:#aaa;margin-top:4px">${included.reduce((s,i)=>s+(i.qty||1),0)} units · ${included.length} lines</div>
 </div>
 ${ord.notes?`<div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:0.5px solid #eee;font-size:10px"><strong>Notes:</strong> ${esc(ord.notes)}</div>`:''}
-${ord.orderTerms?`<div style="margin-top:20px;padding-top:14px;border-top:0.5px solid #ddd;font-size:8.5px;color:#555;line-height:1.8"><strong style="font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:#888;display:block;margin-bottom:5px">Terms &amp; Conditions</strong>${esc(ord.orderTerms).replace(/\n/g,'<br>')}</div>`:''}
-${seller.bankDetails?`<div style="margin-top:20px;padding-top:12px;border-top:0.5px solid #ddd;font-size:9px;color:#444;line-height:1.7"><strong style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888">Payment Details</strong><br>${esc(seller.bankDetails).replace(/\n/g,'<br>')}</div>`:''}
+${ord.orderTerms?`<div class="terms"><strong style="font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:#888;display:block;margin-bottom:5px">Terms &amp; Conditions</strong><span style="font-size:8.5px;color:#555;line-height:1.8">${esc(ord.orderTerms).replace(/\n/g,'<br>')}</span></div>`:''}
+${seller.bankDetails?`<div class="payment"><strong style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#888">Payment Details</strong><br><span style="font-size:9px;color:#444;line-height:1.7">${esc(seller.bankDetails).replace(/\n/g,'<br>')}</span></div>`:''}
 <div class="footer">${esc(ord.paymentTerms)}. All prices are wholesale and exclusive of taxes, freight and duties.</div>
 </body></html>`;
 
