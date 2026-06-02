@@ -1583,7 +1583,10 @@ function renderProductionSheet(v,ord,allImgs){
     const status=item.prodStatus||'Not Started';
     const statusOpts=PROD_STATUSES.map(s=>`<option value="${s}"${s===status?' selected':''}>${s}</option>`).join('');
     const statusCol=PROD_STATUS_COLOURS[status]||'#f5f5f5';
-    const pkgOpts=PACKAGING_OPTIONS.map(p=>`<option value="${p}"${p===(item.prodPackaging||'')?' selected':''}>${p}</option>`).join('');
+    const pkgArr=Array.isArray(item.prodPackaging)?item.prodPackaging:(item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?[item.prodPackaging]:[]);
+    const pkgChips=pkgArr.map((p,ci)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#f0f0f0;border-radius:3px;padding:2px 6px;font-size:10px;margin:2px 2px 2px 0;white-space:nowrap">${esc(p)}<button data-action="removePkg" data-prod-idx="${realIdx}" data-pkg-ci="${ci}" style="border:none;background:none;cursor:pointer;font-size:11px;color:#999;padding:0;line-height:1">×</button></span>`).join('');
+    const pkgAddOpts=PACKAGING_OPTIONS.filter(p=>p!=='— Select packaging —'&&!pkgArr.includes(p)).map(p=>`<option value="${p}">${p}</option>`).join('');
+    const pkgCell=`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px">${pkgChips}<select data-prod-idx="${realIdx}" data-prod-field="prodPackagingAdd" style="border:none;border-bottom:1px solid #eee;font-size:10px;background:transparent;cursor:pointer;max-width:160px;color:#aaa"><option value="">+ Add packaging</option>${pkgAddOpts}</select></div>`;
     return`<tr style="border-bottom:0.5px solid #f0f0f0">
       <td style="padding:10px 8px;color:#bbb;font-size:10px;width:28px">${idx+1}</td>
       <td style="padding:10px 8px;width:52px">${thumb}</td>
@@ -1615,12 +1618,7 @@ function renderProductionSheet(v,ord,allImgs){
           ${statusOpts}
         </select>
       </td>
-      <td style="padding:10px 8px;min-width:180px">
-        <select data-prod-idx="${realIdx}" data-prod-field="prodPackaging"
-          style="border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;cursor:pointer;width:100%;max-width:240px">
-          ${pkgOpts}
-        </select>
-      </td>
+      <td style="padding:10px 8px;min-width:180px">${pkgCell}</td>
       <td style="padding:10px 8px">
         <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodNotes"
           value="${esc(item.prodNotes||'')}" placeholder="Production notes…"
@@ -1702,7 +1700,7 @@ async function printProductionSheet(id){
       <td style="padding:7px 6px;font-size:10px;color:#555">${(item.prodCost||item.unitWholesale)?'$'+Number(item.prodCost||item.unitWholesale).toFixed(2):'—'}</td>
       <td style="padding:7px 6px;text-align:center;font-weight:600;font-size:11px">${item.qty||1}</td>
       <td style="padding:7px 6px"><span style="background:${statusCol};padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600">${status}</span></td>
-      <td style="padding:7px 6px;font-size:9px;color:#555">${esc((item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?item.prodPackaging:'—'))}</td>
+      <td style="padding:7px 6px;font-size:9px;color:#555">${(()=>{const a=Array.isArray(item.prodPackaging)?item.prodPackaging:(item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?[item.prodPackaging]:[]);return a.length?esc(a.join(' + ')):'—';})()}</td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodNotes||'')}</td>
     </tr>`;
   }).join('');
@@ -2420,14 +2418,23 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(_handleOrderHdr(t))return;
-  // Production dropdowns (status + packaging)
-  if(t.dataset.prodIdx!==undefined&&(t.dataset.prodField==='prodStatus'||t.dataset.prodField==='prodPackaging')){
+  // Production dropdowns (status + packaging add)
+  if(t.dataset.prodIdx!==undefined&&(t.dataset.prodField==='prodStatus'||t.dataset.prodField==='prodPackagingAdd')){
     const idx=parseInt(t.dataset.prodIdx,10);
     const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
     if(ord&&ord.items[idx]){
-      ord.items[idx][t.dataset.prodField]=t.value;
-      if(t.dataset.prodField==='prodStatus') t.style.background=PROD_STATUS_COLOURS[t.value]||'#f5f5f5';
-      saveST();
+      if(t.dataset.prodField==='prodPackagingAdd'){
+        if(!t.value)return;
+        const arr=Array.isArray(ord.items[idx].prodPackaging)?ord.items[idx].prodPackaging:(ord.items[idx].prodPackaging&&ord.items[idx].prodPackaging!=='— Select packaging —'?[ord.items[idx].prodPackaging]:[]);
+        if(!arr.includes(t.value)) arr.push(t.value);
+        ord.items[idx].prodPackaging=arr;
+        saveST();
+        renderOrder(el('view'),el('topbar-actions'));
+      } else {
+        ord.items[idx].prodStatus=t.value;
+        t.style.background=PROD_STATUS_COLOURS[t.value]||'#f5f5f5';
+        saveST();
+      }
     }
     return;
   }
@@ -2629,6 +2636,18 @@ document.addEventListener('click',e=>{
     saveST();
     const ef=el('ef');if(ef){ef.innerHTML=editorFieldsHTML(ls);bindSlots();}
     refreshPreview();
+  }
+  else if(a==='removePkg'){
+    const idx=parseInt(btn.dataset.prodIdx,10);
+    const ci=parseInt(btn.dataset.pkgCi,10);
+    const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+    if(ord&&ord.items[idx]){
+      const arr=Array.isArray(ord.items[idx].prodPackaging)?ord.items[idx].prodPackaging:[];
+      arr.splice(ci,1);
+      ord.items[idx].prodPackaging=arr;
+      saveST();
+      renderOrder(el('view'),el('topbar-actions'));
+    }
   }
   else if(a==='printOrder'){printOrder(id);}
   else if(a==='printProdSheet'){printProductionSheet(id);}
