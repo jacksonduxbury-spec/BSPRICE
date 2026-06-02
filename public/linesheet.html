@@ -597,6 +597,7 @@ const ST={
   activeId:null,
   activeOrderId:null,
   view:'dashboard',  // 'dashboard' | 'editor' | 'order'
+  prodMode:false,
 };
 
 function mkOrder(primaryLS){
@@ -634,6 +635,8 @@ function mkOrder(primaryLS){
     paymentTerms:'50% deposit required upfront, balance due on delivery',
     currency:primaryLS?primaryLS.currency:'AUD',
     notes:'',
+    orderTerms:'',
+    prodInstructions:'',
     items
   };
 }
@@ -1371,10 +1374,13 @@ async function renderOrder(v,ta){
 
   ta.innerHTML=`
     <button class="btn-ghost btn-ghost-sm" data-action="back">← Back</button>
-    <button class="btn-ghost btn-ghost-sm" data-action="syncOrder" data-id="${ord.id}">↻ Sync from sheets</button>
-    <button class="btn-ghost btn-ghost-sm" data-action="exportOrderCSV" data-id="${ord.id}">⬇ Production CSV</button>
-    <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">🖨 Print / PDF</button>
-    <button class="btn btn-sm" data-action="saveOrderBack">Save Order</button>`;
+    <button class="btn-ghost btn-ghost-sm" data-action="toggleProd" data-id="${ord.id}" style="${ST.prodMode?'background:#f0f0f0;font-weight:600':''}">⚙ Production Sheet</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">🖨 Order PDF</button>
+    ${ST.prodMode?`<button class="btn-ghost btn-ghost-sm" data-action="printProdSheet" data-id="${ord.id}">🖨 Production PDF</button>`:''}
+    <button class="btn btn-sm" data-action="saveOrderBack">Save</button>`;
+
+  // ── Production Sheet mode ──────────────────────────────────────────────
+  if(ST.prodMode){renderProductionSheet(v,ord,allImgs);return;}
 
   const included=ord.items.filter(i=>i.included&&i.qty>0);
   const subtotal=included.reduce((s,i)=>s+(i.unitWholesale*(i.qty||1)),0);
@@ -1538,6 +1544,187 @@ async function renderOrder(v,ta){
 </div>`;
 }
 
+/* ─────────────────────────────────────────────────────────
+   PRODUCTION SHEET
+───────────────────────────────────────────────────────── */
+const PROD_STATUSES=['Not Started','In Progress','Complete','Dispatched'];
+const PROD_STATUS_COLOURS={'Not Started':'#f5f5f5','In Progress':'#fff8e1','Complete':'#e8f5e9','Dispatched':'#e3f2fd'};
+
+function renderProductionSheet(v,ord,allImgs){
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  const seller=loadSeller();
+
+  const rows=included.map((item,idx)=>{
+    const realIdx=ord.items.indexOf(item);
+    const thumb=item.image
+      ?`<img src="${item.image}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:0.5px solid #eee">`
+      :`<div style="width:44px;height:44px;background:#f5f5f5;border-radius:4px;border:0.5px solid #eee"></div>`;
+    const status=item.prodStatus||'Not Started';
+    const statusOpts=PROD_STATUSES.map(s=>`<option value="${s}"${s===status?' selected':''}>${s}</option>`).join('');
+    const statusCol=PROD_STATUS_COLOURS[status]||'#f5f5f5';
+    return`<tr style="border-bottom:0.5px solid #f0f0f0">
+      <td style="padding:10px 8px;color:#bbb;font-size:10px;width:28px">${idx+1}</td>
+      <td style="padding:10px 8px;width:52px">${thumb}</td>
+      <td style="padding:10px 8px">
+        <div style="font-weight:600;font-size:12px">${esc(item.pieceName||'—')}</div>
+        <div style="font-size:10px;color:#888;margin-top:2px">${esc(item.metalName||'')}</div>
+      </td>
+      <td style="padding:10px 8px">
+        <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodStone"
+          value="${esc(item.prodStone||'')}" placeholder="Stone / material specs"
+          style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
+      </td>
+      <td style="padding:10px 8px">
+        <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodMaker"
+          value="${esc(item.prodMaker||'')}" placeholder="Maker"
+          style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
+      </td>
+      <td style="padding:10px 8px">
+        <input type="number" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodCost"
+          value="${item.prodCost||''}" placeholder="0.00"
+          style="width:70px;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none;text-align:right">
+      </td>
+      <td style="padding:10px 8px;text-align:center;width:32px">
+        <span style="font-weight:600;font-size:12px">${item.qty||1}</span>
+      </td>
+      <td style="padding:10px 8px;width:130px">
+        <select data-prod-idx="${realIdx}" data-prod-field="prodStatus"
+          style="border:none;border-radius:4px;padding:4px 6px;font-size:11px;background:${statusCol};cursor:pointer;width:100%">
+          ${statusOpts}
+        </select>
+      </td>
+      <td style="padding:10px 8px">
+        <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodNotes"
+          value="${esc(item.prodNotes||'')}" placeholder="Production notes…"
+          style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Summary counts
+  const counts=PROD_STATUSES.reduce((acc,s)=>{acc[s]=included.filter(i=>(i.prodStatus||'Not Started')===s).length;return acc;},{});
+
+  v.innerHTML=`<div style="max-width:1100px;margin:0 auto;padding:24px 20px 60px">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin-bottom:4px">Production Sheet</div>
+      <div style="font-size:20px;font-weight:300">${esc(ord.buyerName)||'Order'}</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">${esc(ord.orderNumber)} · ${ord.orderDate||''}</div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      ${PROD_STATUSES.map(s=>`<div style="text-align:center;padding:8px 14px;background:${PROD_STATUS_COLOURS[s]};border-radius:6px;min-width:80px">
+        <div style="font-size:18px;font-weight:600">${counts[s]}</div>
+        <div style="font-size:9px;color:#888;margin-top:2px">${s}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <label style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#888;display:block;margin-bottom:6px">Workshop Instructions</label>
+    <textarea data-order-hdr="prodInstructions" rows="3"
+      style="width:100%;border:1px solid #e8e8e8;border-radius:6px;padding:10px 12px;font-size:12px;font-family:inherit;resize:vertical;outline:none"
+      placeholder="Any general production notes, priorities, deadlines…">${esc(ord.prodInstructions||'')}</textarea>
+  </div>
+
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="border-bottom:2px solid #000">
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left;width:28px">#</th>
+        <th style="padding:8px;width:52px"></th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">Cost</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Status</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>`;
+}
+
+async function printProductionSheet(id){
+  const ord=ST.orders.find(o=>o.id===id)||ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  saveST();
+  const allImgs=await idbGetAll();
+  for(const item of ord.items){
+    if(item.productId&&!item.image) item.image=allImgs[`img:${item.productId}:0`]||null;
+  }
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  const seller=loadSeller();
+  const sellerLogo=localStorage.getItem('bs_ls_logo')||'';
+
+  const rows=included.map((item,idx)=>{
+    const thumb=item.image
+      ?`<td><img src="${item.image}" style="width:40px;height:40px;object-fit:cover;border:0.5px solid #eee"></td>`
+      :`<td><div style="width:40px;height:40px;background:#f5f5f5;border:0.5px solid #eee"></div></td>`;
+    const status=item.prodStatus||'Not Started';
+    const statusCol=PROD_STATUS_COLOURS[status]||'#f5f5f5';
+    return`<tr style="border-bottom:0.5px solid #eee;page-break-inside:avoid">
+      <td style="padding:7px 6px;color:#bbb;font-size:9px">${idx+1}</td>
+      ${thumb}
+      <td style="padding:7px 6px"><div style="font-weight:600;font-size:11px">${esc(item.pieceName||'—')}</div><div style="font-size:9px;color:#888">${esc(item.metalName||'')}</div></td>
+      <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodStone||'—')}</td>
+      <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodMaker||'—')}</td>
+      <td style="padding:7px 6px;font-size:10px;color:#555">${item.prodCost?'$'+Number(item.prodCost).toFixed(2):'—'}</td>
+      <td style="padding:7px 6px;text-align:center;font-weight:600;font-size:11px">${item.qty||1}</td>
+      <td style="padding:7px 6px"><span style="background:${statusCol};padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600">${status}</span></td>
+      <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodNotes||'')}</td>
+    </tr>`;
+  }).join('');
+
+  const counts=PROD_STATUSES.reduce((acc,s)=>{acc[s]=included.filter(i=>(i.prodStatus||'Not Started')===s).length;return acc;},{});
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Production — ${esc(ord.orderNumber)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;color:#000}
+@page{margin:0;size:A4 landscape}
+@media print{body{padding:12mm 14mm}html{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body style="padding:14mm 16mm">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #000">
+  <div>
+    ${sellerLogo?`<img src="${sellerLogo}" style="height:36px;margin-bottom:6px;display:block" alt="">`:''}
+    <div style="font-size:8px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#888;margin-bottom:3px">Production Sheet</div>
+    <div style="font-size:16px;font-weight:300">${esc(ord.buyerName)||'Order'}</div>
+    <div style="font-size:10px;color:#999;margin-top:2px">${esc(ord.orderNumber)} · ${ord.orderDate||''}</div>
+  </div>
+  <div style="display:flex;gap:10px">
+    ${PROD_STATUSES.map(s=>`<div style="text-align:center;padding:6px 12px;background:${PROD_STATUS_COLOURS[s]};border-radius:4px">
+      <div style="font-size:16px;font-weight:700">${counts[s]}</div>
+      <div style="font-size:7px;color:#888;margin-top:1px">${s}</div>
+    </div>`).join('')}
+  </div>
+</div>
+${ord.prodInstructions?`<div style="margin-bottom:14px;padding:8px 12px;background:#fafafa;border-left:3px solid #000;font-size:10px;line-height:1.6"><strong>Instructions:</strong> ${esc(ord.prodInstructions)}</div>`:''}
+<table style="width:100%;border-collapse:collapse">
+  <thead>
+    <tr style="border-bottom:1px solid #000">
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left;width:24px">#</th>
+      <th style="padding:6px;width:44px"></th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">Cost</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Status</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+</body></html>`;
+  const w=window.open('','_blank','width=1100,height=860');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+
 function addItemFromQuote(){
   const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
   if(!ord)return;
@@ -1699,7 +1886,7 @@ function exportOrderCSV(ordId){
 }
 
 function saveOrderAndBack(){
-  saveST();ST.view='dashboard';render();
+  saveST();ST.view='dashboard';ST.prodMode=false;render();
 }
 function deleteOrder(id){
   if(!confirm('Delete this order?'))return;
@@ -2154,6 +2341,18 @@ function _handleOrderHdr(t){
 document.addEventListener('input',e=>{
   const t=e.target;
   if(_handleOrderHdr(t))return;
+  // Production sheet item fields
+  if(t.dataset.prodIdx!==undefined&&t.dataset.prodField){
+    const idx=parseInt(t.dataset.prodIdx,10);
+    const field=t.dataset.prodField;
+    const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+    if(ord&&ord.items[idx]){
+      ord.items[idx][field]=field==='prodCost'?(parseFloat(t.value)||0):t.value;
+      clearTimeout(_orderFieldTimer);
+      _orderFieldTimer=setTimeout(()=>saveST(),400);
+    }
+    return;
+  }
   if(t.dataset.orderIdx!==undefined&&t.dataset.orderField){
     const idx=parseInt(t.dataset.orderIdx,10);
     const field=t.dataset.orderField;
@@ -2189,6 +2388,17 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(_handleOrderHdr(t))return;
+  // Production status dropdown
+  if(t.dataset.prodIdx!==undefined&&t.dataset.prodField==='prodStatus'){
+    const idx=parseInt(t.dataset.prodIdx,10);
+    const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
+    if(ord&&ord.items[idx]){
+      ord.items[idx].prodStatus=t.value;
+      t.style.background=PROD_STATUS_COLOURS[t.value]||'#f5f5f5';
+      saveST();
+    }
+    return;
+  }
   if(!t.dataset.lsid||!t.dataset.path)return;
   const ls=ST.lineSheets.find(x=>x.id===t.dataset.lsid);
   if(!ls)return;
@@ -2389,6 +2599,8 @@ document.addEventListener('click',e=>{
     refreshPreview();
   }
   else if(a==='printOrder'){printOrder(id);}
+  else if(a==='printProdSheet'){printProductionSheet(id);}
+  else if(a==='toggleProd'){ST.prodMode=!ST.prodMode;renderOrder(el('view'),el('topbar-actions'));}
   else if(a==='saveOrderBack'){saveOrderAndBack();}
   else if(a==='deleteOrder'){deleteOrder(id);}
   else if(a==='syncOrder'){syncOrderFromSheets(id);}
