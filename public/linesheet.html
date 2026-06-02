@@ -1670,6 +1670,26 @@ function renderProductionSheet(v,ord,allImgs){
     </thead>
     <tbody>${rows}</tbody>
   </table>
+
+  ${(()=>{
+    const pkgTotals={};
+    for(const item of included){
+      const qty=item.qty||1;
+      const arr=Array.isArray(item.prodPackaging)?item.prodPackaging:(item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?[item.prodPackaging]:[]);
+      for(const p of arr) pkgTotals[p]=(pkgTotals[p]||0)+qty;
+    }
+    const entries=Object.entries(pkgTotals);
+    if(!entries.length)return'';
+    return`<div style="margin-top:32px;padding-top:20px;border-top:1px solid #e0e0e0">
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#888;margin-bottom:12px">Packaging Summary</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${entries.map(([name,total])=>`<div style="display:flex;align-items:center;gap:10px;background:#f8f8f8;border:0.5px solid #e8e8e8;border-radius:6px;padding:10px 16px">
+          <span style="font-size:11px;color:#444">${esc(name)}</span>
+          <span style="font-size:20px;font-weight:700;color:#000">×${total}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  })()}
 </div>`;
 }
 
@@ -1747,6 +1767,35 @@ ${ord.prodInstructions?`<div style="margin-bottom:14px;padding:8px 12px;backgrou
   </thead>
   <tbody>${rows}</tbody>
 </table>
+
+${(()=>{
+  // Build packaging totals
+  const pkgTotals={};
+  for(const item of included){
+    const qty=item.qty||1;
+    const arr=Array.isArray(item.prodPackaging)?item.prodPackaging:(item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?[item.prodPackaging]:[]);
+    for(const p of arr){
+      pkgTotals[p]=(pkgTotals[p]||0)+qty;
+    }
+  }
+  const entries=Object.entries(pkgTotals);
+  if(!entries.length)return'';
+  const pkgRows=entries.map(([name,total])=>`
+    <tr style="border-bottom:0.5px solid #eee">
+      <td style="padding:6px 8px;font-size:10px">${esc(name)}</td>
+      <td style="padding:6px 8px;font-size:12px;font-weight:700;text-align:right;width:60px">${total}</td>
+    </tr>`).join('');
+  return`<div style="margin-top:28px;page-break-inside:avoid">
+  <div style="font-size:8px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin-bottom:8px;padding-top:16px;border-top:1px solid #000">Packaging Summary</div>
+  <table style="width:360px;border-collapse:collapse">
+    <thead><tr style="border-bottom:1px solid #000">
+      <th style="padding:5px 8px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Packaging</th>
+      <th style="padding:5px 8px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">Total Qty</th>
+    </tr></thead>
+    <tbody>${pkgRows}</tbody>
+  </table>
+</div>`;
+})()}
 </body></html>`;
   const w=window.open('','_blank','width=1100,height=860');
   w.document.write(html);
