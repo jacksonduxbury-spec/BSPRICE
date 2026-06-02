@@ -1552,6 +1552,25 @@ async function renderOrder(v,ta){
 const PROD_STATUSES=['Not Started','In Progress','Complete','Dispatched'];
 const PROD_STATUS_COLOURS={'Not Started':'#f5f5f5','In Progress':'#fff8e1','Complete':'#e8f5e9','Dispatched':'#e3f2fd'};
 
+const PACKAGING_OPTIONS=[
+  '— Select packaging —',
+  // TOBE Italy
+  'TOBE: Box 3052 Black Velvet — Ring Tab (6×6×5.5cm)',
+  'TOBE: Box 3052 Grey Suede — Ring Slit (6×6×5.5cm)',
+  'TOBE: Box 3053 Black Velvet — Ring Tab/Slit (7×7.5×6cm)',
+  'TOBE: Box 3053 Grey Suede — Earring Pillow/Ring Tab (7×7.5×6cm)',
+  'TOBE: Box 3054 Black Velvet — Pendant (8.3×8.5×6.2cm)',
+  'TOBE: Box 3055 Grey Suede — Misc/Pillow (10.5×10.7×6.2cm)',
+  'TOBE: Tao Box 8114 Black/Teal — Bracelet Pillow (13×13×7.5cm)',
+  'TOBE: Microfiber Cloth Black Velvet (16×16cm)',
+  // New Directions
+  'ND: Midnight A7 Box Black — Foldable (114×81×35mm)',
+  'ND: Midnight Small Rigid Box Black — Foldable (220×203×70mm)',
+  'ND: Midnight Medium Rigid Box Black — Foldable (305×220×100mm)',
+  'ND: Jewellery Pouch Black/Gold — Microfiber/Suede (111×70×70mm)',
+  'ND: Velvet Foam Insert Black (114×81×15mm)',
+];
+
 function renderProductionSheet(v,ord,allImgs){
   const included=ord.items.filter(i=>i.included&&i.qty>0);
   const seller=loadSeller();
@@ -1564,6 +1583,7 @@ function renderProductionSheet(v,ord,allImgs){
     const status=item.prodStatus||'Not Started';
     const statusOpts=PROD_STATUSES.map(s=>`<option value="${s}"${s===status?' selected':''}>${s}</option>`).join('');
     const statusCol=PROD_STATUS_COLOURS[status]||'#f5f5f5';
+    const pkgOpts=PACKAGING_OPTIONS.map(p=>`<option value="${p}"${p===(item.prodPackaging||'')?' selected':''}>${p}</option>`).join('');
     return`<tr style="border-bottom:0.5px solid #f0f0f0">
       <td style="padding:10px 8px;color:#bbb;font-size:10px;width:28px">${idx+1}</td>
       <td style="padding:10px 8px;width:52px">${thumb}</td>
@@ -1593,6 +1613,12 @@ function renderProductionSheet(v,ord,allImgs){
         <select data-prod-idx="${realIdx}" data-prod-field="prodStatus"
           style="border:none;border-radius:4px;padding:4px 6px;font-size:11px;background:${statusCol};cursor:pointer;width:100%">
           ${statusOpts}
+        </select>
+      </td>
+      <td style="padding:10px 8px;min-width:180px">
+        <select data-prod-idx="${realIdx}" data-prod-field="prodPackaging"
+          style="border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;cursor:pointer;width:100%;max-width:240px">
+          ${pkgOpts}
         </select>
       </td>
       <td style="padding:10px 8px">
@@ -1640,6 +1666,7 @@ function renderProductionSheet(v,ord,allImgs){
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Status</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Packaging</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
       </tr>
     </thead>
@@ -1675,6 +1702,7 @@ async function printProductionSheet(id){
       <td style="padding:7px 6px;font-size:10px;color:#555">${(item.prodCost||item.unitWholesale)?'$'+Number(item.prodCost||item.unitWholesale).toFixed(2):'—'}</td>
       <td style="padding:7px 6px;text-align:center;font-weight:600;font-size:11px">${item.qty||1}</td>
       <td style="padding:7px 6px"><span style="background:${statusCol};padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600">${status}</span></td>
+      <td style="padding:7px 6px;font-size:9px;color:#555">${esc((item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?item.prodPackaging:'—'))}</td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodNotes||'')}</td>
     </tr>`;
   }).join('');
@@ -1715,6 +1743,7 @@ ${ord.prodInstructions?`<div style="margin-bottom:14px;padding:8px 12px;backgrou
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Status</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Packaging</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
     </tr>
   </thead>
@@ -2391,13 +2420,13 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(_handleOrderHdr(t))return;
-  // Production status dropdown
-  if(t.dataset.prodIdx!==undefined&&t.dataset.prodField==='prodStatus'){
+  // Production dropdowns (status + packaging)
+  if(t.dataset.prodIdx!==undefined&&(t.dataset.prodField==='prodStatus'||t.dataset.prodField==='prodPackaging')){
     const idx=parseInt(t.dataset.prodIdx,10);
     const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
     if(ord&&ord.items[idx]){
-      ord.items[idx].prodStatus=t.value;
-      t.style.background=PROD_STATUS_COLOURS[t.value]||'#f5f5f5';
+      ord.items[idx][t.dataset.prodField]=t.value;
+      if(t.dataset.prodField==='prodStatus') t.style.background=PROD_STATUS_COLOURS[t.value]||'#f5f5f5';
       saveST();
     }
     return;
