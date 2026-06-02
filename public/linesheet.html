@@ -510,7 +510,37 @@ textarea.fi{resize:vertical;min-height:52px}
     <span class="topbar-brand">Brohn Smith · Line Sheet Builder</span>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
+    <button class="btn-ghost btn-ghost-sm" id="btn-ring-sizer" title="Ring Size Converter">💍 Ring Sizes</button>
     <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+</div>
+
+<!-- Ring Size Modal -->
+<div id="ring-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:10px;padding:28px 32px;width:600px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:14px;font-weight:600;letter-spacing:0.04em">Ring Size Converter</div>
+      <button id="btn-ring-close" style="border:none;background:none;font-size:20px;cursor:pointer;color:#999;line-height:1">×</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <label style="font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;display:block;margin-bottom:5px">Search any size</label>
+        <input id="ring-search" type="text" placeholder="e.g. 7, N, 54, 14…"
+          style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:14px;outline:none">
+      </div>
+    </div>
+    <table id="ring-table" style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:2px solid #000">
+          <th style="padding:8px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-weight:600">US / Canada</th>
+          <th style="padding:8px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-weight:600">UK / AU / NZ</th>
+          <th style="padding:8px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-weight:600">EU / ISO</th>
+          <th style="padding:8px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-weight:600">Japan</th>
+          <th style="padding:8px;text-align:right;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-weight:600">Diameter (mm)</th>
+        </tr>
+      </thead>
+      <tbody id="ring-tbody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -3283,6 +3313,83 @@ async function initApp(){
   render();
 }
 initApp();
+
+/* ─────────────────────────────────────────────────────────
+   RING SIZE CONVERTER
+───────────────────────────────────────────────────────── */
+const RING_SIZES=[
+  // [US, UK, EU, Japan, DiameterMM]
+  ['3',   'F',   '44',   '4',  '14.1'],
+  ['3¼',  'F½',  '44.8', '5',  '14.3'],
+  ['3½',  'G',   '45.5', '6',  '14.5'],
+  ['3¾',  'G½',  '46.5', '7',  '14.8'],
+  ['4',   'H',   '47',   '8',  '15.0'],
+  ['4¼',  'H½',  '47.8', '8',  '15.2'],
+  ['4½',  'I',   '48.7', '9',  '15.5'],
+  ['4¾',  'I½',  '49.3', '9',  '15.7'],
+  ['5',   'J',   '50',   '10', '15.9'],
+  ['5¼',  'J½',  '50.8', '11', '16.2'],
+  ['5½',  'K',   '51.5', '12', '16.5'],
+  ['5¾',  'K½',  '52.5', '12', '16.7'],
+  ['6',   'L',   '53',   '13', '16.9'],
+  ['6¼',  'L½',  '53.8', '14', '17.1'],
+  ['6½',  'M',   '54.8', '15', '17.3'],
+  ['6¾',  'M½',  '55.5', '15', '17.5'],
+  ['7',   'N',   '56',   '16', '17.8'],
+  ['7¼',  'N½',  '57',   '17', '18.0'],
+  ['7½',  'O',   '57.8', '18', '18.2'],
+  ['7¾',  'O½',  '58.5', '18', '18.5'],
+  ['8',   'P',   '59.5', '19', '18.8'],
+  ['8¼',  'P½',  '60',   '19', '19.0'],
+  ['8½',  'Q',   '61',   '20', '19.2'],
+  ['8¾',  'Q½',  '61.8', '21', '19.4'],
+  ['9',   'R',   '62.5', '22', '19.6'],
+  ['9¼',  'R½',  '63.5', '22', '20.0'],
+  ['9½',  'S',   '64',   '23', '20.2'],
+  ['9¾',  'S½',  '65',   '24', '20.4'],
+  ['10',  'T',   '65.8', '25', '20.6'],
+  ['10¼', 'T½',  '66.5', '25', '20.8'],
+  ['10½', 'U',   '67.5', '26', '21.0'],
+  ['10¾', 'U½',  '68',   '27', '21.4'],
+  ['11',  'V',   '69',   '28', '21.6'],
+  ['11¼', 'V½',  '69.8', '28', '21.8'],
+  ['11½', 'W',   '70.5', '29', '22.0'],
+  ['11¾', 'W½',  '71.5', '30', '22.2'],
+  ['12',  'X',   '72',   '31', '22.5'],
+  ['12¼', 'X½',  '73',   '31', '22.8'],
+  ['12½', 'Y',   '74',   '32', '23.0'],
+  ['13',  'Z',   '75',   '33', '23.4'],
+  ['13½', 'Z+1', '76',   '34', '23.6'],
+];
+
+function renderRingTable(filter){
+  const tbody=document.getElementById('ring-tbody');
+  if(!tbody)return;
+  const q=(filter||'').toLowerCase().trim();
+  const rows=RING_SIZES.filter(r=>!q||r.some(v=>v.toLowerCase().includes(q)));
+  tbody.innerHTML=rows.map(r=>`<tr style="border-bottom:0.5px solid #f0f0f0${q&&r.some(v=>v.toLowerCase()===q)?';background:#fffde7':''}" >
+    <td style="padding:8px;font-weight:${q&&r[0].toLowerCase().includes(q)?'700':'400'}">${r[0]}</td>
+    <td style="padding:8px;font-weight:${q&&r[1].toLowerCase().includes(q)?'700':'400'}">${r[1]}</td>
+    <td style="padding:8px;font-weight:${q&&r[2].toLowerCase().includes(q)?'700':'400'}">${r[2]}</td>
+    <td style="padding:8px;font-weight:${q&&r[3].toLowerCase().includes(q)?'700':'400'}">${r[3]}</td>
+    <td style="padding:8px;text-align:right;color:#888">${r[4]}</td>
+  </tr>`).join('');
+}
+
+document.addEventListener('click',e=>{
+  if(e.target.closest('#btn-ring-sizer')){
+    const m=document.getElementById('ring-modal');
+    m.style.display='flex';
+    renderRingTable('');
+    setTimeout(()=>document.getElementById('ring-search').focus(),100);
+  }
+  if(e.target.closest('#btn-ring-close')||e.target.id==='ring-modal'){
+    document.getElementById('ring-modal').style.display='none';
+  }
+});
+document.getElementById('ring-search').addEventListener('input',function(){
+  renderRingTable(this.value);
+});
 </script>
 </body>
 </html>
