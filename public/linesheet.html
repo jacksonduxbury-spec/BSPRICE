@@ -1303,13 +1303,6 @@ function metalBlockHTML(ls,p,pi,mv,mi){
   </div>
   <div class="f-row-2">
     <div class="f-row">
-      <label>Cost (${esc(ls.currency)})</label>
-      <input class="fi" type="text" inputmode="decimal"
-        data-lsid="${ls.id}"
-        data-path="products.${pi}.metalVariants.${mi}.subtotalCost"
-        value="${mv.subtotalCost!=null&&mv.subtotalCost!==0?mv.subtotalCost:''}">
-    </div>
-    <div class="f-row">
       <label>Wholesale (${esc(ls.currency)})</label>
       <input class="fi" type="text" inputmode="decimal"
         data-lsid="${ls.id}"
@@ -1590,7 +1583,7 @@ function renderProductionSheet(v,ord,allImgs){
       </td>
       <td style="padding:10px 8px">
         <input type="number" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodCost"
-          value="${item.prodCost||item.unitCost||''}" placeholder="${item.unitCost?item.unitCost:'0.00'}"
+          value="${item.prodCost||item.unitWholesale||''}" placeholder="${item.unitWholesale||'0.00'}"
           style="width:70px;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none;text-align:right">
       </td>
       <td style="padding:10px 8px;text-align:center;width:32px">
@@ -1644,7 +1637,7 @@ function renderProductionSheet(v,ord,allImgs){
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
-        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">Cost</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Status</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
@@ -1679,7 +1672,7 @@ async function printProductionSheet(id){
       <td style="padding:7px 6px"><div style="font-weight:600;font-size:11px">${esc(item.pieceName||'—')}</div><div style="font-size:9px;color:#888">${esc(item.metalName||'')}</div></td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodStone||'—')}</td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodMaker||'—')}</td>
-      <td style="padding:7px 6px;font-size:10px;color:#555">${(item.prodCost||item.unitCost)?'$'+Number(item.prodCost||item.unitCost).toFixed(2):'—'}</td>
+      <td style="padding:7px 6px;font-size:10px;color:#555">${(item.prodCost||item.unitWholesale)?'$'+Number(item.prodCost||item.unitWholesale).toFixed(2):'—'}</td>
       <td style="padding:7px 6px;text-align:center;font-weight:600;font-size:11px">${item.qty||1}</td>
       <td style="padding:7px 6px"><span style="background:${statusCol};padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600">${status}</span></td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodNotes||'')}</td>
@@ -1719,7 +1712,7 @@ ${ord.prodInstructions?`<div style="margin-bottom:14px;padding:8px 12px;backgrou
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
-      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">Cost</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Status</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Production Notes</th>
