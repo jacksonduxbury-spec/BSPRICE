@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wholesale Line Sheet Builder — Guide Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #fafaf8;
+      color: #0a0a0a;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 64px 24px 120px;
+    }
+
+    #root {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* ── Header ── */
+    .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 400;
+      line-height: 1.1;
+      margin-top: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .descriptor {
+      font-size: 15px;
+      color: #666;
+      margin-top: 14px;
+      max-width: 520px;
+      line-height: 1.65;
+    }
+
+    /* ── Rule ── */
+    .rule {
+      border: none;
+      border-top: 0.5px solid #0a0a0a;
+      margin: 32px 0;
+    }
+
+    .rule-light {
+      border: none;
+      border-top: 0.5px solid #ddd;
+      margin: 28px 0;
+    }
+
+    /* ── API Key ── */
+    .api-key-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .api-key-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .api-key-input {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      border: 0.5px solid #0a0a0a;
+      background: #fafaf8;
+      padding: 8px 12px;
+      outline: none;
+      color: #0a0a0a;
+      letter-spacing: 0.04em;
+    }
+
+    .api-key-input:focus {
+      border-color: #0a0a0a;
+      outline: 2px solid #0a0a0a;
+      outline-offset: -2px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: none;
+      padding: 13px 28px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: inline-block;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-solid {
+      background: #0a0a0a;
+      color: #fafaf8;
+    }
+
+    .btn-solid:not(:disabled):hover {
+      opacity: 0.8;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #0a0a0a;
+      border: 0.5px solid #0a0a0a;
+    }
+
+    .btn-outline:not(:disabled):hover {
+      background: #0a0a0a;
+      color: #fafaf8;
+    }
+
+    /* ── Loading ── */
+    .loading-msg {
+      font-size: 14px;
+      font-style: italic;
+      color: #666;
+      margin-top: 20px;
+    }
+
+    /* ── Output card ── */
+    .output-card {
+      border: 0.5px solid #0a0a0a;
+      background: #fff;
+      padding: 40px 44px;
+      margin-top: 32px;
+    }
+
+    /* ── Markdown styles ── */
+    .md h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .md h1:first-child { margin-top: 0; }
+
+    .md h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 21px;
+      font-weight: 400;
+      line-height: 1.25;
+      margin-top: 32px;
+      margin-bottom: 10px;
+    }
+
+    .md h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      color: #0a0a0a;
+    }
+
+    .md p {
+      font-size: 15px;
+      line-height: 1.72;
+      margin-bottom: 14px;
+      color: #0a0a0a;
+    }
+
+    .md ul, .md ol {
+      padding-left: 22px;
+      margin-bottom: 14px;
+    }
+
+    .md li {
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 4px;
+    }
+
+    .md strong {
+      font-weight: 600;
+    }
+
+    .md code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      background: #f0f0ee;
+      padding: 1px 5px;
+      letter-spacing: 0.02em;
+    }
+
+    .md pre {
+      background: #f0f0ee;
+      border-left: 2px solid #0a0a0a;
+      padding: 16px 18px;
+      margin: 18px 0;
+      overflow-x: auto;
+    }
+
+    .md pre code {
+      background: none;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .md hr {
+      border: none;
+      border-top: 0.5px solid #0a0a0a;
+      margin: 28px 0;
+    }
+
+    /* ── Action row ── */
+    .action-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .share-note {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: #666;
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: #c00;
+      margin-top: 16px;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useCallback, useRef } = React;
+
+    const PROMPT = `You are a senior product engineer writing a high-level technical guide for another Claude instance. Write a clear, thorough overview of how to build a "Wholesale Line Sheet Builder" web application -- a tool used by a product brand to create buyer-ready PDF documents for wholesale accounts. Cover: (1) what the app does and its core workflow, (2) why it is built as a static single-page HTML/JS app with localStorage on Netlify with no backend, (3) two distinct modes -- editor interface vs document/print view, (4) editor features including a dashboard, form-based editor, up to 3 products per document, per-product image slots and metal/variant rows, per-variant wholesale and RRP pricing columns, composite product display, and a live preview panel, (5) document/print view including cover page, per-product pages, strict typographic constraints (single font, black/white only, hairline rules, no decoration), and PDF export via window.print(), (6) data model in localStorage as JSON, (7) optional CSV import for pricing, (8) key technical considerations including print CSS media queries, FileReader API for images, and currency toggle, (9) limitations and future iteration paths, (10) recommended build order. Write as structured markdown. Be specific and technical but accessible. Do not reference any specific brand names or personal data.`;
+
+    /* ── Inline markdown renderer ── */
+    function renderInline(text, key) {
+      const parts = [];
+      const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+      let last = 0, m, idx = 0;
+      while ((m = regex.exec(text)) !== null) {
+        if (m.index > last) parts.push(text.slice(last, m.index));
+        const t = m[0];
+        if (t.startsWith('**')) parts.push(<strong key={idx++}>{t.slice(2, -2)}</strong>);
+        else parts.push(<code key={idx++}>{t.slice(1, -1)}</code>);
+        last = regex.lastIndex;
+      }
+      if (last < text.length) parts.push(text.slice(last));
+      return parts;
+    }
+
+    function MarkdownRenderer({ text }) {
+      const lines = text.split('\n');
+      const elements = [];
+      let i = 0, k = 0;
+
+      while (i < lines.length) {
+        const line = lines[i];
+
+        // Fenced code block
+        if (line.startsWith('```')) {
+          let code = '';
+          i++;
+          while (i < lines.length && !lines[i].startsWith('```')) { code += lines[i] + '\n'; i++; }
+          elements.push(<pre key={k++}><code>{code.trimEnd()}</code></pre>);
+          i++; continue;
+        }
+
+        // Headings
+        if (line.startsWith('### ')) { elements.push(<h3 key={k++}>{renderInline(line.slice(4))}</h3>); i++; continue; }
+        if (line.startsWith('## '))  { elements.push(<h2 key={k++}>{renderInline(line.slice(3))}</h2>); i++; continue; }
+        if (line.startsWith('# '))   { elements.push(<h1 key={k++}>{renderInline(line.slice(2))}</h1>); i++; continue; }
+
+        // HR
+        if (/^[-*]{3,}$/.test(line.trim())) { elements.push(<hr key={k++} />); i++; continue; }
+
+        // Unordered list
+        if (/^[-*] /.test(line)) {
+          const items = [];
+          while (i < lines.length && /^[-*] /.test(lines[i])) {
+            items.push(<li key={i}>{renderInline(lines[i].slice(2))}</li>);
+            i++;
+          }
+          elements.push(<ul key={k++}>{items}</ul>);
+          continue;
+        }
+
+        // Ordered list
+        if (/^\d+\. /.test(line)) {
+          const items = [];
+          while (i < lines.length && /^\d+\. /.test(lines[i])) {
+            items.push(<li key={i}>{renderInline(lines[i].replace(/^\d+\. /, ''))}</li>);
+            i++;
+          }
+          elements.push(<ol key={k++}>{items}</ol>);
+          continue;
+        }
+
+        // Empty line
+        if (line.trim() === '') { i++; continue; }
+
+        // Paragraph
+        elements.push(<p key={k++}>{renderInline(line)}</p>);
+        i++;
+      }
+
+      return <div className="md">{elements}</div>;
+    }
+
+    /* ── Main App ── */
+    function App() {
+      const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') || '');
+      const [output, setOutput]   = useState('');
+      const [loading, setLoading] = useState(false);
+      const [done, setDone]       = useState(false);
+      const [copied, setCopied]   = useState(false);
+      const [error, setError]     = useState('');
+
+      const saveKey = (val) => {
+        setApiKey(val);
+        localStorage.setItem('anthropic_api_key', val);
+      };
+
+      const generate = useCallback(async () => {
+        if (!apiKey.trim()) { setError('Please enter your Anthropic API key above.'); return; }
+        setError('');
+        setLoading(true);
+        setDone(false);
+        setOutput('');
+
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey.trim(),
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true',
+            },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 1000,
+              messages: [{ role: 'user', content: PROMPT }],
+            }),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err?.error?.message || `API error ${res.status}`);
+          }
+
+          const data = await res.json();
+          const text = data?.content?.[0]?.text || '';
+          setOutput(text);
+          setDone(true);
+        } catch (e) {
+          setError(e.message || 'Something went wrong. Check your API key and try again.');
+        } finally {
+          setLoading(false);
+        }
+      }, [apiKey]);
+
+      const copy = useCallback(() => {
+        navigator.clipboard.writeText(output).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+      }, [output]);
+
+      return (
+        <>
+          {/* Header */}
+          <div className="label">Build Guide Generator</div>
+          <h1 className="title">Wholesale Line Sheet<br />Builder</h1>
+          <p className="descriptor">
+            Click generate to produce a technical overview of this application — suitable for handing to another Claude instance to continue development from scratch.
+          </p>
+
+          <hr className="rule" />
+
+          {/* API Key */}
+          <div className="api-key-row">
+            <span className="api-key-label">API Key</span>
+            <input
+              className="api-key-input"
+              type="password"
+              placeholder="sk-ant-..."
+              value={apiKey}
+              onChange={e => saveKey(e.target.value)}
+              spellCheck={false}
+            />
+          </div>
+
+          {/* Generate button */}
+          <button
+            className="btn btn-solid"
+            onClick={generate}
+            disabled={loading}
+          >
+            {loading ? 'Generating…' : 'Generate Guide'}
+          </button>
+
+          {loading && <p className="loading-msg">Calling Claude — this takes a moment…</p>}
+          {error  && <p className="error-msg">{error}</p>}
+
+          {/* Output */}
+          {done && output && (
+            <div className="fade-in">
+              <div className="output-card">
+                <MarkdownRenderer text={output} />
+              </div>
+
+              <div className="action-row">
+                <button className="btn btn-outline" onClick={copy}>
+                  {copied ? 'Copied ✓' : 'Copy to Clipboard'}
+                </button>
+                <button className="btn btn-solid" onClick={generate} disabled={loading}>
+                  Regenerate
+                </button>
+              </div>
+
+              <p className="share-note">
+                To share: copy the text above and paste it at the start of a new Claude conversation,<br />
+                or attach this page's URL along with your GitHub repo link.
+              </p>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
