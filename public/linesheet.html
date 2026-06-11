@@ -1667,10 +1667,10 @@ function renderProductionSheet(v,ord,allImgs){
       <div style="font-size:20px;font-weight:300">${esc(ord.buyerName)||'Order'}</div>
       <div style="font-size:11px;color:#999;margin-top:2px">${esc(ord.orderNumber)} · ${ord.orderDate||''}</div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      ${PROD_STATUSES.map(s=>`<div style="text-align:center;padding:8px 14px;background:${PROD_STATUS_COLOURS[s]};border-radius:6px;min-width:80px">
-        <div style="font-size:18px;font-weight:600">${counts[s]}</div>
-        <div style="font-size:9px;color:#888;margin-top:2px">${s}</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      ${PROD_STATUSES.map(s=>`<div style="text-align:center;padding:14px 24px;background:${PROD_STATUS_COLOURS[s]};border-radius:8px;min-width:110px">
+        <div style="font-size:26px;font-weight:600">${counts[s]}</div>
+        <div style="font-size:10px;color:#666;margin-top:4px;letter-spacing:0.05em">${s}</div>
       </div>`).join('')}
     </div>
   </div>
