@@ -510,7 +510,6 @@ textarea.fi{resize:vertical;min-height:52px}
     <span class="topbar-brand">Brohn Smith · Line Sheet Builder</span>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
-    <button class="btn-ghost btn-ghost-sm" id="btn-ring-sizer" title="Ring Size Converter">💍 Ring Sizes</button>
     <div class="topbar-actions" id="topbar-actions"></div>
   </div>
 </div>
@@ -1408,7 +1407,7 @@ async function renderOrder(v,ta){
     <button class="btn-ghost btn-ghost-sm" data-action="back">← Back</button>
     <button class="btn-ghost btn-ghost-sm" data-action="toggleProd" data-id="${ord.id}" style="${ST.prodMode?'background:#f0f0f0;font-weight:600':''}">⚙ Production Sheet</button>
     <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">🖨 Order PDF</button>
-    ${ST.prodMode?`<button class="btn-ghost btn-ghost-sm" data-action="printProdSheet" data-id="${ord.id}">🖨 Production PDF</button>`:''}
+    ${ST.prodMode?`<button class="btn-ghost btn-ghost-sm" id="btn-ring-sizer">💍 Ring Sizes</button><button class="btn-ghost btn-ghost-sm" data-action="printProdSheet" data-id="${ord.id}">🖨 Production PDF</button>`:''}
     <button class="btn btn-sm" data-action="saveOrderBack">Save</button>`;
 
   // ── Production Sheet mode ──────────────────────────────────────────────
@@ -1630,14 +1629,14 @@ function renderProductionSheet(v,ord,allImgs){
           style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
       </td>
       <td style="padding:10px 8px">
-        <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodMaker"
-          value="${esc(item.prodMaker||'')}" placeholder="Maker"
-          style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
-      </td>
-      <td style="padding:10px 8px">
         <input type="number" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodCost"
           value="${item.prodCost||item.unitWholesale||''}" placeholder="${item.unitWholesale||'0.00'}"
           style="width:70px;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none;text-align:right">
+      </td>
+      <td style="padding:10px 8px">
+        <input type="number" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodWeight"
+          value="${item.prodWeight||''}" placeholder="0.0"
+          style="width:60px;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none;text-align:right">
       </td>
       <td style="padding:10px 8px;text-align:center;width:32px">
         <span style="font-weight:600;font-size:12px">${item.qty||1}</span>
@@ -1649,7 +1648,7 @@ function renderProductionSheet(v,ord,allImgs){
         </select>
       </td>
       <td style="padding:10px 8px;min-width:180px">${pkgCell}</td>
-      <td style="padding:10px 8px">
+      <td style="padding:10px 8px;min-width:280px">
         <input type="text" class="prod-inline" data-prod-idx="${realIdx}" data-prod-field="prodNotes"
           value="${esc(item.prodNotes||'')}" placeholder="Production notes…"
           style="width:100%;border:none;border-bottom:1px solid #eee;padding:3px 0;font-size:11px;background:transparent;outline:none">
@@ -1690,8 +1689,8 @@ function renderProductionSheet(v,ord,allImgs){
         <th style="padding:8px;width:52px"></th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
-        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
+        <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:right">Weight (g)</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Status</th>
         <th style="padding:8px;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-align:left">Packaging</th>
@@ -1746,8 +1745,8 @@ async function printProductionSheet(id){
       ${thumb}
       <td style="padding:7px 6px"><div style="font-weight:600;font-size:11px">${esc(item.pieceName||'—')}</div><div style="font-size:9px;color:#888">${esc(item.metalName||'')}</div></td>
       <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodStone||item.metalName||'—')}</td>
-      <td style="padding:7px 6px;font-size:10px;color:#555">${esc(item.prodMaker||'—')}</td>
-      <td style="padding:7px 6px;font-size:10px;color:#555">${(item.prodCost||item.unitWholesale)?'$'+Number(item.prodCost||item.unitWholesale).toFixed(2):'—'}</td>
+      <td style="padding:7px 6px;font-size:10px;color:#555;text-align:right">${(item.prodCost||item.unitWholesale)?'$'+Number(item.prodCost||item.unitWholesale).toFixed(2):'—'}</td>
+      <td style="padding:7px 6px;font-size:10px;color:#555;text-align:right">${item.prodWeight?item.prodWeight+'g':'—'}</td>
       <td style="padding:7px 6px;text-align:center;font-weight:600;font-size:11px">${item.qty||1}</td>
       <td style="padding:7px 6px"><span style="background:${statusCol};padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600">${status}</span></td>
       <td style="padding:7px 6px;font-size:9px;color:#555">${(()=>{const a=Array.isArray(item.prodPackaging)?item.prodPackaging:(item.prodPackaging&&item.prodPackaging!=='— Select packaging —'?[item.prodPackaging]:[]);return a.length?esc(a.join(' + ')):'—';})()}</td>
@@ -1787,8 +1786,8 @@ ${ord.prodInstructions?`<div style="margin-bottom:14px;padding:8px 12px;backgrou
       <th style="padding:6px;width:44px"></th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Piece</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Stone / Material</th>
-      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Maker</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">WS Price</th>
+      <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:right">Weight (g)</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:center">Qty</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Status</th>
       <th style="padding:6px;font-size:7px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:left">Packaging</th>
@@ -2467,7 +2466,7 @@ document.addEventListener('input',e=>{
     const field=t.dataset.orderField;
     const ord=ST.orders.find(o=>o.id===ST.activeOrderId);
     if(ord&&ord.items[idx]){
-      const numericFields=['unitWholesale','qty'];
+      const numericFields=['unitWholesale','qty','prodCost','prodWeight'];
       ord.items[idx][field]=numericFields.includes(field)?(parseFloat(t.value)||0):t.value;
       clearTimeout(_orderFieldTimer);
       /* Re-render totals when price changes so line total updates live */
