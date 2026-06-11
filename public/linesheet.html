@@ -1407,7 +1407,7 @@ async function renderOrder(v,ta){
     <button class="btn-ghost btn-ghost-sm" data-action="back">← Back</button>
     <button class="btn-ghost btn-ghost-sm" data-action="toggleProd" data-id="${ord.id}" style="${ST.prodMode?'background:#f0f0f0;font-weight:600':''}">⚙ Production Sheet</button>
     <button class="btn-ghost btn-ghost-sm" data-action="printOrder" data-id="${ord.id}">🖨 Order PDF</button>
-    ${ST.prodMode?`<button class="btn-ghost btn-ghost-sm" id="btn-ring-sizer">💍 Ring Sizes</button><button class="btn-ghost btn-ghost-sm" data-action="printProdSheet" data-id="${ord.id}">🖨 Production PDF</button>`:''}
+    ${ST.prodMode?`<button class="btn-ghost btn-ghost-sm" id="btn-ring-sizer">💍 Ring Sizes</button><button class="btn-ghost btn-ghost-sm" data-action="copyProdText" data-id="${ord.id}">Copy Text</button><button class="btn-ghost btn-ghost-sm" data-action="printProdSheet" data-id="${ord.id}">🖨 Production PDF</button>`:''}
     <button class="btn btn-sm" data-action="saveOrderBack">Save</button>`;
 
   // ── Production Sheet mode ──────────────────────────────────────────────
@@ -1720,6 +1720,35 @@ function renderProductionSheet(v,ord,allImgs){
     </div>`;
   })()}
 </div>`;
+}
+
+function copyProdText(id){
+  const ord=ST.orders.find(o=>o.id===id)||ST.orders.find(o=>o.id===ST.activeOrderId);
+  if(!ord)return;
+  const included=ord.items.filter(i=>i.included&&i.qty>0);
+  const lines=[];
+  lines.push(`PRODUCTION — ${ord.buyerName||ord.orderNumber}`);
+  lines.push(`${ord.orderNumber} · ${ord.orderDate||''}`);
+  if(ord.prodInstructions){lines.push('');lines.push(`Instructions: ${ord.prodInstructions}`);}
+  lines.push('');
+  lines.push('─'.repeat(40));
+  included.forEach((item,i)=>{
+    lines.push('');
+    lines.push(`${i+1}. ${item.pieceName||'—'}  [${item.metalName||''}]`);
+    if(item.prodStone&&item.prodStone!==item.metalName) lines.push(`   Material: ${item.prodStone}`);
+    lines.push(`   Qty: ${item.qty||1}   Status: ${item.prodStatus||'Not Started'}`);
+    if(item.prodWeight) lines.push(`   Weight: ${item.prodWeight}g`);
+    const pkg=Array.isArray(item.prodPackaging)?item.prodPackaging:[];
+    if(pkg.length) lines.push(`   Packaging: ${pkg.join(' + ')}`);
+    if(item.prodNotes) lines.push(`   Notes: ${item.prodNotes}`);
+  });
+  lines.push('');
+  lines.push('─'.repeat(40));
+  const text=lines.join('\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('[data-action="copyProdText"]');
+    if(btn){const orig=btn.textContent;btn.textContent='Copied ✓';setTimeout(()=>btn.textContent=orig,2000);}
+  }).catch(()=>alert('Copy failed — please use a secure (https) connection.'));
 }
 
 async function printProductionSheet(id){
@@ -2729,6 +2758,7 @@ document.addEventListener('click',e=>{
   }
   else if(a==='printOrder'){printOrder(id);}
   else if(a==='printProdSheet'){printProductionSheet(id);}
+  else if(a==='copyProdText'){copyProdText(id);}
   else if(a==='toggleProd'){ST.prodMode=!ST.prodMode;renderOrder(el('view'),el('topbar-actions'));}
   else if(a==='saveOrderBack'){saveOrderAndBack();}
   else if(a==='deleteOrder'){deleteOrder(id);}
