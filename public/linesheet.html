@@ -1032,15 +1032,16 @@ function downloadAllCSV(){
 }
 
 function downloadBackup(){
-  /* Export includes images currently loaded in ST */
-  const data=JSON.stringify({lineSheets:ST.lineSheets});
+  const data=JSON.stringify({lineSheets:ST.lineSheets,orders:ST.orders});
   const blob=new Blob([data],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='brohn-linesheet-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.download='bs-backup-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
   URL.revokeObjectURL(url);
+  localStorage.setItem('bs_last_file_backup',Date.now().toString());
+  render();
 }
 
 function restoreBackup(file){
@@ -1050,11 +1051,12 @@ function restoreBackup(file){
       const d=JSON.parse(ev.target.result);
       if(!Array.isArray(d.lineSheets))throw new Error('Invalid backup file');
       ST.lineSheets=d.lineSheets;
+      if(Array.isArray(d.orders))ST.orders=d.orders;
       _imgsDirty=true;
       saveImagesToIDB().then(()=>{
         saveST();
         render();
-        alert('Restored '+d.lineSheets.length+' line sheet(s).');
+        alert('Restored '+d.lineSheets.length+' line sheet(s) and '+(d.orders||[]).length+' order(s).');
       });
     }catch(e){alert('Restore failed: '+e.message);}
   };
@@ -2207,16 +2209,28 @@ function renderDashboard(v,ta){
     <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()" title="Share with colleague">⬆ Share</button>
     <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0" title="Load from colleague">⬇ Import<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
     <button class="btn btn-sm" data-action="newLS">New Line Sheet</button>`;
+  const lastBk=parseInt(localStorage.getItem('bs_last_file_backup')||'0',10);
+  const hoursSinceBk=lastBk?Math.floor((Date.now()-lastBk)/3600000):999;
+  const bkWarning=hoursSinceBk>24?`<div style="display:flex;align-items:center;gap:10px;background:#fff8e6;border:1px solid #f5c842;border-radius:6px;padding:10px 14px;margin-bottom:14px">
+    <span style="font-size:16px">⚠️</span>
+    <span style="font-size:12px;color:#7a5c00;flex:1">${lastBk?'Last backup was '+hoursSinceBk+' hours ago.':'No file backup downloaded yet.'} Download one now to avoid data loss.</span>
+    <button class="btn btn-sm" data-action="downloadBackup" style="background:#f5c842;color:#5a4000;border:none">Download Backup</button>
+  </div>`:'';
   const backupBar=`
-<div style="display:flex;align-items:center;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #eee;flex-wrap:wrap">
-  <span style="font-size:11px;color:#aaa;flex:1;min-width:120px">Auto-backup active</span>
-  <button class="btn-ghost btn-ghost-sm" onclick="loadAllImages().then(()=>{render();alert('Images reloaded.')})">🔄 Reload images</button>
-  <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">🏷 Logo all sheets<input type="file" accept="image/*" style="display:none" onchange="applyLogoToAll(this.files[0])"></label>
-  <button class="btn-ghost btn-ghost-sm" onclick="roundUpAllRRPs()">✦ Round up RRPs</button>
-  <button class="btn-ghost btn-ghost-sm" onclick="addChainSizes()">📏 Add chain sizes</button>
-  <button class="btn-ghost btn-ghost-sm" onclick="createObjectsSheet()">＋ Create Objects sheet</button>
-  <button class="btn-ghost btn-ghost-sm" onclick="downloadBackup()">⬆ Share with colleague</button>
-  <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬇ Import from colleague<input type="file" accept=".json" style="display:none" onchange="restoreBackup(this.files[0])"></label>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid #eee">
+  ${bkWarning}
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span style="font-size:11px;color:#aaa;flex:1;min-width:120px">${lastBk?'Last backup: '+new Date(lastBk).toLocaleDateString('en-AU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'No file backup yet'}</span>
+    <button class="btn-ghost btn-ghost-sm" data-action="downloadBackup">⬇ Download Backup</button>
+    <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬆ Restore from file<input type="file" accept=".json" style="display:none" id="restore-backup-input"></label>
+    <button class="btn-ghost btn-ghost-sm" data-action="reloadImages">🔄 Reload images</button>
+    <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">🏷 Logo all sheets<input type="file" accept="image/*" style="display:none" id="logo-all-input"></label>
+    <button class="btn-ghost btn-ghost-sm" data-action="roundUpRRPs">✦ Round up RRPs</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="addChainSizes">📏 Add chain sizes</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="createObjectsSheet">＋ Create Objects sheet</button>
+    <button class="btn-ghost btn-ghost-sm" data-action="shareColleague">⬆ Share with colleague</button>
+    <label class="btn-ghost btn-ghost-sm" style="cursor:pointer;margin:0">⬇ Import from colleague<input type="file" accept=".json" style="display:none" id="import-colleague-input"></label>
+  </div>
 </div>`;
   if(ST.lineSheets.length===0){
     v.innerHTML=`
@@ -2412,22 +2426,22 @@ function openSlotPicker(lsid,pi,ii){
 })();
 
 function bindSlots(){
-  /* Attach change listeners directly to every slot-file-input in the editor.
-     Direct attachment (not delegation) means it works even if the element
-     was just created via innerHTML and avoids any bubbling / re-render race. */
   document.querySelectorAll('.slot-file-input').forEach(function(inp){
-    /* Avoid double-wiring on repeated bindSlots calls */
     if(inp._slotWired)return;
     inp._slotWired=true;
     inp.addEventListener('change',function(){
       const file=this.files&&this.files[0];
       if(!file)return;
-      const lsid=this.dataset.lsid;
-      const pi=parseInt(this.dataset.pi,10);
-      const ii=parseInt(this.dataset.ii,10);
-      saveFileToSlot(lsid,pi,ii,file);
+      saveFileToSlot(this.dataset.lsid,parseInt(this.dataset.pi,10),parseInt(this.dataset.ii,10),file);
     });
   });
+  // Backup/restore file inputs — wire once with guard
+  const restoreInp=document.getElementById('restore-backup-input');
+  if(restoreInp&&!restoreInp._wired){restoreInp._wired=true;restoreInp.addEventListener('change',function(){if(this.files[0])restoreBackup(this.files[0]);});}
+  const logoInp=document.getElementById('logo-all-input');
+  if(logoInp&&!logoInp._wired){logoInp._wired=true;logoInp.addEventListener('change',function(){if(this.files[0])applyLogoToAll(this.files[0]);});}
+  const importInp=document.getElementById('import-colleague-input');
+  if(importInp&&!importInp._wired){importInp._wired=true;importInp.addEventListener('change',function(){if(this.files[0])restoreBackup(this.files[0]);});}
 }
 
 /* Drag-drop support via event delegation */
@@ -2608,7 +2622,13 @@ document.addEventListener('click',e=>{
   const pi=btn.dataset.pi!=null?+btn.dataset.pi:null;
   const mi=btn.dataset.mi!=null?+btn.dataset.mi:null;
 
-  if(a==='newLS'){
+  if(a==='downloadBackup'){downloadBackup();}
+  else if(a==='reloadImages'){loadAllImages().then(()=>{render();alert('Images reloaded.');});}
+  else if(a==='roundUpRRPs'){roundUpAllRRPs();}
+  else if(a==='addChainSizes'){addChainSizes();}
+  else if(a==='createObjectsSheet'){createObjectsSheet();}
+  else if(a==='shareColleague'){downloadBackup();}
+  else if(a==='newLS'){
     const ls=mkLineSheet();
     ST.lineSheets.push(ls);
     ST.activeId=ls.id;
