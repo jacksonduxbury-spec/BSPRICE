@@ -30,8 +30,11 @@ export interface QuoteMetalVariant {
 export interface QuoteLineItem {
   id: string
   name: string
-  price: number
   qty: number
+  metalLines: MetalLine[]
+  stoneLines: StoneLine[]
+  labour: number
+  packaging: number
 }
 
 export interface Quote {

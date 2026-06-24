@@ -692,7 +692,11 @@ function ExportSheet({ open, onClose, quote, settings }: {
     const lineItems = quote.lineItems || []
     if (lineItems.length > 0) {
       for (const li of lineItems) {
-        const lineTotal = li.price * (li.qty || 1)
+        const unitP = calcRetailPrice(
+          { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+          prices, settings.stoneGP
+        )
+        const lineTotal = unitP * (li.qty || 1)
         tableRows.push([li.qty > 1 ? `${li.name} ×${li.qty}` : li.name, fmt2(lineTotal)])
       }
     } else {
@@ -924,20 +928,42 @@ function ExportSheet({ open, onClose, quote, settings }: {
 
     // Items table
     const tableRows: (string | number)[][] = []
-    for (const m of quote.metalLines) {
-      const cost = (m.grams || 0) * prices[m.metalType]
-      tableRows.push([METAL_LABELS[m.metalType], `${m.grams}g`, fmt2(cost), '—'])
-    }
-    for (const s of quote.stoneLines) {
-      const retail = calcStoneRetail(s, settings.stoneGP)
-      const gp = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
-      tableRows.push([STONE_LABELS[s.stoneType], `WS ${fmt2(s.wholesaleCost)}`, fmt2(retail), `${gp}% GP`])
+    const internalLineItems = quote.lineItems || []
+    if (internalLineItems.length > 0) {
+      for (const li of internalLineItems) {
+        const unitP = calcRetailPrice(
+          { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+          prices, settings.stoneGP
+        )
+        tableRows.push([li.qty > 1 ? `${li.name} ×${li.qty}` : li.name, 'Product', fmt2(unitP * (li.qty || 1)), `${quote.retailGP}% GP`])
+        for (const m of li.metalLines) {
+          const cost = (m.grams || 0) * prices[m.metalType]
+          tableRows.push([`  └ ${METAL_LABELS[m.metalType]}`, `${m.grams}g`, fmt2(cost), ''])
+        }
+        for (const s of li.stoneLines) {
+          const retail = calcStoneRetail(s, settings.stoneGP)
+          const gp = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
+          tableRows.push([`  └ ${STONE_LABELS[s.stoneType]}`, `WS ${fmt2(s.wholesaleCost)}`, fmt2(retail), `${gp}% GP`])
+        }
+        if (li.labour > 0) tableRows.push([`  └ Labour`, '', fmt2(li.labour * (li.qty || 1)), ''])
+        if (li.packaging > 0) tableRows.push([`  └ Packaging`, '', fmt2(li.packaging * (li.qty || 1)), ''])
+      }
+    } else {
+      for (const m of quote.metalLines) {
+        const cost = (m.grams || 0) * prices[m.metalType]
+        tableRows.push([METAL_LABELS[m.metalType], `${m.grams}g`, fmt2(cost), '—'])
+      }
+      for (const s of quote.stoneLines) {
+        const retail = calcStoneRetail(s, settings.stoneGP)
+        const gp = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
+        tableRows.push([STONE_LABELS[s.stoneType], `WS ${fmt2(s.wholesaleCost)}`, fmt2(retail), `${gp}% GP`])
+      }
+      if (quote.labour > 0) tableRows.push(['Labour', '', fmt2(quote.labour), ''])
+      if (quote.packaging > 0) tableRows.push(['Packaging', '', fmt2(quote.packaging), ''])
     }
     for (const item of (quote.additionalItems || [])) {
       tableRows.push([item.label || 'Additional Item', 'Fixed price', fmt2(item.price), '—'])
     }
-    if (quote.labour > 0) tableRows.push(['Labour', '', fmt2(quote.labour), ''])
-    if (quote.packaging > 0) tableRows.push(['Packaging', '', fmt2(quote.packaging), ''])
 
     autoTable(doc, {
       startY: 46,
@@ -1179,6 +1205,14 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
   const [showExport, setShowExport] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const prices = settings.metalPrices
+
+  function calcLiUnitPrice(li: QuoteLineItem) {
+    return calcRetailPrice(
+      { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+      prices,
+      settings.stoneGP
+    )
+  }
 
   // ── Metal variant helpers ──────────────────────────────────────────────────
   const hasVariants = (quote.metalVariants?.length ?? 0) > 0
@@ -1554,23 +1588,35 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
                 onClick={() => onChange({ ...quote, lineItems: [], metalLines: [], labour: 0, packaging: 0 })}
               >Clear all</button>
             </div>
-            {(quote.lineItems || []).map(li => (
-              <div key={li.id} className="px-4 py-3 border-b border-ios-separator/30 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium">{li.name}</div>
-                  <div className="text-xs text-ios-secondary mt-0.5">
-                    {formatPrice(li.price, quote.currency)} × {li.qty}
+            {(quote.lineItems || []).map(li => {
+              const unitPrice = calcLiUnitPrice(li)
+              return (
+                <div key={li.id} className="px-4 py-3 border-b border-ios-separator/30 flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium">{li.name}</div>
+                    <div className="text-xs text-ios-secondary mt-0.5">
+                      {formatPrice(unitPrice, quote.currency)} × {li.qty}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold">{formatPrice(unitPrice * li.qty, quote.currency)}</span>
+                    <button
+                      className="text-ios-secondary press-feedback"
+                      onClick={() => {
+                        const remaining = (quote.lineItems || []).filter(x => x.id !== li.id)
+                        onChange({
+                          ...quote,
+                          lineItems: remaining,
+                          metalLines: remaining.flatMap(r => r.metalLines.map(l => ({ ...l, id: crypto.randomUUID() }))),
+                          labour: remaining.reduce((s, r) => s + (r.labour || 0) * (r.qty || 1), 0),
+                          packaging: remaining.reduce((s, r) => s + (r.packaging || 0) * (r.qty || 1), 0),
+                        })
+                      }}
+                    >✕</button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold">{formatPrice(li.price * li.qty, quote.currency)}</span>
-                  <button
-                    className="text-ios-secondary press-feedback"
-                    onClick={() => onChange({ ...quote, lineItems: (quote.lineItems || []).filter(x => x.id !== li.id) })}
-                  >✕</button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
@@ -3602,36 +3648,51 @@ export default function App() {
   // All hooks declared — safe to return early now
   if (!hydrated) return null
 
+  function liPrice(li: QuoteLineItem) {
+    return calcRetailPrice(
+      { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail', id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+      settings.metalPrices,
+      settings.stoneGP ?? STONE_GP
+    ) * (li.qty || 1)
+  }
+
+  function mergedFromItems(items: QuoteLineItem[]) {
+    return {
+      metalLines: items.flatMap(li => li.metalLines.map(l => ({ ...l, id: crypto.randomUUID() }))),
+      labour: items.reduce((s, li) => s + (li.labour || 0) * (li.qty || 1), 0),
+      packaging: items.reduce((s, li) => s + (li.packaging || 0) * (li.qty || 1), 0),
+    }
+  }
+
   function handleLoadProductToQuote(p: Product, gp: number = 70) {
-    const pQuote = quoteFromProduct(p)
-    const itemPrice = calcRetailPrice(pQuote, settings.metalPrices, settings.stoneGP ?? STONE_GP)
+    const lineItem: QuoteLineItem = {
+      id: crypto.randomUUID(), name: p.name, qty: 1,
+      metalLines: p.metalLines.map(l => ({ ...l, id: crypto.randomUUID() })),
+      stoneLines: p.stoneLines.map(l => ({ ...l, id: crypto.randomUUID() })),
+      labour: p.labour, packaging: p.packaging,
+    }
     const q: Quote = {
-      ...pQuote,
+      ...quoteFromProduct(p),
       retailGP: gp,
       mode: 'retail' as const,
-      lineItems: [{ id: crypto.randomUUID(), name: p.name, price: itemPrice, qty: 1 }],
+      lineItems: [lineItem],
     }
     setQuote(q)
     setTab('build')
   }
 
-  // Merge product metals + labour into the current quote, preserving existing stones
   function handleAddProductToQuote(p: Product) {
-    const pQuote = quoteFromProduct(p)
-    const itemPrice = calcRetailPrice(pQuote, settings.metalPrices, settings.stoneGP ?? STONE_GP)
     setQuote(prev => {
       const existing = (prev.lineItems || []).find(li => li.name === p.name)
       const lineItems: QuoteLineItem[] = existing
         ? (prev.lineItems || []).map(li => li.name === p.name ? { ...li, qty: li.qty + 1 } : li)
-        : [...(prev.lineItems || []), { id: crypto.randomUUID(), name: p.name, price: itemPrice, qty: 1 }]
-      return {
-        ...prev,
-        name: prev.name === 'New Quote' ? p.name : prev.name,
-        metalLines: [...prev.metalLines, ...p.metalLines.map(l => ({ ...l, id: crypto.randomUUID() }))],
-        labour: (prev.labour || 0) + (p.labour || 0),
-        packaging: (prev.packaging || 0) + (p.packaging || 0),
-        lineItems,
-      }
+        : [...(prev.lineItems || []), {
+            id: crypto.randomUUID(), name: p.name, qty: 1,
+            metalLines: p.metalLines.map(l => ({ ...l, id: crypto.randomUUID() })),
+            stoneLines: p.stoneLines.map(l => ({ ...l, id: crypto.randomUUID() })),
+            labour: p.labour, packaging: p.packaging,
+          }]
+      return { ...prev, name: prev.name === 'New Quote' ? p.name : prev.name, lineItems, ...mergedFromItems(lineItems) }
     })
     setTab('build')
   }

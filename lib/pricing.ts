@@ -1,4 +1,4 @@
-import type { MetalLine, StoneLine, AdditionalItem, Quote, MetalPrices, StoneType, MetalType, AppSettings, WaxMultipliers } from './types'
+import type { MetalLine, StoneLine, AdditionalItem, Quote, QuoteLineItem, MetalPrices, StoneType, MetalType, AppSettings, WaxMultipliers } from './types'
 export type { StoneType, MetalType, WaxMultipliers, AdditionalItem }
 
 export const STONE_GP: Record<StoneType, number> = {
@@ -128,9 +128,18 @@ export function newQuote(): Quote {
   }
 }
 
+function calcLiPrice(li: QuoteLineItem, quote: Quote, prices: MetalPrices, gpMap?: Record<StoneType, number>): number {
+  return calcRetailPrice(
+    { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+    prices,
+    gpMap
+  ) * (li.qty || 1)
+}
+
 export function generateTextExport(quote: Quote, prices: MetalPrices, settings: AppSettings): string {
   const rate = quote.currency === 'USD' ? settings.usdRate : 1
   const fmt = (n: number) => formatPrice(n * rate, quote.currency)
+  const lineItems = quote.lineItems || []
 
   const lines: string[] = [
     'BROHN SMITH JEWELLERY',
@@ -139,22 +148,45 @@ export function generateTextExport(quote: Quote, prices: MetalPrices, settings: 
     `Date: ${new Date(quote.createdAt).toLocaleDateString('en-AU')}`,
     `Mode: ${quote.mode === 'retail' ? 'Retail' : 'Wholesale'}`,
     '',
-    '── METALS ──',
   ]
 
-  for (const m of quote.metalLines) {
-    const cost = (m.grams || 0) * prices[m.metalType]
-    lines.push(`  ${METAL_LABELS[m.metalType]}: ${m.grams}g × ${fmt(prices[m.metalType])}/g = ${fmt(cost)}`)
-  }
-
-  if (quote.stoneLines.length) {
-    lines.push('')
-    lines.push('── STONES ──')
-    for (const s of quote.stoneLines) {
-      const retail = calcStoneRetail(s, settings.stoneGP)
-      const gpPct = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
-      lines.push(`  ${STONE_LABELS[s.stoneType]}: WS ${fmt(s.wholesaleCost)} → Retail ${fmt(retail)} (${gpPct}% GP)`)
+  if (lineItems.length > 0) {
+    lines.push('── PRODUCTS ──')
+    for (const li of lineItems) {
+      const unitP = calcRetailPrice(
+        { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+        prices, settings.stoneGP
+      )
+      lines.push(`  ${li.name}${li.qty > 1 ? ` ×${li.qty}` : ''}: ${fmt(unitP * (li.qty || 1))}`)
+      for (const m of li.metalLines) {
+        const cost = (m.grams || 0) * prices[m.metalType]
+        lines.push(`    └ ${METAL_LABELS[m.metalType]}: ${m.grams}g = ${fmt(cost)}`)
+      }
+      for (const s of li.stoneLines) {
+        const retail = calcStoneRetail(s, settings.stoneGP)
+        const gpPct = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
+        lines.push(`    └ ${STONE_LABELS[s.stoneType]}: WS ${fmt(s.wholesaleCost)} → ${fmt(retail)} (${gpPct}% GP)`)
+      }
+      if (li.labour > 0) lines.push(`    └ Labour: ${fmt(li.labour * (li.qty || 1))}`)
+      if (li.packaging > 0) lines.push(`    └ Packaging: ${fmt(li.packaging * (li.qty || 1))}`)
     }
+  } else {
+    lines.push('── METALS ──')
+    for (const m of quote.metalLines) {
+      const cost = (m.grams || 0) * prices[m.metalType]
+      lines.push(`  ${METAL_LABELS[m.metalType]}: ${m.grams}g × ${fmt(prices[m.metalType])}/g = ${fmt(cost)}`)
+    }
+    if (quote.stoneLines.length) {
+      lines.push('')
+      lines.push('── STONES ──')
+      for (const s of quote.stoneLines) {
+        const retail = calcStoneRetail(s, settings.stoneGP)
+        const gpPct = ((settings.stoneGP?.[s.stoneType] ?? STONE_GP[s.stoneType]) * 100).toFixed(0)
+        lines.push(`  ${STONE_LABELS[s.stoneType]}: WS ${fmt(s.wholesaleCost)} → Retail ${fmt(retail)} (${gpPct}% GP)`)
+      }
+    }
+    if (quote.labour > 0) lines.push(`  Labour: ${fmt(quote.labour)}`)
+    if (quote.packaging > 0) lines.push(`  Packaging: ${fmt(quote.packaging)}`)
   }
 
   if (quote.additionalItems?.length) {
@@ -165,19 +197,10 @@ export function generateTextExport(quote: Quote, prices: MetalPrices, settings: 
     }
   }
 
-  const metalCost = calcMetalCost(quote.metalLines, prices)
-  const stoneCost = quote.stoneLines.reduce((sum, s) => sum + s.wholesaleCost, 0)
   const additionalCost = calcAdditionalCost(quote.additionalItems)
-
   lines.push('')
   lines.push('── SUMMARY ──')
-  lines.push(`  Metal cost: ${fmt(metalCost)}`)
-  if (stoneCost > 0) lines.push(`  Stone cost (WS): ${fmt(stoneCost)}`)
   if (additionalCost > 0) lines.push(`  Additional items: ${fmt(additionalCost)}`)
-  if (quote.labour > 0) lines.push(`  Labour: ${fmt(quote.labour)}`)
-  if (quote.packaging > 0) lines.push(`  Packaging: ${fmt(quote.packaging)}`)
-  lines.push(`  Total cost: ${fmt(calcTotalCost(quote, prices))}`)
-  lines.push('')
 
   if (quote.mode === 'retail') {
     const retail = calcRetailPrice(quote, prices, settings.stoneGP)
@@ -201,9 +224,10 @@ export function generateTextExport(quote: Quote, prices: MetalPrices, settings: 
 export function generateClientTextExport(quote: Quote, prices: MetalPrices, settings: AppSettings): string {
   const rate = quote.currency === 'USD' ? settings.usdRate : 1
   const fmt = (n: number) => formatPrice(n * rate, quote.currency)
+  const lineItems = quote.lineItems || []
 
   const finalPrice = quote.mode === 'retail'
-    ? calcRetailPrice(quote, prices)
+    ? calcRetailPrice(quote, prices, settings.stoneGP)
     : quote.wholesalePrice
 
   const lines: string[] = [
@@ -215,29 +239,48 @@ export function generateClientTextExport(quote: Quote, prices: MetalPrices, sett
   lines.push(`Date: ${new Date(quote.createdAt).toLocaleDateString('en-AU')}`)
   lines.push('')
 
-  if (quote.metalLines.length) {
-    for (const m of quote.metalLines) {
-      lines.push(`  ${METAL_LABELS[m.metalType]}`)
+  if (lineItems.length > 0) {
+    for (const li of lineItems) {
+      const unitP = calcRetailPrice(
+        { metalLines: li.metalLines, stoneLines: li.stoneLines, labour: li.labour, packaging: li.packaging, retailGP: quote.retailGP, additionalItems: [], mode: 'retail' as const, id: '', name: '', clientName: '', wholesalePrice: 0, currency: quote.currency, createdAt: '', updatedAt: '' },
+        prices, settings.stoneGP
+      )
+      lines.push(`  ${li.name}${li.qty > 1 ? ` ×${li.qty}` : ''}`)
+      lines.push(`  ${fmt(unitP * (li.qty || 1))}`)
+      lines.push('')
     }
-  }
-  if (quote.stoneLines.length) {
-    for (const s of quote.stoneLines) {
-      lines.push(`  ${STONE_LABELS_CLIENT[s.stoneType]}`)
+  } else {
+    if (quote.metalLines.length) {
+      for (const m of quote.metalLines) {
+        lines.push(`  ${METAL_LABELS[m.metalType]}`)
+      }
     }
-  }
-  if (quote.additionalItems?.length) {
-    for (const item of quote.additionalItems) {
-      lines.push(`  ${item.label}`)
+    if (quote.stoneLines.length) {
+      for (const s of quote.stoneLines) {
+        lines.push(`  ${STONE_LABELS_CLIENT[s.stoneType]}`)
+      }
     }
+    lines.push('')
+    if (finalPrice > 0) {
+      lines.push(`  PRICE: ${fmt(finalPrice)}`)
+    } else {
+      lines.push(`  PRICE: (to be confirmed)`)
+    }
+    lines.push('')
   }
 
-  lines.push('')
-  if (finalPrice > 0) {
-    lines.push(`  PRICE: ${fmt(finalPrice)}`)
-  } else {
-    lines.push(`  PRICE: (to be confirmed)`)
+  if (quote.additionalItems?.length) {
+    for (const item of quote.additionalItems) {
+      lines.push(`  ${item.label}: ${fmt(item.price)}`)
+    }
+    lines.push('')
   }
-  lines.push('')
+
+  if (lineItems.length > 0) {
+    lines.push(`  TOTAL: ${fmt(finalPrice)}`)
+    lines.push('')
+  }
+
   lines.push('─────────────────────────────')
   lines.push('All prices AUD ex GST unless otherwise stated')
   lines.push('brohnsmith.com')
