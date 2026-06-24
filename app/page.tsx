@@ -696,9 +696,6 @@ function ExportSheet({ open, onClose, quote, settings }: {
     } else {
       // Manually built single quote — show piece name + total as one row
       tableRows.push([quote.name && quote.name !== 'New Quote' ? quote.name : 'Item', fmt2(finalPrice)])
-      for (const m of quote.metalLines) tableRows.push([`  ${METAL_LABELS[m.metalType]}`, ''])
-      for (const s of quote.stoneLines) tableRows.push([`  ${STONE_LABELS_CLIENT[s.stoneType]}`, ''])
-      for (const item of (quote.additionalItems || [])) tableRows.push([`  ${item.label || 'Additional Item'}`, fmt2(item.price)])
     }
 
     autoTable(doc, {
