@@ -687,6 +687,8 @@ function ExportSheet({ open, onClose, quote, settings }: {
 
     // ── ITEMS TABLE ───────────────────────────────────────
     const tableRows: (string | number)[][] = []
+    const additionalItems = quote.additionalItems || []
+    const additionalTotal = calcAdditionalCost(additionalItems)
     const lineItems = quote.lineItems || []
     if (lineItems.length > 0) {
       for (const li of lineItems) {
@@ -694,8 +696,13 @@ function ExportSheet({ open, onClose, quote, settings }: {
         tableRows.push([li.qty > 1 ? `${li.name} ×${li.qty}` : li.name, fmt2(lineTotal)])
       }
     } else {
-      // Manually built single quote — show piece name + total as one row
-      tableRows.push([quote.name && quote.name !== 'New Quote' ? quote.name : 'Item', fmt2(finalPrice)])
+      // Single quote — show piece name with price excluding additional items
+      const pieceName = quote.name && quote.name !== 'New Quote' ? quote.name : 'Item'
+      tableRows.push([pieceName, fmt2(finalPrice - additionalTotal)])
+    }
+    // Additional items always shown in both paths
+    for (const item of additionalItems) {
+      tableRows.push([item.label || 'Additional Item', fmt2(item.price)])
     }
 
     autoTable(doc, {
