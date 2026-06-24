@@ -1544,6 +1544,36 @@ function QuoteBuilderTab({ quote, settings, onChange }: {
           </div>
         </div>
 
+        {/* Quote items list — shows when products added via Add to Quote */}
+        {(quote.lineItems?.length ?? 0) > 0 && (
+          <div className="ios-card mx-4 mb-3 animate-in">
+            <div className="px-4 py-3 border-b border-ios-separator/60 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ios-secondary">Quote Items</span>
+              <button
+                className="text-xs text-ios-destructive press-feedback"
+                onClick={() => onChange({ ...quote, lineItems: [], metalLines: [], labour: 0, packaging: 0 })}
+              >Clear all</button>
+            </div>
+            {(quote.lineItems || []).map(li => (
+              <div key={li.id} className="px-4 py-3 border-b border-ios-separator/30 flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">{li.name}</div>
+                  <div className="text-xs text-ios-secondary mt-0.5">
+                    {formatPrice(li.price, quote.currency)} × {li.qty}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold">{formatPrice(li.price * li.qty, quote.currency)}</span>
+                  <button
+                    className="text-ios-secondary press-feedback"
+                    onClick={() => onChange({ ...quote, lineItems: (quote.lineItems || []).filter(x => x.id !== li.id) })}
+                  >✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Price summary */}
         <PriceSummary quote={quote} settings={settings} />
 
