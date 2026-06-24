@@ -64,6 +64,10 @@ function loadActiveQuote(): Quote {
     const parsed = JSON.parse(q)
     // Back-fill additionalItems for quotes saved before this field existed
     if (!parsed.additionalItems) parsed.additionalItems = []
+    // Migrate lineItems that used old schema (price field, no metalLines)
+    if (parsed.lineItems) {
+      parsed.lineItems = parsed.lineItems.filter((li: any) => li.metalLines && Array.isArray(li.metalLines))
+    }
     return parsed
   } catch { return newQuote() }
 }
