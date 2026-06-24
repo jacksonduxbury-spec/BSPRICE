@@ -1973,19 +1973,16 @@ function PriceViewSheet({ product, open, onClose, onLoadToQuote, onAddToQuote, s
         <div className="flex flex-col gap-2">
           <button
             className="w-full btn-gold rounded-ios py-3.5 text-sm font-bold press-feedback"
-            onClick={() => { onLoadToQuote(product, 70); onClose() }}
-          >
-            New Quote from Product →
-          </button>
-          <button
-            className="w-full bg-ios-bg rounded-ios py-3 text-sm font-semibold press-feedback text-ios-blue"
             onClick={() => { onAddToQuote(product); onClose() }}
           >
-            Add metals &amp; labour to current quote
+            + Add to Quote
           </button>
-          <p className="text-xs text-ios-secondary text-center px-2">
-            Keeps any stones already in your quote
-          </p>
+          <button
+            className="w-full bg-ios-bg rounded-ios py-3 text-sm font-semibold press-feedback text-ios-secondary"
+            onClick={() => { onLoadToQuote(product, 70); onClose() }}
+          >
+            New Quote (replaces current)
+          </button>
         </div>
       </div>
     </Sheet>
