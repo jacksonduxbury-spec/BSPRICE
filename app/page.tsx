@@ -11,7 +11,8 @@ import {
 import {
   type Quote, type MetalLine, type StoneLine, type AdditionalItem, type MetalType,
   type StoneType, type Currency, type AppSettings, type Product,
-  type ProductCategory, type QuoteMetalVariant
+  type ProductCategory, type QuoteMetalVariant,
+  type QuoteLineItem,
 } from '@/lib/types'
 import {
   calcMetalCost, calcStoneRetail, calcAdditionalCost, calcTotalCost, calcRetailPrice,
@@ -686,9 +687,19 @@ function ExportSheet({ open, onClose, quote, settings }: {
 
     // ── ITEMS TABLE ───────────────────────────────────────
     const tableRows: (string | number)[][] = []
-    for (const m of quote.metalLines) tableRows.push([METAL_LABELS[m.metalType], ''])
-    for (const s of quote.stoneLines) tableRows.push([STONE_LABELS_CLIENT[s.stoneType], ''])
-    for (const item of (quote.additionalItems || [])) tableRows.push([item.label || 'Additional Item', fmt2(item.price)])
+    const lineItems = quote.lineItems || []
+    if (lineItems.length > 0) {
+      for (const li of lineItems) {
+        const lineTotal = li.price * (li.qty || 1)
+        tableRows.push([li.qty > 1 ? `${li.name} ×${li.qty}` : li.name, fmt2(lineTotal)])
+      }
+    } else {
+      // Manually built single quote — show piece name + total as one row
+      tableRows.push([quote.name && quote.name !== 'New Quote' ? quote.name : 'Item', fmt2(finalPrice)])
+      for (const m of quote.metalLines) tableRows.push([`  ${METAL_LABELS[m.metalType]}`, ''])
+      for (const s of quote.stoneLines) tableRows.push([`  ${STONE_LABELS_CLIENT[s.stoneType]}`, ''])
+      for (const item of (quote.additionalItems || [])) tableRows.push([`  ${item.label || 'Additional Item'}`, fmt2(item.price)])
+    }
 
     autoTable(doc, {
       startY: y,
@@ -3561,23 +3572,36 @@ export default function App() {
   if (!hydrated) return null
 
   function handleLoadProductToQuote(p: Product, gp: number = 70) {
-    const q = { ...quoteFromProduct(p), retailGP: gp, mode: 'retail' as const }
+    const pQuote = quoteFromProduct(p)
+    const itemPrice = calcRetailPrice(pQuote, settings.metalPrices, settings.stoneGP ?? STONE_GP)
+    const q: Quote = {
+      ...pQuote,
+      retailGP: gp,
+      mode: 'retail' as const,
+      lineItems: [{ id: crypto.randomUUID(), name: p.name, price: itemPrice, qty: 1 }],
+    }
     setQuote(q)
     setTab('build')
   }
 
   // Merge product metals + labour into the current quote, preserving existing stones
   function handleAddProductToQuote(p: Product) {
-    setQuote(prev => ({
-      ...prev,
-      name: prev.name === 'New Quote' ? p.name : prev.name,
-      metalLines: [
-        ...prev.metalLines,
-        ...p.metalLines.map(l => ({ ...l, id: crypto.randomUUID() })),
-      ],
-      labour: (prev.labour || 0) + (p.labour || 0),
-      packaging: (prev.packaging || 0) + (p.packaging || 0),
-    }))
+    const pQuote = quoteFromProduct(p)
+    const itemPrice = calcRetailPrice(pQuote, settings.metalPrices, settings.stoneGP ?? STONE_GP)
+    setQuote(prev => {
+      const existing = (prev.lineItems || []).find(li => li.name === p.name)
+      const lineItems: QuoteLineItem[] = existing
+        ? (prev.lineItems || []).map(li => li.name === p.name ? { ...li, qty: li.qty + 1 } : li)
+        : [...(prev.lineItems || []), { id: crypto.randomUUID(), name: p.name, price: itemPrice, qty: 1 }]
+      return {
+        ...prev,
+        name: prev.name === 'New Quote' ? p.name : prev.name,
+        metalLines: [...prev.metalLines, ...p.metalLines.map(l => ({ ...l, id: crypto.randomUUID() }))],
+        labour: (prev.labour || 0) + (p.labour || 0),
+        packaging: (prev.packaging || 0) + (p.packaging || 0),
+        lineItems,
+      }
+    })
     setTab('build')
   }
 

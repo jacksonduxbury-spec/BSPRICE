@@ -27,6 +27,13 @@ export interface QuoteMetalVariant {
   metalLines: MetalLine[]
 }
 
+export interface QuoteLineItem {
+  id: string
+  name: string
+  price: number
+  qty: number
+}
+
 export interface Quote {
   id: string
   name: string
@@ -43,6 +50,7 @@ export interface Quote {
   currency: Currency
   createdAt: string
   updatedAt: string
+  lineItems?: QuoteLineItem[]
 }
 
 export interface MetalPrices {
