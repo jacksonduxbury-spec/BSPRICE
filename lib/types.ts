@@ -67,6 +67,8 @@ export interface MetalPrices {
 
 export type ProductCategory = 'ring' | 'earrings' | 'necklace' | 'bracelet' | 'pendant' | 'bangle' | 'sapphire' | 'other'
 
+export type CatalogueProductType = 'standard' | 'charm' | 'chain' | 'earring'
+
 export interface Product {
   id: string
   sku: string
@@ -80,6 +82,7 @@ export interface Product {
   labour: number
   packaging: number
   notes: string
+  catalogueType?: CatalogueProductType
   createdAt: string
   updatedAt: string
 }

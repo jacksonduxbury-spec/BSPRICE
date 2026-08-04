@@ -20,6 +20,7 @@ import {
   DEFAULT_SETTINGS, STONE_GP, STONE_LABELS, STONE_LABELS_CLIENT, METAL_LABELS, DEFAULT_METAL_PRICES,
   DEFAULT_WAX_MULTIPLIERS, CROSS_METAL
 } from '@/lib/pricing'
+import CatalogueQuotesTab from './cat-quotes-tab'
 
 // ─── Persistence helpers ─────────────────────────────────────────────────────
 
@@ -3592,7 +3593,7 @@ function WaxWeightTab({ settings }: { settings: AppSettings }) {
 
 // ─── Root app ─────────────────────────────────────────────────────────────────
 
-type Tab = 'build' | 'stones' | 'wax' | 'products' | 'sheets' | 'settings'
+type Tab = 'build' | 'quotes' | 'stones' | 'wax' | 'products' | 'sheets' | 'settings'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('build')
@@ -3769,6 +3770,9 @@ export default function App() {
             onSaveProducts={setProducts}
           />
         )}
+        {tab === 'quotes' && (
+          <CatalogueQuotesTab products={products} />
+        )}
         {tab === 'settings' && (
           <SettingsTab settings={settings} onChange={setSettings} />
         )}
@@ -3779,10 +3783,10 @@ export default function App() {
         <div className="flex">
           {[
             { id: 'build',    icon: PenLine,      label: 'Sales'    },
+            { id: 'quotes',   icon: LayoutList,   label: 'Quotes'   },
             { id: 'stones',   icon: Gem,           label: 'Stones'   },
             { id: 'wax',      icon: Layers,        label: 'Wax'      },
             { id: 'products', icon: Package,       label: 'Products' },
-            { id: 'sheets',   icon: LayoutList,    label: 'Sheets'   },
             { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
           ].map(({ id, icon: Icon, label }) => (
             <button
