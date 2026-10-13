@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, PenLine, RefreshCw,
   CheckCircle, X, ChevronRight, BarChart3,
   Package, Search, Tag, Edit3, ArrowRight, Gem, Layers, Scale,
-  ImagePlus, FileImage, Loader2, LayoutList
+  ImagePlus, FileImage, Loader2, LayoutList, Eye
 } from 'lucide-react'
 import {
   type Quote, type MetalLine, type StoneLine, type AdditionalItem, type MetalType,
@@ -21,6 +21,7 @@ import {
   DEFAULT_WAX_MULTIPLIERS, CROSS_METAL
 } from '@/lib/pricing'
 import CatalogueQuotesTab from './cat-quotes-tab'
+import ClientView, { type ClientOptions, DEFAULT_CLIENT_OPTIONS, loadClientOptions, saveClientOptions } from './client-view'
 
 // ─── Persistence helpers ─────────────────────────────────────────────────────
 
@@ -507,15 +508,15 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
                 </button>
               </div>
               <button onClick={openPush} className="w-full py-2 rounded-xl text-sm font-semibold press-feedback"
-                style={{ background: 'var(--gold)', color: '#000' }}>
+                style={{ background: 'var(--ink)', color: 'var(--ground)' }}>
                 → Push to Line Sheet
               </button>
             </div>
             {pushOpen && (
-              <div style={{ position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.45)',display:'flex',alignItems:'flex-end' }}
+              <div style={{ position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'flex-end' }}
                 onClick={e => { if(e.target===e.currentTarget) setPushOpen(false) }}>
-                <div style={{ background:'#fff',borderRadius:'20px 20px 0 0',width:'100%',padding:'20px 20px 40px',maxHeight:'85vh',overflowY:'auto' }}>
-                  <div style={{ width:36,height:5,background:'#ddd',borderRadius:3,margin:'0 auto 16px' }}/>
+                <div style={{ background:'var(--ground)',borderTop:'1px solid var(--hairline)',width:'100%',padding:'20px 20px 40px',maxHeight:'85vh',overflowY:'auto' }}>
+                  <div style={{ width:36,height:5,background:'var(--hairline)',margin:'0 auto 16px' }}/>
                   <div className="text-sm font-bold mb-1">Push to Line Sheet</div>
                   <div className="flex gap-4 mb-4 py-2 border-b border-ios-separator/60">
                     <div><div className="text-xs text-ios-secondary mb-0.5">Wholesale</div>
@@ -561,7 +562,7 @@ function PriceSummary({ quote, settings }: { quote: Quote; settings: AppSettings
                     {selVar >= 0 && (
                       <button onClick={() => confirmPush(ws, rrp)}
                         className="w-full py-3 rounded-xl font-bold text-sm press-feedback mt-2"
-                        style={{ background: pushed ? 'var(--ios-green)' : 'var(--gold)', color: '#000', transition: 'background 0.3s' }}>
+                        style={{ background: pushed ? 'var(--text)' : 'var(--ink)', color: 'var(--ground)', transition: 'background 0.3s' }}>
                         {pushed ? '✓ Done' : `Confirm — WS ${formatPrice(ws, currency)}  RRP ${formatPrice(rrp, currency)}`}
                       </button>
                     )}
@@ -2691,7 +2692,7 @@ function ProductsTab({ products, settings, onLoadToQuote, onAddToQuote, onSavePr
 
       {/* Sticky select bar */}
       {selectMode && (
-        <div className="fixed bottom-16 left-0 right-0 z-50 px-4 pb-2">
+        <div className="staff-fab">
           <div className="ios-card flex items-center gap-3 px-4 py-3 shadow-lg">
             <span className="text-sm font-semibold flex-1">
               {selectedIds.size === 0 ? 'Select products' : `${selectedIds.size} selected`}
@@ -2780,9 +2781,11 @@ function ProductsTab({ products, settings, onLoadToQuote, onAddToQuote, onSavePr
 
 // ─── Settings tab ─────────────────────────────────────────────────────────────
 
-function SettingsTab({ settings, onChange }: {
+function SettingsTab({ settings, onChange, clientOptions, onClientOptions }: {
   settings: AppSettings
   onChange: (s: AppSettings) => void
+  clientOptions: ClientOptions
+  onClientOptions: (o: ClientOptions) => void
 }) {
   const [refreshing, setRefreshing] = useState(false)
   const [sheetUrl, setSheetUrl] = useState(settings.googleSheetUrl || DEFAULT_SETTINGS.googleSheetUrl)
@@ -2840,6 +2843,27 @@ function SettingsTab({ settings, onChange }: {
     <div className="scroll-content pt-2">
       <div className="px-4 mb-3">
         <h1 className="text-xl font-bold">Settings</h1>
+      </div>
+
+      {/* Client view */}
+      <div className="px-4 mb-1">
+        <span className="field-label">Client view</span>
+      </div>
+      <div className="ios-card mx-4 mb-3">
+        <label className="ios-row" style={{ cursor: 'pointer' }}>
+          <div className="flex-1">
+            <div className="font-semibold text-sm">Show Price List pieces</div>
+            <div className="text-xs text-ios-secondary">
+              On: pieces and metals from the Price List sheet appear beside the website range, marked made to order.
+              Off: clients see only what is listed on brohnsmith.com.
+            </div>
+          </div>
+          <input
+            type="checkbox" style={{ width: 22, height: 22, accentColor: 'var(--ink)' }}
+            checked={clientOptions.showListPrices}
+            onChange={e => onClientOptions({ ...clientOptions, showListPrices: e.target.checked })}
+          />
+        </label>
       </div>
 
       {/* Metal Prices */}
@@ -3601,8 +3625,12 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [products, setProducts] = useState<Product[]>([])
   const [hydrated, setHydrated] = useState(false)
+  // Opens on the client view every time; staff tools sit behind a press-and-hold on the monogram
+  const [mode, setMode] = useState<'client' | 'staff'>('client')
+  const [clientOptions, setClientOptions] = useState<ClientOptions>(DEFAULT_CLIENT_OPTIONS)
 
   useEffect(() => {
+    setClientOptions(loadClientOptions())
     setQuote(loadActiveQuote())
     setSettings(loadSettings())
     setProducts(loadProducts())
@@ -3631,6 +3659,7 @@ export default function App() {
       setSettings(updated)
       // Clean up the URL so it doesn't re-apply on refresh
       window.history.replaceState({}, '', '/')
+      setMode('staff')
       setTab('settings')
     } catch {}
   }, [hydrated]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -3713,92 +3742,101 @@ export default function App() {
     setTab('build')
   }
 
+  if (mode === 'client') {
+    return <ClientView options={clientOptions} onExit={() => setMode('staff')} />
+  }
+
+  const TABS: { id: Tab; icon: typeof PenLine; label: string }[] = [
+    { id: 'build',    icon: PenLine,      label: 'Sales'    },
+    { id: 'quotes',   icon: LayoutList,   label: 'Quotes'   },
+    { id: 'stones',   icon: Gem,          label: 'Stones'   },
+    { id: 'wax',      icon: Layers,       label: 'Wax'      },
+    { id: 'products', icon: Package,      label: 'Products' },
+    { id: 'settings', icon: SettingsIcon, label: 'Settings' },
+  ]
+
   return (
-    <div className="min-h-screen bg-ios-bg" style={{ maxWidth: 430, margin: '0 auto', position: 'relative' }}>
-      {/* Nav bar */}
-      <div className="sticky top-0 z-30 bg-ios-bg/90 backdrop-blur-md border-b border-ios-separator/40 px-4 pb-3 flex items-center justify-between" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
-        <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-nav.png" alt="Brohn Smith" style={{ height: 28, width: 28, objectFit: 'contain' }} />
-          <span className="text-xs font-medium text-ios-secondary uppercase tracking-widest">Pricing</span>
-        </div>
-        <div className="flex items-center gap-3">
-          {tab === 'build' && (<>
-            <button
-              className="press-feedback text-ios-secondary text-xs font-semibold flex items-center gap-1"
-              title="Save as product"
-              onClick={() => {
-                const p = productFromQuote(quote)
-                setProducts(prev => [p, ...prev])
-                setTab('products')
-              }}
-            >
-              <Package size={15} /> Save
-            </button>
-            <button
-              className="press-feedback text-ios-blue text-sm font-semibold flex items-center gap-1"
-              onClick={handleNewQuote}
-            >
-              <Plus size={16} /> New
-            </button>
-          </>)}
-          <button
-            className="press-feedback text-ios-secondary text-xs font-semibold"
-            title="Open second window"
-            onClick={() => window.open(window.location.href, '_blank')}
-          >⧉</button>
-        </div>
-      </div>
-
-      {/* Tab content */}
-      <div style={{ paddingBottom: 64 }}>
-        {tab === 'build' && (
-          <QuoteBuilderTab quote={quote} settings={settings} onChange={setQuote} />
-        )}
-        {tab === 'stones' && (
-          <StonesTab settings={settings} onAddToQuote={handleAddStoneToQuote} />
-        )}
-        {tab === 'wax' && (
-          <WaxWeightTab settings={settings} />
-        )}
-        {tab === 'products' && (
-          <ProductsTab
-            products={products}
-            settings={settings}
-            onLoadToQuote={(p, gp) => handleLoadProductToQuote(p, gp)}
-            onAddToQuote={handleAddProductToQuote}
-            onSaveProducts={setProducts}
-          />
-        )}
-        {tab === 'quotes' && (
-          <CatalogueQuotesTab products={products} />
-        )}
-        {tab === 'settings' && (
-          <SettingsTab settings={settings} onChange={setSettings} />
-        )}
-      </div>
-
-      {/* Bottom tab bar */}
-      <div className="tab-bar">
-        <div className="flex">
-          {[
-            { id: 'build',    icon: PenLine,      label: 'Sales'    },
-            { id: 'quotes',   icon: LayoutList,   label: 'Quotes'   },
-            { id: 'stones',   icon: Gem,           label: 'Stones'   },
-            { id: 'wax',      icon: Layers,        label: 'Wax'      },
-            { id: 'products', icon: Package,       label: 'Products' },
-            { id: 'settings', icon: SettingsIcon,  label: 'Settings' },
-          ].map(({ id, icon: Icon, label }) => (
-            <button
-              key={id}
-              className="flex-1 flex flex-col items-center gap-0.5 py-2 press-feedback"
-              style={{ color: tab === id ? 'var(--gold)' : 'var(--ios-secondary)' }}
-              onClick={() => id === 'sheets' ? window.location.href = '/linesheet.html' : setTab(id as Tab)}
-            >
-              <Icon size={20} strokeWidth={tab === id ? 2.5 : 1.8} />
-              <span className="text-[9px] font-semibold">{label}</span>
+    <div className="min-h-screen bg-ios-bg">
+      {/* Tab rail (left on iPad, bottom on phones) */}
+      <nav className="tab-bar staff-nav">
+        <div className="staff-nav-inner">
+          {TABS.map(({ id, icon: Icon, label }) => (
+            <button key={id} className={`press-feedback ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>
+              <Icon size={20} strokeWidth={tab === id ? 2 : 1.5} />
+              <span>{label}</span>
             </button>
           ))}
+        </div>
+      </nav>
+
+      <div className="staff-main">
+        <div className="staff-column">
+          {/* Nav bar */}
+          <div className="sticky top-0 z-30 bg-ios-bg border-b border-ios-separator/60 px-4 pb-3 flex items-center justify-between" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)' }}>
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/monogram-ivory.svg" alt="Brohn Smith" style={{ height: 24, width: 24 }} />
+              <span className="text-[10px] text-ios-secondary uppercase" style={{ letterSpacing: '0.3em' }}>Pricing</span>
+            </div>
+            <div className="flex items-center gap-5">
+              {tab === 'build' && (<>
+                <button
+                  className="press-feedback text-ios-secondary text-xs uppercase tracking-widest flex items-center gap-1"
+                  title="Save as product"
+                  onClick={() => {
+                    const p = productFromQuote(quote)
+                    setProducts(prev => [p, ...prev])
+                    setTab('products')
+                  }}
+                >
+                  <Package size={15} /> Save
+                </button>
+                <button
+                  className="press-feedback text-ios-blue text-xs font-bold uppercase tracking-widest flex items-center gap-1"
+                  onClick={handleNewQuote}
+                >
+                  <Plus size={16} /> New
+                </button>
+              </>)}
+              <button
+                className="press-feedback text-ios-blue text-xs font-bold uppercase tracking-widest flex items-center gap-1"
+                title="Back to the client view"
+                onClick={() => setMode('client')}
+              >
+                <Eye size={15} /> Client view
+              </button>
+            </div>
+          </div>
+
+          {/* Tab content */}
+          {tab === 'build' && (
+            <QuoteBuilderTab quote={quote} settings={settings} onChange={setQuote} />
+          )}
+          {tab === 'stones' && (
+            <StonesTab settings={settings} onAddToQuote={handleAddStoneToQuote} />
+          )}
+          {tab === 'wax' && (
+            <WaxWeightTab settings={settings} />
+          )}
+          {tab === 'products' && (
+            <ProductsTab
+              products={products}
+              settings={settings}
+              onLoadToQuote={(p, gp) => handleLoadProductToQuote(p, gp)}
+              onAddToQuote={handleAddProductToQuote}
+              onSaveProducts={setProducts}
+            />
+          )}
+          {tab === 'quotes' && (
+            <CatalogueQuotesTab products={products} />
+          )}
+          {tab === 'settings' && (
+            <SettingsTab
+              settings={settings} onChange={setSettings}
+              clientOptions={clientOptions}
+              onClientOptions={o => { setClientOptions(o); saveClientOptions(o) }}
+            />
+          )}
         </div>
       </div>
     </div>

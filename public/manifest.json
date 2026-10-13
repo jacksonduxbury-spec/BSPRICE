@@ -4,9 +4,9 @@
   "description": "Brohn Smith Jewellery Pricing Tool",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
-  "orientation": "portrait",
+  "background_color": "#100e0c",
+  "theme_color": "#100e0c",
+  "orientation": "any",
   "icons": [
     {
       "src": "/icon-192.png",

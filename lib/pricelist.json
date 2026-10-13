@@ -1,0 +1,2687 @@
+{
+ "pulledAt": "2026-10-13T05:25:58.796Z",
+ "rows": [
+  {
+   "product": "ARKA RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "K-S",
+   "build": "CAST",
+   "rrp": 476.55241333333333
+  },
+  {
+   "product": "ARKA RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "K-S",
+   "build": "CAST",
+   "rrp": 7626.45312
+  },
+  {
+   "product": "ARKA RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "K-S",
+   "build": "CAST",
+   "rrp": 20046.89456
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 364.7215
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 5334.442080000001
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 9931.236626666665
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 10124.052766666668
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 13888.120986666667
+  },
+  {
+   "product": "HAZAR",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "M-V",
+   "build": "CAST",
+   "rrp": 14585.828839999998
+  },
+  {
+   "product": "LOA",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "K-X",
+   "build": "CAST",
+   "rrp": 261.44888
+  },
+  {
+   "product": "LOA",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "K-X",
+   "build": "CAST",
+   "rrp": 3217.5422399999998
+  },
+  {
+   "product": "LOA",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "K-X",
+   "build": "CAST",
+   "rrp": 8200.763120000001
+  },
+  {
+   "product": "MODUS RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-W",
+   "build": "CAST",
+   "rrp": 569.0889599999999
+  },
+  {
+   "product": "MODUS RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-W",
+   "build": "CAST",
+   "rrp": 9522.960479999998
+  },
+  {
+   "product": "MODUS RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-W",
+   "build": "CAST",
+   "rrp": 25143.42981333333
+  },
+  {
+   "product": "MODUS PETIT RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "I-L",
+   "build": "CAST",
+   "rrp": 6065.663999999999
+  },
+  {
+   "product": "MODUS PETIT RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "I-L",
+   "build": "CAST",
+   "rrp": 16138.906666666666
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 302.8649066666666
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 4066.5662400000006
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 7514.132413333332
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 7658.738633333333
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 10481.227973333333
+  },
+  {
+   "product": "NERA",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 11004.46468
+  },
+  {
+   "product": "NERO RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-U",
+   "build": "CAST",
+   "rrp": 379.64120333333335
+  },
+  {
+   "product": "NERO RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-U",
+   "build": "CAST",
+   "rrp": 5640.090719999999
+  },
+  {
+   "product": "NERO RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-U",
+   "build": "CAST",
+   "rrp": 14710.165066666666
+  },
+  {
+   "product": "NIGHTMASS RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 277.5338866666666
+  },
+  {
+   "product": "NIGHTMASS RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 3547.60032
+  },
+  {
+   "product": "NIGHTMASS RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 9086.99704
+  },
+  {
+   "product": "NIGHTMASS II RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 271.3062
+  },
+  {
+   "product": "NIGHTMASS II RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 3419.8929599999997
+  },
+  {
+   "product": "NIGHTMASS II RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 8743.2708
+  },
+  {
+   "product": "THE ORB",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 492.29356000000007
+  },
+  {
+   "product": "THE ORB",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 7949.08224
+  },
+  {
+   "product": "THE ORB",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 20913.802506666667
+  },
+  {
+   "product": "ORO RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "O-T",
+   "build": "CAST",
+   "rrp": 425.0498266666666
+  },
+  {
+   "product": "ORO RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "O-T",
+   "build": "CAST",
+   "rrp": 6570.83328
+  },
+  {
+   "product": "ORO RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "O-T",
+   "build": "CAST",
+   "rrp": 17210.807973333332
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 234.32214666666664
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 2661.7852799999996
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 4835.607993333332
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 4926.790183333333
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 6707.141466666667
+  },
+  {
+   "product": "PARIA RING",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 7037.102599999999
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 296.19784333333325
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 3858.2016000000003
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 7253.302319999999
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 7392.7062
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 10114.034480000002
+  },
+  {
+   "product": "ROMEO",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "M-T",
+   "build": "CAST",
+   "rrp": 10618.46676
+  },
+  {
+   "product": "SABI",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 322.50313333333327
+  },
+  {
+   "product": "SABI",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 4469.14512
+  },
+  {
+   "product": "SABI",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "O-U",
+   "build": "CAST",
+   "rrp": 11562.79226666667
+  },
+  {
+   "product": "SAR II",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-X",
+   "build": "CAST",
+   "rrp": 236.92019999999997
+  },
+  {
+   "product": "SAR II",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-X",
+   "build": "CAST",
+   "rrp": 2715.20304
+  },
+  {
+   "product": "SAR II",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-X",
+   "build": "CAST",
+   "rrp": 6850.015626666665
+  },
+  {
+   "product": "SAR",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 276.17754999999994
+  },
+  {
+   "product": "SAR",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 3519.65328
+  },
+  {
+   "product": "SAR",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-R",
+   "build": "CAST",
+   "rrp": 9012.454
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 325.5405633333333
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 4531.4068800000005
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 8399.892526666667
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 8562.165516666666
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 11731.20432
+  },
+  {
+   "product": "THE SURA RING",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "P-Z",
+   "build": "CAST",
+   "rrp": 12318.453839999998
+  },
+  {
+   "product": "TABOR RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "M-Z",
+   "build": "CAST",
+   "rrp": 310.50624
+  },
+  {
+   "product": "TABOR RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "M-Z",
+   "build": "CAST",
+   "rrp": 4222.92816
+  },
+  {
+   "product": "TABOR RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "M-Z",
+   "build": "CAST",
+   "rrp": 10902.258106666666
+  },
+  {
+   "product": "TAINO II",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "P-U",
+   "build": "CAST",
+   "rrp": 437.25685666666664
+  },
+  {
+   "product": "TAINO II",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "P-U",
+   "build": "CAST",
+   "rrp": 6820.9416
+  },
+  {
+   "product": "TAINO II",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "P-U",
+   "build": "CAST",
+   "rrp": 17883.07576
+  },
+  {
+   "product": "TIGRIS",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "P-X",
+   "build": "CAST",
+   "rrp": 307.3732933333333
+  },
+  {
+   "product": "TIGRIS",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "P-X",
+   "build": "CAST",
+   "rrp": 4158.897599999999
+  },
+  {
+   "product": "TIGRIS",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "P-X",
+   "build": "CAST",
+   "rrp": 10729.704773333333
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 224.69406666666666
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 2464.3871999999997
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 4459.115686666666
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 4542.788616666666
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 6176.367413333333
+  },
+  {
+   "product": "VESPA II",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "P-T",
+   "build": "CAST",
+   "rrp": 6479.146960000001
+  },
+  {
+   "product": "VESPA",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 192.69598333333332
+  },
+  {
+   "product": "VESPA",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 1808.5161599999997
+  },
+  {
+   "product": "VESPA",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "K-O",
+   "build": "CAST",
+   "rrp": 4414.252773333334
+  },
+  {
+   "product": "VOID RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 396.9297199999999
+  },
+  {
+   "product": "VOID RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5994.55824
+  },
+  {
+   "product": "VOID RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 15662.659466666664
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 279.04304999999994
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 3578.7311999999997
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "14YG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 6582.933573333334
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "14WG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 6708.966733333334
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 9170.512853333332
+  },
+  {
+   "product": "ZADA",
+   "category": "HAND",
+   "metal": "18WG",
+   "size": "R-X",
+   "build": "CAST",
+   "rrp": 9626.62624
+  },
+  {
+   "product": "ZAMA RING",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 311.0411333333333
+  },
+  {
+   "product": "ZAMA RING",
+   "category": "HAND",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 4650.624
+  },
+  {
+   "product": "ZAMA RING",
+   "category": "HAND",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 10341.114666666666
+  },
+  {
+   "product": "ORINOCO S/S",
+   "category": "HAND",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 458.5188666666666
+  },
+  {
+   "product": "ARA",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1516.2704333333334
+  },
+  {
+   "product": "KOZANE SMALL",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "25mm x 8.3mm",
+   "build": "CAST",
+   "rrp": 1530.98
+  },
+  {
+   "product": "KOZANE SMALL",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "25mm x 8.3mm",
+   "build": "CAST",
+   "rrp": 29321.846400000002
+  },
+  {
+   "product": "KOZANE SMALL",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "25mm x 8.3mm",
+   "build": "CAST",
+   "rrp": 76877.68
+  },
+  {
+   "product": "KA",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "3.48mm x 2.54mm",
+   "build": "CAST",
+   "rrp": 386.11723333333333
+  },
+  {
+   "product": "KA",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "3.48mm x 2.54mm",
+   "build": "CAST",
+   "rrp": 5789.731199999999
+  },
+  {
+   "product": "KA",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "3.48mm x 2.54mm",
+   "build": "CAST",
+   "rrp": 14827.501333333335
+  },
+  {
+   "product": "KOZANE",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1814.6644999999996
+  },
+  {
+   "product": "KOZANE",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 36453.647999999994
+  },
+  {
+   "product": "NOA",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "6.74mm x 2.66mm",
+   "build": "CAST",
+   "rrp": 607.9069333333333
+  },
+  {
+   "product": "NOA",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "6.74mm x 2.66mm",
+   "build": "CAST",
+   "rrp": 10346.160000000002
+  },
+  {
+   "product": "NOA",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "6.74mm x 2.66mm",
+   "build": "CAST",
+   "rrp": 26837.213333333337
+  },
+  {
+   "product": "SUSA",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "11mm x 2.94mm",
+   "build": "CAST",
+   "rrp": 969.3419999999999
+  },
+  {
+   "product": "SUSA",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "11mm x 2.94mm",
+   "build": "CAST",
+   "rrp": 17785.732799999998
+  },
+  {
+   "product": "SUSA",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "11mm x 2.94mm",
+   "build": "CAST",
+   "rrp": 46459.97840000001
+  },
+  {
+   "product": "TAO",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "9mm x 3mm",
+   "build": "CAST",
+   "rrp": 686.9947333333332
+  },
+  {
+   "product": "TAO",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "9mm x 3mm",
+   "build": "CAST",
+   "rrp": 11973.456
+  },
+  {
+   "product": "TAO",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "9mm x 3mm",
+   "build": "CAST",
+   "rrp": 31137.242399999992
+  },
+  {
+   "product": "VOID II",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "11mm x 2.43mm",
+   "build": "CAST",
+   "rrp": 853.9578666666666
+  },
+  {
+   "product": "VOID II",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "11mm x 2.43mm",
+   "build": "CAST",
+   "rrp": 15404.927999999998
+  },
+  {
+   "product": "VOID II",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "11mm x 2.43mm",
+   "build": "CAST",
+   "rrp": 40185.9392
+  },
+  {
+   "product": "VOID III",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "6mm x 2,85mm",
+   "build": "CAST",
+   "rrp": 604.4683333333332
+  },
+  {
+   "product": "VOID III",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "6mm x 2,85mm",
+   "build": "CAST",
+   "rrp": 10282.483199999999
+  },
+  {
+   "product": "VOID III",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "6mm x 2,85mm",
+   "build": "CAST",
+   "rrp": 26671.562133333333
+  },
+  {
+   "product": "VOID IV",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "3mm x 2.55mm",
+   "build": "CAST",
+   "rrp": 390.8930666666667
+  },
+  {
+   "product": "VOID IV",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "3mm x 2.55mm",
+   "build": "CAST",
+   "rrp": 5888.784
+  },
+  {
+   "product": "VOID IV",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "3mm x 2.55mm",
+   "build": "CAST",
+   "rrp": 15089.782400000002
+  },
+  {
+   "product": "WABI",
+   "category": "WRIST",
+   "metal": "STG",
+   "size": "11mmx2mm",
+   "build": "CAST",
+   "rrp": 820.3359999999999
+  },
+  {
+   "product": "WABI",
+   "category": "WRIST",
+   "metal": "9YG",
+   "size": "11mmx2mm",
+   "build": "CAST",
+   "rrp": 14715.096
+  },
+  {
+   "product": "WABI",
+   "category": "WRIST",
+   "metal": "18YG",
+   "size": "11mmx2mm",
+   "build": "CAST",
+   "rrp": 38363.776000000005
+  },
+  {
+   "product": "CRUSH",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 227.87599999999998
+  },
+  {
+   "product": "CRUSH",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2915.6737866666667
+  },
+  {
+   "product": "CRUSH",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7169.561813333333
+  },
+  {
+   "product": "CRUSH II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 338.6753333333333
+  },
+  {
+   "product": "CRUSH II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5539.865466666667
+  },
+  {
+   "product": "CRUSH II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 14220.781226666666
+  },
+  {
+   "product": "FRACTA",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 235.5173333333333
+  },
+  {
+   "product": "FRACTA",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3408.8152266666666
+  },
+  {
+   "product": "FRACTA",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 8495.461626666667
+  },
+  {
+   "product": "FRACTA II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 311.54859999999996
+  },
+  {
+   "product": "FRACTA II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5007.102906666667
+  },
+  {
+   "product": "FRACTA II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 12789.278773333333
+  },
+  {
+   "product": "GILT",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 166.87905666666666
+  },
+  {
+   "product": "GILT",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1606.0542666666665
+  },
+  {
+   "product": "GILT",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3651.544453333334
+  },
+  {
+   "product": "LIMINAL II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 391.97363333333334
+  },
+  {
+   "product": "LIMINAL II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 6099.513786666666
+  },
+  {
+   "product": "LIMINAL II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 15725.446293333334
+  },
+  {
+   "product": "LIMINAL",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 284.78483
+  },
+  {
+   "product": "LIMINAL",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 4022.5888266666666
+  },
+  {
+   "product": "LIMINAL",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 10144.38128
+  },
+  {
+   "product": "LOHAR",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 149.26578333333333
+  },
+  {
+   "product": "LOHAR",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1245.2190666666665
+  },
+  {
+   "product": "LOHAR",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2681.79472
+  },
+  {
+   "product": "LOST",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 223.19568333333333
+  },
+  {
+   "product": "LOST",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2760.3731466666663
+  },
+  {
+   "product": "LOST",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 6752.672960000001
+  },
+  {
+   "product": "MOMENTO",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 880.8088299999998
+  },
+  {
+   "product": "MOMENTO",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 16238.982906666668
+  },
+  {
+   "product": "MOMENTO",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 42970.237199999996
+  },
+  {
+   "product": "MOMENTO II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 370.10031666666663
+  },
+  {
+   "product": "MOMENTO II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5771.224506666667
+  },
+  {
+   "product": "MOMENTO II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 14843.353653333334
+  },
+  {
+   "product": "MOMENTO III",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 138.64432999999997
+  },
+  {
+   "product": "MOMENTO III",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1027.3029066666666
+  },
+  {
+   "product": "MOMENTO III",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2096.4938133333335
+  },
+  {
+   "product": "NEFERTITI",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 150.31646666666668
+  },
+  {
+   "product": "NEFERTITI",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1266.4446666666668
+  },
+  {
+   "product": "NEFERTITI",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2739.082426666667
+  },
+  {
+   "product": "POISE",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 144.12698666666668
+  },
+  {
+   "product": "POISE",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1140.1523466666665
+  },
+  {
+   "product": "POISE",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2398.807253333333
+  },
+  {
+   "product": "PRISM II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 167.8915333333333
+  },
+  {
+   "product": "PRISM II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2071.2486666666664
+  },
+  {
+   "product": "PRISM II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3868.9616533333333
+  },
+  {
+   "product": "PRISM",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1561.8342666666667
+  },
+  {
+   "product": "ROLLA - Organic LARGE",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 257.5434766666666
+  },
+  {
+   "product": "ROLLA - Organic LARGE",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3464.355546666666
+  },
+  {
+   "product": "ROLLA - Organic LARGE",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 8644.547706666666
+  },
+  {
+   "product": "ROLLA II - Smooth large",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 199.69858333333335
+  },
+  {
+   "product": "ROLLA II - Smooth large",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2278.9057866666662
+  },
+  {
+   "product": "ROLLA II - Smooth large",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5458.522959999999
+  },
+  {
+   "product": "ROLLA III - Stacked bot smooth and organic",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 161.8739833333333
+  },
+  {
+   "product": "ROLLA III - Stacked bot smooth and organic",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1503.8176266666667
+  },
+  {
+   "product": "ROLLA III - Stacked bot smooth and organic",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3376.1493333333333
+  },
+  {
+   "product": "RUNE",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 401.85005666666666
+  },
+  {
+   "product": "RUNE",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 6422.142906666666
+  },
+  {
+   "product": "RUNE",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 16592.35424
+  },
+  {
+   "product": "RUNE II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 304.55677999999995
+  },
+  {
+   "product": "RUNE II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 4427.997786666667
+  },
+  {
+   "product": "RUNE II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 11233.53792
+  },
+  {
+   "product": "SABLE",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 229.6144033333333
+  },
+  {
+   "product": "SABLE",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2891.971866666666
+  },
+  {
+   "product": "SABLE",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7106.062186666666
+  },
+  {
+   "product": "SABLE II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 190.26153666666664
+  },
+  {
+   "product": "SABLE II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2085.399066666667
+  },
+  {
+   "product": "SABLE II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 4938.79232
+  },
+  {
+   "product": "SABLE III",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 168.25449666666668
+  },
+  {
+   "product": "SABLE III",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1634.3550666666667
+  },
+  {
+   "product": "SABLE III",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3727.4679199999996
+  },
+  {
+   "product": "SABLE X",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 236.47250000000003
+  },
+  {
+   "product": "SABLE X",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3032.7683466666663
+  },
+  {
+   "product": "SABLE X",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7484.299093333332
+  },
+  {
+   "product": "VOID II",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 192.21007666666665
+  },
+  {
+   "product": "VOID II",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2125.373946666666
+  },
+  {
+   "product": "VOID II",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5045.775386666667
+  },
+  {
+   "product": "VOID III",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 171.19641
+  },
+  {
+   "product": "VOID III",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1694.4942666666664
+  },
+  {
+   "product": "VOID III",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3888.2876266666663
+  },
+  {
+   "product": "VOODOO",
+   "category": "CHARM",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 168.77028666666666
+  },
+  {
+   "product": "VOODOO",
+   "category": "CHARM",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1644.9678666666666
+  },
+  {
+   "product": "VOODOO",
+   "category": "CHARM",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3755.076453333333
+  },
+  {
+   "product": "Dr. Spoona Drop",
+   "category": "OBJECT",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 183.04879999999997
+  },
+  {
+   "product": "Dr. Spoona Drop",
+   "category": "OBJECT",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 1615.3632
+  },
+  {
+   "product": "Dr. Spoona Drop",
+   "category": "OBJECT",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 3846.2072
+  },
+  {
+   "product": "Dr. Spoona Drop Large",
+   "category": "OBJECT",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 242.2691333333333
+  },
+  {
+   "product": "Dr. Spoona Drop Large",
+   "category": "OBJECT",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2832.2975999999994
+  },
+  {
+   "product": "Dr. Spoona Drop Large",
+   "category": "OBJECT",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7387.0016000000005
+  },
+  {
+   "product": "Dr. Spoona",
+   "category": "OBJECT",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 246.08979999999997
+  },
+  {
+   "product": "Dr. Spoona",
+   "category": "OBJECT",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2899.5119999999997
+  },
+  {
+   "product": "Dr. Spoona",
+   "category": "OBJECT",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7338.6866666666665
+  },
+  {
+   "product": "Chic Holder",
+   "category": "OBJECT",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 530.3239333333333
+  },
+  {
+   "product": "Chic Holder",
+   "category": "OBJECT",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 7317.018133333333
+  },
+  {
+   "product": "Chic Holder",
+   "category": "OBJECT",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 18855.757066666665
+  },
+  {
+   "product": "Last Straw",
+   "category": "OBJECT",
+   "metal": "STG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 311.2028333333333
+  },
+  {
+   "product": "Last Straw",
+   "category": "OBJECT",
+   "metal": "9YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 2357.9482666666668
+  },
+  {
+   "product": "Last Straw",
+   "category": "OBJECT",
+   "metal": "18YG",
+   "size": "",
+   "build": "CAST",
+   "rrp": 5891.177599999999
+  },
+  {
+   "product": "BRONTE",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "13.4mm x 13.3",
+   "build": "HANDMADE",
+   "rrp": 2648.6166666666663
+  },
+  {
+   "product": "CIRCA",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "15.85mm x 3mm",
+   "build": "HANDMADE",
+   "rrp": 1462.9999999999998
+  },
+  {
+   "product": "CLEO III",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "20mm",
+   "build": "HANDMADE",
+   "rrp": 1250.3333333333333
+  },
+  {
+   "product": "CLEO II",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "15mm",
+   "build": "HANDMADE",
+   "rrp": 963.2333333333332
+  },
+  {
+   "product": "CLEO I",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "11mm",
+   "build": "HANDMADE",
+   "rrp": 798.4166666666666
+  },
+  {
+   "product": "ELINA",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "13mm",
+   "build": "HANDMADE",
+   "rrp": 824.9999999999999
+  },
+  {
+   "product": "ESMERA",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "14mm",
+   "build": "HANDMADE",
+   "rrp": 1835.1666666666665
+  },
+  {
+   "product": "FORME II",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "4mmx 10mm",
+   "build": "HANDMADE",
+   "rrp": 1489.5833333333333
+  },
+  {
+   "product": "FORME III",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "4mm x 12mm",
+   "build": "HANDMADE",
+   "rrp": 1718.1999999999996
+  },
+  {
+   "product": "FORME",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "4mm x 8mm",
+   "build": "HANDMADE",
+   "rrp": 1250.3333333333333
+  },
+  {
+   "product": "HEPTA",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "12 mm x 2 mm",
+   "build": "HANDMADE",
+   "rrp": 931.3333333333333
+  },
+  {
+   "product": "LINEA",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "3mm x 12mm",
+   "build": "HANDMADE",
+   "rrp": 1728.8333333333333
+  },
+  {
+   "product": "QUADRE",
+   "category": "EAR",
+   "metal": "9YG",
+   "size": "4mm x 15mm",
+   "build": "HANDMADE",
+   "rrp": 1409.8333333333333
+  },
+  {
+   "product": "ENTER THE VOID",
+   "category": "HIGH HAND",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 9504.293333333331
+  },
+  {
+   "product": "ENTER THE VOID 18YG",
+   "category": "HIGH HAND",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 25110.469999999998
+  },
+  {
+   "product": "THE ORINOCO",
+   "category": "HIGH HAND",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4451.883333333333
+  },
+  {
+   "product": "OWN THE NIGHT",
+   "category": "HIGH HAND",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 7019.6866666666665
+  },
+  {
+   "product": "CRUSH MY VOODOO",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 5859.003333333333
+  },
+  {
+   "product": "VOODOO POISED",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4152.903333333333
+  },
+  {
+   "product": "LOHAR IN RUNES",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 11322.593333333332
+  },
+  {
+   "product": "LOST RUNE",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 12235.3
+  },
+  {
+   "product": "RUNE II",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 9903.593333333332
+  },
+  {
+   "product": "VOODOO PEOPLE II",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 6525.713333333333
+  },
+  {
+   "product": "SPOON ME",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 10339.156666666666
+  },
+  {
+   "product": "LOST II",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 5025.056666666666
+  },
+  {
+   "product": "DR DROP",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 1715.3399999999997
+  },
+  {
+   "product": "VOODOO PEOPLE",
+   "category": "HIGH NECK",
+   "metal": "STG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 886.7099999999998
+  },
+  {
+   "product": "OWN THE NIGHT",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 3790.086666666666
+  },
+  {
+   "product": "ROLLA 2",
+   "category": "HIGH NECK",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 7205.513333333333
+  },
+  {
+   "product": "TANYA",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 19777.596666666665
+  },
+  {
+   "product": "DEMI",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 8925.766666666666
+  },
+  {
+   "product": "ENYA",
+   "category": "ENGAGEMENT",
+   "metal": "18WG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 7836.986666666667
+  },
+  {
+   "product": "AVA",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 7455.176666666666
+  },
+  {
+   "product": "DIOR",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 25757.196666666663
+  },
+  {
+   "product": "ZOE",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 20334.306666666664
+  },
+  {
+   "product": "SADE",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 13413.289999999999
+  },
+  {
+   "product": "ELLE",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 7541.453333333334
+  },
+  {
+   "product": "BAD BOY PINKY",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 30921
+  },
+  {
+   "product": "ROMEO II",
+   "category": "ENGAGEMENT",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4407.174933333333
+  },
+  {
+   "product": "NERA II",
+   "category": "ENGAGEMENT",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4407.56624
+  },
+  {
+   "product": "ZADA II",
+   "category": "ENGAGEMENT",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4183.7312
+  },
+  {
+   "product": "ROLLA",
+   "category": "ENGAGEMENT",
+   "metal": "9YG",
+   "size": "",
+   "build": "FIXED",
+   "rrp": 4312.455546666667
+  },
+  {
+   "product": "SADE III",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "L.5",
+   "build": "FIXED",
+   "rrp": 13257.977333333332
+  },
+  {
+   "product": "DIOR II",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "M",
+   "build": "FIXED",
+   "rrp": 14989.36853333333
+  },
+  {
+   "product": "ARC",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "L",
+   "build": "FIXED",
+   "rrp": 15717.245866666666
+  },
+  {
+   "product": "NOIR",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "M",
+   "build": "FIXED",
+   "rrp": 12717.6984
+  },
+  {
+   "product": "INEZ",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "M",
+   "build": "FIXED",
+   "rrp": 11911.254666666666
+  },
+  {
+   "product": "VERA",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "L.5",
+   "build": "FIXED",
+   "rrp": 8070.0312
+  },
+  {
+   "product": "COFFIN CUT PENDANT",
+   "category": "ENGAGEMENT",
+   "metal": "18YG",
+   "size": "45cm chain",
+   "build": "FIXED",
+   "rrp": 15140.834133333334
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "9WG",
+   "size": "45cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 1756.7
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "9WG",
+   "size": "55cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 1914.0000000000002
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "9WG",
+   "size": "60cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 1971.2000000000003
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "18YG",
+   "size": "45cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 4122.8
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "55cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 1908.2800000000002
+  },
+  {
+   "product": "The Franco",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "60cm 1.6mm",
+   "build": "HANDMADE",
+   "rrp": 2225.7400000000002
+  },
+  {
+   "product": "The Cuban",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "50cm 3.90mm",
+   "build": "HANDMADE",
+   "rrp": 4259.200000000001
+  },
+  {
+   "product": "The Cuban",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "55cm 3.90mm",
+   "build": "HANDMADE",
+   "rrp": 4942.740000000001
+  },
+  {
+   "product": "The Cuban",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "60cm 3.90mm",
+   "build": "HANDMADE",
+   "rrp": 5019.960000000001
+  },
+  {
+   "product": "The Cuban",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "55cm 5.8mm",
+   "build": "HANDMADE",
+   "rrp": 6919.000000000001
+  },
+  {
+   "product": "Oval Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 11mm",
+   "build": "HANDMADE",
+   "rrp": 1363.6920000000002
+  },
+  {
+   "product": "F.Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "50cm 10mm",
+   "build": "HANDMADE",
+   "rrp": 532.7850000000001
+  },
+  {
+   "product": "FIGO",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "50cm 11mm",
+   "build": "HANDMADE",
+   "rrp": 1023.9240000000001
+  },
+  {
+   "product": "(Unnamed Curb)",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 9mm",
+   "build": "HANDMADE",
+   "rrp": 881.9184000000001
+  },
+  {
+   "product": "S. Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 10mm",
+   "build": "HANDMADE",
+   "rrp": 756.0300000000001
+  },
+  {
+   "product": "S. Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "50cm 6mm",
+   "build": "HANDMADE",
+   "rrp": 373.0287000000001
+  },
+  {
+   "product": "FIGO",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "50cm 7mm",
+   "build": "HANDMADE",
+   "rrp": 435.10170000000005
+  },
+  {
+   "product": "CURB V",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 3.5mm",
+   "build": "HANDMADE",
+   "rrp": 225.0336
+  },
+  {
+   "product": "CURB III",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 3mm",
+   "build": "HANDMADE",
+   "rrp": 135.3
+  },
+  {
+   "product": "CURB IIII",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm 2.8mm",
+   "build": "HANDMADE",
+   "rrp": 161.21820000000002
+  },
+  {
+   "product": "The Belcher",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "65cm 3.2mm",
+   "build": "HANDMADE",
+   "rrp": 3601.4
+  },
+  {
+   "product": "FIGO",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "55cm 5.5mm",
+   "build": "HANDMADE",
+   "rrp": 9350
+  },
+  {
+   "product": "Belcher",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "52cm 2.6mm",
+   "build": "HANDMADE",
+   "rrp": 1570.8000000000002
+  },
+  {
+   "product": "CURB III",
+   "category": "CHAIN",
+   "metal": "9YG",
+   "size": "70cm 1.8mm",
+   "build": "HANDMADE",
+   "rrp": 1771.0000000000002
+  },
+  {
+   "product": "CURB II",
+   "category": "CHAIN",
+   "metal": "18YG",
+   "size": "60cm 16.7mm",
+   "build": "HANDMADE",
+   "rrp": 164421.40000000002
+  },
+  {
+   "product": "FIGO",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "45cm 3.6mm",
+   "build": "HANDMADE",
+   "rrp": 134.4288
+  },
+  {
+   "product": "Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "45cm",
+   "build": "HANDMADE",
+   "rrp": 88.5819
+  },
+  {
+   "product": "Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "50cm",
+   "build": "HANDMADE",
+   "rrp": 95.55150000000002
+  },
+  {
+   "product": "Curb",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm",
+   "build": "HANDMADE",
+   "rrp": 150.54600000000002
+  },
+  {
+   "product": "FIGO",
+   "category": "CHAIN",
+   "metal": "STG",
+   "size": "55cm",
+   "build": "HANDMADE",
+   "rrp": 86.5128
+  }
+ ],
+ "gems": [
+  {
+   "code": "S.B.E.142",
+   "description": "Blue Emerald Sapphire",
+   "colour": "Blue",
+   "cut": "Emerald",
+   "carat": 5.02,
+   "retailIncGst": 7700
+  },
+  {
+   "code": "S.B.FF.2384",
+   "description": "Blue Free Form Sapphire",
+   "colour": "Blue",
+   "cut": "Free Form",
+   "carat": 1.68,
+   "retailIncGst": 2772
+  },
+  {
+   "code": "S.G.M.2493",
+   "description": "Green Marquise Sapphire",
+   "colour": "Green",
+   "cut": "Marquise",
+   "carat": 1.62,
+   "retailIncGst": 3564
+  },
+  {
+   "code": "S.P.BA.1684",
+   "description": "Blue Baguette Australian Sapphire",
+   "colour": "Blue",
+   "cut": "Baguette",
+   "carat": 1.21,
+   "retailIncGst": 1870
+  },
+  {
+   "code": "S.P.E.1251",
+   "description": "Parti Emerald Sapphire",
+   "colour": "Parti",
+   "cut": "Emerald",
+   "carat": 0.87,
+   "retailIncGst": 1408
+  },
+  {
+   "code": "S.P.FF.1027",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.73,
+   "retailIncGst": 2640
+  },
+  {
+   "code": "S.P.FF.1450",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.63,
+   "retailIncGst": 3586
+  },
+  {
+   "code": "S.P.FF.1472",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 3.2,
+   "retailIncGst": 7040
+  },
+  {
+   "code": "S.P.FF.1486",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 2.56,
+   "retailIncGst": 4158
+  },
+  {
+   "code": "S.P.FF.1638",
+   "description": "Parti Free Form Australian Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.74,
+   "retailIncGst": 2684
+  },
+  {
+   "code": "S.P.FF.1859",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 0.6,
+   "retailIncGst": 968
+  },
+  {
+   "code": "S.P.FF.1946",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 2.87,
+   "retailIncGst": 4620
+  },
+  {
+   "code": "S.P.FF.2012",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 0.98,
+   "retailIncGst": 1584
+  },
+  {
+   "code": "S.P.FF.2123",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 2.48,
+   "retailIncGst": 5456
+  },
+  {
+   "code": "S.P.FF.2189",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.17,
+   "retailIncGst": 2420
+  },
+  {
+   "code": "S.P.FF.2291",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.65,
+   "retailIncGst": 3630
+  },
+  {
+   "code": "S.P.FF.2372",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 1.43,
+   "retailIncGst": 3146
+  },
+  {
+   "code": "S.P.FF.2649",
+   "description": "Parti Free Form Sapphire",
+   "colour": "Parti",
+   "cut": "Free Form",
+   "carat": 3.63,
+   "retailIncGst": 7986
+  },
+  {
+   "code": "S.P.K.1627",
+   "description": "Parti Kite Sapphire",
+   "colour": "Parti",
+   "cut": "Kite",
+   "carat": 1.63,
+   "retailIncGst": 2596
+  },
+  {
+   "code": "S.P.PE.2050",
+   "description": "Parti Pear Sapphire",
+   "colour": "Parti",
+   "cut": "Pear",
+   "carat": 5.31,
+   "retailIncGst": 17523
+  },
+  {
+   "code": "S.P.PE.2642",
+   "description": "Parti Pear Sapphire",
+   "colour": "Parti",
+   "cut": "Pear",
+   "carat": 1.24,
+   "retailIncGst": 2728
+  },
+  {
+   "code": "S.P.R.2397",
+   "description": "Parti Rose Sapphire",
+   "colour": "Parti",
+   "cut": "Rose",
+   "carat": 4.72,
+   "retailIncGst": 10384
+  },
+  {
+   "code": "S.P.RD.2071",
+   "description": "Parti Radiant Sapphire",
+   "colour": "Parti",
+   "cut": "Radiant",
+   "carat": 1.47,
+   "retailIncGst": 2508
+  },
+  {
+   "code": "S.P.T.1512",
+   "description": "Parti Trilliant Sapphire",
+   "colour": "Parti",
+   "cut": "Trilliant",
+   "carat": 1.05,
+   "retailIncGst": 1617
+  },
+  {
+   "code": "S.P.T.1656",
+   "description": "Parti Trilliant Sapphire",
+   "colour": "Parti",
+   "cut": "Trilliant",
+   "carat": 1.36,
+   "retailIncGst": 2090
+  },
+  {
+   "code": "S.P.TB.1492",
+   "description": "Parti Tapered Baguette Sapphire",
+   "colour": "Parti",
+   "cut": "Tapered Baguette",
+   "carat": 3.69,
+   "retailIncGst": 8118
+  },
+  {
+   "code": "S.T.FF.1929",
+   "description": "Teal Free Form Sapphire",
+   "colour": "Teal",
+   "cut": "Free Form",
+   "carat": 1.09,
+   "retailIncGst": 1760
+  },
+  {
+   "code": "S.T.FF.2089",
+   "description": "Teal Free Form Sapphire",
+   "colour": "Teal",
+   "cut": "Free Form",
+   "carat": 1.36,
+   "retailIncGst": 2200
+  },
+  {
+   "code": "S.T.FF.2410",
+   "description": "Teal Free Form Sapphire",
+   "colour": "Teal",
+   "cut": "Free Form",
+   "carat": 1.77,
+   "retailIncGst": 3102
+  },
+  {
+   "code": "S.T.FF.2428",
+   "description": "Teal Free Form Sapphire",
+   "colour": "Teal",
+   "cut": "Free Form",
+   "carat": 1,
+   "retailIncGst": 1980
+  },
+  {
+   "code": "S.T.FF.2535",
+   "description": "Teal Free Form Sapphire",
+   "colour": "Teal",
+   "cut": "Free Form",
+   "carat": 1.34,
+   "retailIncGst": 2948
+  },
+  {
+   "code": "S.T.M.2491",
+   "description": "Teal Marquise Sapphire",
+   "colour": "Teal",
+   "cut": "Marquise",
+   "carat": 1.05,
+   "retailIncGst": 2079
+  },
+  {
+   "code": "S.T.SH.2130",
+   "description": "Teal Shield Sapphire",
+   "colour": "Teal",
+   "cut": "Shield",
+   "carat": 1.71,
+   "retailIncGst": 2750
+  }
+ ]
+}
